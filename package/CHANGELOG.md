@@ -1,5 +1,11 @@
 # astro-charm
 
+## 1.4.7
+
+### Patch Changes
+
+- 95614ba: chore: update deps
+
 ## 1.4.6
 
 ### Patch Changes
