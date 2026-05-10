@@ -1,3 +1,7 @@
 packages:
   - 'package'
   - 'playground'
+allowBuilds:
+  esbuild: false
+  puppeteer: false
+  sharp: false

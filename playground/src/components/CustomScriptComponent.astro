@@ -1,20 +1,107 @@
 ---
-//! It is now instead by the following in `astro.config.ts`
-/*
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-  }),
-*/
-
-/* 
-    This component will be added to the end of <head>
-    Here is an example to add Vercel Analytics
-    tip: if you want to add Google Analytics, just add `googleAnalyticsId` to your config in `astro.config.{ts,mts,js,mjs}`
-*/
-
-// import Analytics from "@vercel/analytics/astro";
+// This component is injected into the end of <head>
+// 统计数据：构建时生成，注入到页面
+import { getCollection } from "astro:content";
+const posts = await getCollection("posts", ({ data }) => !data.draft);
+const allTags = posts.flatMap((p) => p.data.tags ?? []);
+const uniqueTagCount = new Set(allTags).size;
+const totalChars = posts.reduce((sum, p) => {
+  const cleaned = (p.body ?? "").replace(/^---[\s\S]*?---/, "").replace(/[#*`>\[\]!]/g, "");
+  return sum + cleaned.length;
+}, 0);
+const postCount = posts.length;
+const FOUNDED = "2026-05-10";
 ---
 
-<!-- {import.meta.env.PROD && <Analytics />} -->
+<style is:global>
+  /* 背景图容器：固定在视口，不影响布局 */
+  #anime-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* 两张图交替淡入淡出，实现平滑切换 */
+  #anime-bg img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+
+  /* 横屏：图片靠右显示，给左侧内容留空间 */
+  @media (orientation: landscape) and (min-width: 52rem) {
+    #anime-bg img {
+      object-position: right center;
+    }
+  }
+
+  /* 竖屏/手机：图片居中，全屏覆盖 */
+  @media (orientation: portrait) {
+    #anime-bg img {
+      object-position: center top;
+    }
+  }
+
+  #anime-bg img.visible {
+    opacity: 0.18;
+  }
+
+  html.charm.dark #anime-bg img.visible {
+    opacity: 0.22;
+  }
+
+  /* body 背景色改为透明，让背景图透出来 */
+  html.charm body {
+    background-color: transparent !important;
+  }
+</style>
+
+<!-- 把构建时统计数据注入为 JS 全局变量，供 about 页面的统计块使用 -->
+<script define:vars={{ postCount, uniqueTagCount, totalChars, FOUNDED }}>
+  window.__siteStats = { postCount, uniqueTagCount, totalChars, FOUNDED };
+</script>
+
+<script>
+  // 只在 about 页面执行
+  if (location.pathname === "/about" || location.pathname === "/about/") {
+    document.addEventListener("DOMContentLoaded", () => {
+      const el = document.getElementById("site-stats-dynamic");
+      if (!el) return;
+
+      const { postCount, uniqueTagCount, totalChars, FOUNDED } = window.__siteStats ?? {};
+      const now = new Date();
+      const founded = new Date(FOUNDED);
+      const runningDays = Math.floor((now - founded) / (1000 * 60 * 60 * 24));
+      const lastUpdated = now.toISOString().split("T")[0];
+
+      function booksEquivalent(chars) {
+        if (chars < 30000) return "还不够一篇毕业论文 😅";
+        if (chars < 110000) return `快赶上一本《活着》了（${(chars / 110000).toFixed(2)} 本）`;
+        return `相当于 ${(chars / 110000).toFixed(1)} 本《活着》`;
+      }
+
+      el.innerHTML = `
+        <li>📝 <span>文章总数</span><strong>${postCount} 篇</strong></li>
+        <li>🏷️ <span>标签总数</span><strong>${uniqueTagCount} 个</strong></li>
+        <li>✍️ <span>全站字数</span><strong>约 ${totalChars.toLocaleString("zh-CN")} 字</strong></li>
+        <li>📚 <span>废话产量</span><strong>${booksEquivalent(totalChars)}</strong></li>
+        <li>📅 <span>建站时间</span><strong>${FOUNDED}</strong></li>
+        <li>⏱️ <span>已运行</span><strong>${runningDays} 天</strong></li>
+        <li>🔄 <span>最后更新</span><strong>${lastUpdated}</strong></li>
+      `;
+    });
+  }
+</script>
+
+<script is:inline src="/scripts/anime-bg.js"></script>

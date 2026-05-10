@@ -2,32 +2,65 @@ import charm from "astro-charm";
 
 export default charm({
   config: {
-    lang: "en",
-    title: "Charm Theme",
-    description: "A beautiful blog theme for Astro",
+    lang: "zh-CN",
+    title: "IUHNEHC",
+    titleSuffix: " · 随想",
+    description: "记录日常的碎碎念、读书感悟和胡思乱想",
+    author: "CHENHUI",
+    licenseId: "CC-BY-NC-SA-4.0",
+    shootingStar: true,
+    font: "auto",
     side: {
-      title: "Charm Theme",
-      sub: "A blog theme for Astro",
-      bio: "Cupidatat ex id eiusmod aute do labore ea minim eu fugiat Lorem fugiat adipisicing.",
+      title: "IUHNEHC",
+      sub: "吾生也有涯，而知也无涯",
+      bio: "这里是一些日常的碎碎念和想法。",
+      navHome: {
+        title: "首页",
+        link: "/",
+        icon: {
+          default: "solar:home-smile-broken",
+          hover: "solar:home-smile-outline",
+          active: "solar:home-smile-bold-duotone",
+        },
+      },
+      footer: [
+        {
+          title: "GitHub",
+          link: "https://github.com/CHENHUI-X",
+          icon: "simple-icons:github",
+        },
+        {
+          title: "Bilibili",
+          link: "https://space.bilibili.com/294132471",
+          icon: "simple-icons:bilibili",
+        },
+        {
+          title: "Email",
+          link: "mailto:chenhui2422.xu@gmail.com",
+          icon: "simple-icons:gmail",
+        },
+      ],
+      navStyle: "default",
+      footerStyle: "default",
+      toc: {
+        enabled: true,
+        title: "目录",
+        minLength: 2,
+      },
     },
-    licenseId: "CC0-1.0",
-    giscus: {
-      repo: "Yuhanawa/astro-charm",
-      repoId: "R_kgDOMk98JQ",
-      category: "Blog Post Comments",
-      categoryId: "DIC_kwDOMk98Jc4CljB_",
+    markdown: {
+      headingAnchor: "#",
     },
   },
   pages: {},
   overrides: {
     components: {
-      // override components
-      // ShootingStar: "./src/components/ShootingStar.astro",
+      ShootingStar: undefined,
     },
     custom: {
-      // it will be added to the end of `<head>`.
       CustomScriptComponent: "./src/components/CustomScriptComponent.astro",
       CustomPostHeaderBottom: "./src/components/CustomPostHeaderBottom.astro",
+      CustomPostFooterBottom: "./src/components/WalineComment.astro",
     },
   },
 });

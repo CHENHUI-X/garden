@@ -9,6 +9,13 @@
     "package:release": "changeset publish",
     "format": "prettier --write  \"**/*.{js,ts,css,astro}\""
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "puppeteer", "sharp"]
+  },
+  "dependencies": {
+    "@iconify-json/simple-icons": "^1.2.59",
+    "@iconify-json/solar": "^1.2.5"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
     "astro": "^5.15.9",
