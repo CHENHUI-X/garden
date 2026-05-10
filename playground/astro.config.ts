@@ -4,7 +4,7 @@ import charm from "./charm.theme.ts";
 
 export default defineConfig({
   prefetch: true,
-  site: "https://garden.vercel.app/",
+  site: "https://haibarai.dpdns.org/",
   output: "static",
   integrations: [
     charm,
