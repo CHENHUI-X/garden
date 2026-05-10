@@ -26,9 +26,6 @@ jobs:
       - name: Build playground
         run: pnpm run playground:build
 
-      - name: Add CNAME for custom domain
-        run: echo "haibarai.dpdns.org" > ./dist/CNAME
-
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
