@@ -1,0 +1,43 @@
+---
+// 文章底部评论组件
+// 接收 postEntry，使用 slug 作为 Waline 的 path 区分不同文章
+const { postEntry } = Astro.props;
+const serverURL = import.meta.env.PUBLIC_WALINE_SERVER_URL;
+const slug = postEntry.slug;
+---
+
+<div id="waline-container" class="waline-wrapper" data-serverurl={serverURL} data-path={'/' + slug}></div>
+
+<script is:inline>
+(function () {
+  var container = document.getElementById("waline-container");
+  if (!container) return;
+  var serverURL = container.dataset.serverurl;
+  var path = container.dataset.path;
+
+  // 加载 Waline CSS
+  var link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "https://unpkg.com/@waline/client@3/dist/waline.css";
+  document.head.appendChild(link);
+
+  // 动态导入 Waline 并初始化
+  import("https://unpkg.com/@waline/client@3/dist/waline.js").then(function (mod) {
+    mod.init({
+      el: "#waline-container",
+      serverURL: serverURL,
+      path: path,
+      lang: "zh-CN",
+      reaction: true,
+      pageview: true,
+      dark: "html.charm.dark",
+    });
+  });
+})();
+</script>
+
+<style>
+.waline-wrapper {
+  margin-top: 2rem;
+}
+</style>
