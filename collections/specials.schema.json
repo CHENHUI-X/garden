@@ -1,0 +1,116 @@
+{
+  "$ref": "#/definitions/specials",
+  "definitions": {
+    "specials": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "light": {
+                      "type": "string"
+                    },
+                    "dark": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "light",
+                    "dark"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "default": {
+                  "$ref": "#/definitions/specials/properties/icon/anyOf/0"
+                },
+                "hover": {
+                  "$ref": "#/definitions/specials/properties/icon/anyOf/0"
+                },
+                "active": {
+                  "$ref": "#/definitions/specials/properties/icon/anyOf/0"
+                }
+              },
+              "required": [
+                "default",
+                "hover",
+                "active"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "index": {
+          "type": "number",
+          "default": 0
+        },
+        "published": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "integer",
+              "format": "unix-time"
+            }
+          ]
+        },
+        "updated": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "integer",
+              "format": "unix-time"
+            }
+          ]
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "icon"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
