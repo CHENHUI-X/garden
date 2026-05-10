@@ -78,6 +78,7 @@ index: 1
           lang: "zh-CN",
           reaction: true,
           dark: "html.charm.dark",
+          requiredMeta: ["nick", "mail"], // 昵称和邮箱必填，关闭匿名
         });
       }
     );
