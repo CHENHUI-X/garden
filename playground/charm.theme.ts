@@ -39,6 +39,11 @@ export default charm({
           link: "mailto:chenhui2422.xu@gmail.com",
           icon: "simple-icons:gmail",
         },
+        {
+          title: "技术博客",
+          link: "https://xuchenhui.cc/",
+          icon: "solar:code-bold-duotone",
+        },
       ],
       navStyle: "default",
       footerStyle: "default",
