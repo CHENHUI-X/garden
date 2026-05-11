@@ -40,7 +40,7 @@ export default charm({
           icon: "simple-icons:gmail",
         },
         {
-          title: "技术博客",
+          title: "TechBlog",
           link: "https://xuchenhui.cc/",
           icon: "simple-icons:developmentcontainers",
         },
