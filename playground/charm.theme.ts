@@ -42,7 +42,7 @@ export default charm({
         {
           title: "技术博客",
           link: "https://xuchenhui.cc/",
-          icon: "solar:code-bold-duotone",
+          icon: "simple-icons:developmentcontainers",
         },
       ],
       navStyle: "default",
