@@ -8,12 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **域名**: `https://haibarai.dpdns.org`（GitHub Pages + Cloudflare）
 - **技术博客**: `https://xuchenhui.cc`（共用 Waline 评论服务）
-- **作者**: CHENHUI（算法工程师）
+- **作者**: CHENHUI
+- **建站时间**: 2026-04-01
 
 ## Commands
 
 ```bash
-# 启动开发服务器（日常博客，默认 localhost:4322）
+# 启动开发服务器（默认 localhost:4321）
 cd playground && pnpm dev
 
 # 构建博客（输出到 playground/dist/）
@@ -30,16 +31,14 @@ cd playground && pnpm preview
 - **`playground/src/content/posts/`** — 博客文章目录，.md 文件，YAML frontmatter 定义标题/日期/标签/分类
 - **`playground/src/content/specials/`** — 侧边栏页面，每个 .md 自动生成侧边栏入口（about, murmur, friends）
 - **`playground/src/components/CustomScriptComponent.astro`** — 全局 CSS（背景图样式、body 透明化）+ 二次元背景图注入（`anime-bg.js`）+ About 页面统计（构建时 `getCollection`）
-- **`playground/src/components/CustomPostHeaderBottom.astro`** — 文章头部多语言版本提示（已弃用/不重要）
 - **`playground/src/components/WalineComment.astro`** — 文章底部评论组件（CDN 加载 Waline，`requiredMeta: ["nick","mail"]` 关闭匿名）
 - **`playground/src/content/specials/murmur.md`** — 碎碎念页，含每条说说独立折叠评论区（inline script + `toggleComment` 全局函数）
-- **`playground/src/content/specials/friends.md`** — 友链页，CSS Grid 卡片网格
+- **`playground/src/content/specials/friends.md`** — 友链页，CSS Grid 卡片网格，DiceBear pixel-art 风格头像
 - **`playground/src/content/specials/about.md`** — 关于页，含动态博客统计数据
 - **`playground/public/scripts/anime-bg.js`** — 二次元背景图切换脚本（30s 切换，夜轻 API + 赫萝 API 备用）
+- **`playground/src/styles/custom-charm.css`** — 自定义 CSS（目前为空，可添加自定义样式）
 - **`playground/.env`** — `PUBLIC_WALINE_SERVER_URL` 环境变量（gitignored，需在 CI 中单独配置）
 - **`.github/workflows/deploy.yml`** — GitHub Actions 部署：checkout → pnpm setup → Node 22 → install → build → peaceiris/gh-pages（`cname: haibarai.dpdns.org`）
-- **`package/`** — Astro Charm 主题源码，一般不改
-- **`pnpm-workspace.yaml`** — Monorepo 工作区：`package/` + `playground/`
 
 ## Custom Components Registry
 
@@ -56,7 +55,6 @@ cd playground && pnpm preview
 - **服务端**: `https://waline-comment-smoky.vercel.app`（Vercel + MongoDB Atlas）
 - **管理后台**: `https://waline-comment-smoky.vercel.app/ui/`
 - **客户端**: CDN 加载 `@waline/client@3`（unpkg），不走 node_modules 打包（绕过 Astro `is:inline` 限制）
-- **数据传递**: `<div data-serverurl data-path>` 属性 → JS 读取
 - **关键参数**: `reaction: true`、`pageview: true`、`dark: "html.charm.dark"`、`requiredMeta: ["nick", "mail"]`
 - **博客文章**: `CustomPostFooterBottom` → `WalineComment.astro`（path: `/slug`）
 - **碎碎念**: `murmur.md` inline script → `toggleComment(id)` → `mod.init()`（path: `/murmur/日期`）
@@ -71,6 +69,10 @@ cd playground && pnpm preview
 - CSS 在 `CustomScriptComponent.astro`，JS 在 `public/scripts/anime-bg.js`
 - 兼容 Astro View Transitions：同时监听 `DOMContentLoaded` 和 `astro:page-load`
 
+## Known Issues
+
+- **空文章列表导致 ResponseSentError**: Astro dev server 在 posts 集合为空时会抛出 ResponseSentError。解决方案是确保 `playground/src/content/posts/zh-cn/` 目录下至少有一篇文章。
+
 ## Deployment
 
 - **平台**: GitHub Pages（gh-pages 分支）+ Cloudflare DNS 代理（orange cloud）
@@ -78,10 +80,3 @@ cd playground && pnpm preview
 - **CI**: GitHub Actions（`.github/workflows/deploy.yml`），`peaceiris/actions-gh-pages@v4` 带 `cname` 参数
 - **DNS**: Cloudflare proxied A 记录指向 GitHub Pages IP（185.199.108.153 等）
 - **SSL**: Cloudflare Full（strict）+ GitHub Pages Enforce HTTPS
-
-## Component Scripting Notes
-
-- `CustomScriptComponent.astro` 在 frontmatter 中用 `getCollection` 做构建时统计（posts count, tags, char count）
-- 统计通过 `<script define:vars>` 写入 `window.__siteStats` 全局变量
-- About 页面读取 `window.__siteStats` 动态填充 `#site-stats-dynamic` 列表
-- 带 `<script is:inline>` 的组件中的 CDN 动态 `import()` 绕过 Astro 打包限制

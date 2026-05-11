@@ -5,9 +5,10 @@
 基于 Astro Charm 主题的日常博客（IUHNEHC），记录碎碎念、读书感悟和胡思乱想。
 
 - **域名**: `https://haibarai.dpdns.org`
-- **开发**: `http://localhost:4322`
+- **开发**: `http://localhost:4321`
 - **技术博客**: `https://xuchenhui.cc`（使用同一套 Waline 评论服务）
-- **作者**: CHENHUI（1999，双鱼座，INFJ，算法工程师）
+- **作者**: CHENHUI
+- **建站时间**: 2026-04-01
 
 ---
 
@@ -142,6 +143,7 @@ Garden/
 - **卡片**: 头像 + 名称 + 描述，悬停上浮效果
 - **申请**: 邮件链接 `chenhui2422.xu@gmail.com`
 - **当前友链**: CHENHUI · 技术博客（`xuchenhui.cc`）
+- **头像**: DiceBear pixel-art 风格（`api.dicebear.com/7.x/pixel-art/svg?seed=xxx`）
 
 ---
 
