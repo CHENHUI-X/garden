@@ -13,30 +13,12 @@ index: 1
 <div class="murmur-feed">
 
 <div class="murmur-item">
-<span class="murmur-date">2026-05-10</span>
+<span class="murmur-date">2026-05-01</span>
 
-骑车出去转了一圈，路过一片油菜花田，手机拍了几张，还是觉得不够好看。相机的事还是算了吧，钱包不允许。
+今天是上班的第666天。
 
-<button class="murmur-toggle" onclick="toggleComment('murmur-2026-05-10')">💬 评论</button>
-<div id="murmur-2026-05-10" class="murmur-comment-box"></div>
-</div>
-
-<div class="murmur-item">
-<span class="murmur-date">2026-05-09</span>
-
-看完了《活着》，很沉。合上书坐了一会儿，不知道说什么好。
-
-<button class="murmur-toggle" onclick="toggleComment('murmur-2026-05-09')">💬 评论</button>
-<div id="murmur-2026-05-09" class="murmur-comment-box"></div>
-</div>
-
-<div class="murmur-item">
-<span class="murmur-date">2026-05-08</span>
-
-今天下班晚，路上天已经黑了，但风很好。有时候觉得通勤也没那么难熬。
-
-<button class="murmur-toggle" onclick="toggleComment('murmur-2026-05-08')">💬 评论</button>
-<div id="murmur-2026-05-08" class="murmur-comment-box"></div>
+<button class="murmur-toggle" onclick="toggleComment('murmur-2026-05-01')">💬 评论</button>
+<div id="murmur-2026-05-01" class="murmur-comment-box"></div>
 </div>
 
 </div>
