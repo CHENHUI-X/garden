@@ -57,7 +57,9 @@ export default charm({
       headingAnchor: "#",
     },
   },
-  pages: {},
+  pages: {
+    "/posts/[...slug]": false,
+  },
   overrides: {
     components: {
       ShootingStar: undefined,

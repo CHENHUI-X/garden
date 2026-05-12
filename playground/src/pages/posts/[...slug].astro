@@ -1,0 +1,181 @@
+---
+import config from "charm:config";
+import { getCollection } from "astro:content";
+import {
+  BaseLayout,
+} from "charm:layouts";
+import {
+  PostHeader,
+  PostFooter,
+  Comments,
+  HomeSide,
+} from "charm:components";
+import RightToc from "../../components/RightToc.astro";
+
+// 定义类型
+interface NestedHeading {
+  slug: string;
+  text: string;
+  subheadings?: NestedHeading[];
+  nestedDepth: number;
+  absoluteDepth?: number;
+}
+
+// 实现 getStaticPaths
+export async function getStaticPaths() {
+  const entries = await getCollection(
+    "posts",
+    ({ data }) =>
+      (!data.hidden) &&
+      (import.meta.env.PROD ? data.draft !== true : true),
+  );
+  const sorted = entries.sort(
+    (a, b) =>
+      (b.data.updated ?? b.data.published).valueOf() -
+      (a.data.updated ?? a.data.published).valueOf(),
+  );
+  return sorted.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+// 实现 flat2NestedHeadings
+function flat2NestedHeadings(flatHeadings: { slug: string; text: string; depth: number }[]): NestedHeading[] {
+  const result: NestedHeading[] = [];
+  const stack: NestedHeading[] = [];
+
+  for (const heading of flatHeadings) {
+    while (
+      stack.length > 0 &&
+      (stack[stack.length - 1].absoluteDepth ?? 0) >= heading.depth
+    ) {
+      stack.pop();
+    }
+
+    let nestedDepth: number;
+    if (stack.length === 0) {
+      nestedDepth = 1;
+    } else {
+      nestedDepth = stack[stack.length - 1].nestedDepth + 1;
+    }
+
+    const node: NestedHeading = {
+      ...heading,
+      absoluteDepth: heading.depth,
+      subheadings: [],
+      nestedDepth: nestedDepth,
+    };
+
+    if (stack.length === 0) {
+      result.push(node);
+    } else {
+      stack[stack.length - 1].subheadings = [
+        ...(stack[stack.length - 1].subheadings ?? []),
+        node,
+      ];
+    }
+
+    stack.push(node);
+  }
+
+  return result;
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await entry.render();
+const anchor = config.markdown?.headingAnchor ?? "#";
+const nestedHeadings = flat2NestedHeadings(
+  headings.map((h) => {
+    if (h.text.endsWith(anchor)) h.text = h.text.slice(0, -anchor.length);
+    return h;
+  }),
+);
+
+const hasToc =
+  config.side.toc?.enabled &&
+  headings &&
+  headings.length > (config.side.toc?.minLength ?? 1);
+---
+
+<BaseLayout
+  meta={{
+    title: entry.data.title,
+    description: entry.data.description,
+    image: entry.data.image,
+  }}
+>
+  <main class="three-column-main">
+    <!-- 左侧：完整侧边栏 -->
+    <div class="sidebar-wrapper">
+      <HomeSide />
+    </div>
+
+    <!-- 中间：文章内容 -->
+    <div class="article-wrapper">
+      <article data-pagefind-body>
+        <PostHeader postEntry={entry} />
+        <Content />
+        <PostFooter postEntry={entry} />
+      </article>
+      {config.giscus && <Comments />}
+    </div>
+
+    <!-- 右侧：目录 -->
+    {hasToc && <RightToc headings={nestedHeadings} title={config.side.toc?.title} />}
+  </main>
+</BaseLayout>
+
+<style>
+  .three-column-main {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: auto;
+    margin: 0 clamp(1rem, 3vw, 4rem);
+    gap: clamp(1.5rem, 2vw, 2.5rem);
+  }
+
+  /* 侧边栏容器 - 不设置 height，让 sticky 正常工作 */
+  .sidebar-wrapper {
+    flex-shrink: 0;
+    min-width: 3rem;
+    padding-right: 1rem;
+  }
+
+  .sidebar-wrapper :global(.side) {
+    width: 14em !important;
+  }
+
+  .sidebar-wrapper :global(.side .footer) {
+    padding: 2rem 0 !important;
+  }
+
+  /* 中间文章内容 */
+  .article-wrapper {
+    flex: 1;
+    min-width: 16rem;
+    max-width: 48rem;
+    padding: 3rem 0;
+  }
+
+  /* 响应式设计 */
+  @media (width <= 80rem) {
+    .three-column-main {
+      gap: clamp(1rem, 2vw, 2rem);
+    }
+  }
+
+  @media (width <= 64rem) {
+    .sidebar-wrapper {
+      display: none;
+    }
+  }
+
+  @media (width <= 42rem) {
+    .three-column-main {
+      display: block;
+      margin: 0 1rem;
+    }
+  }
+</style>

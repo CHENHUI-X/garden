@@ -1,0 +1,85 @@
+---
+import {
+  Comments,
+  HomeSide,
+  PostFooter,
+  PostHeader,
+} from "charm:components";
+import { BaseLayout } from "charm:layouts";
+import config from "charm:config";
+import RightToc from "./RightToc.astro";
+
+const { postEntry, headings } = Astro.props;
+const hasToc =
+  config.side.toc?.enabled &&
+  headings &&
+  headings.length > (config.side.toc?.minLength ?? 1);
+---
+
+<BaseLayout {...Astro.props}>
+  <div class="three-column-layout">
+    <!-- 左侧：个人信息 -->
+    <div class="left-sidebar">
+      <HomeSide />
+    </div>
+
+    <!-- 中间：文章内容 -->
+    <div class="content-wrapper">
+      <article data-pagefind-body>
+        {postEntry && <PostHeader {postEntry} />}
+        <slot />
+        {postEntry && <PostFooter {postEntry} />}
+      </article>
+      {config.giscus && <Comments />}
+    </div>
+
+    <!-- 右侧：目录 -->
+    {hasToc && <RightToc headings={headings} title={config.side.toc?.title} />}
+  </div>
+</BaseLayout>
+
+<style>
+  .three-column-layout {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    gap: clamp(1.5rem, 3vw, 4rem);
+  }
+
+  .left-sidebar {
+    flex-shrink: 0;
+  }
+
+  .content-wrapper {
+    flex: 1;
+    min-width: 16rem;
+    max-width: 48rem;
+    padding: 3rem 0;
+  }
+
+  /* 响应式：中等屏幕 */
+  @media (width <= 80rem) {
+    .three-column-layout {
+      gap: clamp(1rem, 2vw, 2rem);
+    }
+  }
+
+  /* 平板：侧边栏更窄 */
+  @media (width <= 64rem) {
+    .left-sidebar {
+      display: none;
+    }
+  }
+
+  /* 移动端：单栏 */
+  @media (width <= 42rem) {
+    .three-column-layout {
+      display: block;
+    }
+
+    .left-sidebar {
+      display: none;
+    }
+  }
+</style>
