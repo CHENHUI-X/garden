@@ -13,6 +13,15 @@ index: 1
 <div class="murmur-feed">
 
 <div class="murmur-item">
+<span class="murmur-date">2026-05-12</span>
+
+TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是当老板的感觉吗?
+
+<button class="murmur-toggle" onclick="toggleComment('murmur-2026-05-12')">💬 评论</button>
+<div id="murmur-2026-05-12" class="murmur-comment-box"></div>
+</div>
+
+<div class="murmur-item">
 <span class="murmur-date">2026-05-01</span>
 
 今天是上班的第666天。
