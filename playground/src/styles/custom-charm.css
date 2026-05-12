@@ -1,9 +1,97 @@
-/* 自定义 CSS */
+/* ========== 布局宽度优化方案 ========== */
 
-html.charm body {
-  /* your custom css */
+/* 1. 正文内容区宽度: 80rem (1280px) */
+html.charm main .content-wrapper {
+  max-width: 80rem;
 }
 
+/* 2. 侧边栏宽度: 15-18em 弹性 */
+html.charm main .side {
+  width: clamp(15em, 16em, 18em); /* 原 clamp(16em, 20em, 24em) */
+  flex-shrink: 0;
+}
+
+/* 目录侧边栏内容宽度 */
+html.charm main #side-toc {
+  width: 100%;
+}
+
+/* 3. 主区域边距和间距 */
+html.charm main {
+  margin: 0 clamp(1.5rem, 5vw, 6rem); /* 减小左右边距 */
+  gap: clamp(1.5rem, 2.5vw, 3rem); /* 减小侧边栏与正文间距 */
+}
+
+/* 4. 响应式断点优化 */
+@media (width >= 90rem) {
+  /* 超宽屏: 增加边距避免正文过宽 */
+  html.charm main {
+    margin: 0 clamp(3rem, 10vw, 12rem);
+  }
+}
+
+@media (width <= 64rem) {
+  /* 中等屏幕: 动态计算内容宽度 */
+  html.charm main .content-wrapper {
+    max-width: calc(100vw - 22rem);
+  }
+}
+
+@media (width <= 52rem) {
+  /* 小屏: 进一步紧凑 */
+  html.charm main .content-wrapper {
+    max-width: calc(100vw - 18rem);
+  }
+  html.charm main .side {
+    width: 14em;
+  }
+}
+
+/* ========== 暗色模式 ========== */
 html.charm.dark body {
   /* your custom css for dark mode */
+}
+
+/* ========== 文章卡片悬停效果增强 ========== */
+.post-list .item-container {
+  transform: translateX(0);
+  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post-list .item-container:hover {
+  transform: translateX(8px);
+  background: linear-gradient(
+    135deg,
+    var(--charm-highlight-color-1),
+    transparent
+  );
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    inset 0 0 0 1px var(--charm-highlight-color-2);
+}
+
+.post-list .item-container h3 {
+  position: relative;
+  display: inline-block;
+}
+
+.post-list .item-container h3::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--charm-highlight-color);
+  transition: width 0.3s ease;
+}
+
+.post-list .item-container:hover h3::after {
+  width: 100%;
+}
+
+html.charm.dark .post-list .item-container:hover {
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px var(--charm-highlight-color-2);
 }
