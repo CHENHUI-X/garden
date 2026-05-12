@@ -1,6 +1,5 @@
 ---
 // This component is injected into the end of <head>
-// 统计数据：构建时生成，注入到页面
 import { getCollection } from "astro:content";
 const posts = await getCollection("posts", ({ data }) => !data.draft);
 const allTags = posts.flatMap((p) => p.data.tags ?? []);
@@ -13,8 +12,46 @@ const postCount = posts.length;
 const FOUNDED = "2026-04-01";
 ---
 
+<style is:inline>
+  /* ========== 布局宽度优化 ========== */
+  /* 使用更高优先级的选择器覆盖 Astro scoped CSS */
+
+  /* 1. 正文内容区宽度: 64rem (1024px) */
+  html.charm.main body main .content-wrapper.content-wrapper {
+    max-width: 64rem !important;
+  }
+  /* 2. 侧边栏宽度: 15-18em 弹性 */
+  html.charm.main body main .side.side {
+    width: clamp(15em, 16em, 18em) !important;
+    flex-shrink: 0;
+  }
+  /* 3. 主区域间距 */
+  html.charm.main body main {
+    gap: clamp(1.5rem, 2.5vw, 3rem) !important;
+  }
+  /* 4. 响应式优化 */
+  @media (min-width: 90rem) {
+    html.charm.main body main {
+      margin: 0 clamp(3rem, 10vw, 12rem) !important;
+    }
+  }
+  @media (max-width: 64rem) {
+    html.charm.main body main .content-wrapper.content-wrapper {
+      max-width: calc(100vw - 22rem) !important;
+    }
+  }
+  @media (max-width: 52rem) {
+    html.charm.main body main .content-wrapper.content-wrapper {
+      max-width: calc(100vw - 18rem) !important;
+    }
+    html.charm.main body main .side.side {
+      width: 14em !important;
+    }
+  }
+</style>
+
 <style is:global>
-  /* 背景图容器：固定在视口，不影响布局 */
+  /* 背景图容器 */
   #anime-bg {
     position: fixed;
     top: 0;
@@ -26,7 +63,6 @@ const FOUNDED = "2026-04-01";
     overflow: hidden;
   }
 
-  /* 两张图交替淡入淡出，实现平滑切换 */
   #anime-bg img {
     position: absolute;
     top: 0;
@@ -39,58 +75,82 @@ const FOUNDED = "2026-04-01";
     transition: opacity 1.2s ease;
   }
 
-  /* 横屏：图片靠右显示，给左侧内容留空间 */
   @media (orientation: landscape) and (min-width: 52rem) {
-    #anime-bg img {
-      object-position: right center;
-    }
+    #anime-bg img { object-position: right center; }
   }
 
-  /* 竖屏/手机：图片居中，全屏覆盖 */
   @media (orientation: portrait) {
-    #anime-bg img {
-      object-position: center top;
-    }
+    #anime-bg img { object-position: center top; }
   }
 
-  #anime-bg img.visible {
-    opacity: 0.18;
+  #anime-bg img.visible { opacity: 0.18; }
+  html.charm.dark #anime-bg img.visible { opacity: 0.22; }
+  html.charm body { background-color: transparent !important; }
+
+  /* 阅读进度条 */
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 5px;
+    background: linear-gradient(90deg, #f66260, #e06458);
+    z-index: 99999;
+    transition: width 0.1s ease-out;
+    box-shadow: 0 2px 8px rgba(230, 100, 88, 0.6);
   }
 
-  html.charm.dark #anime-bg img.visible {
-    opacity: 0.22;
+  /* 返回顶部按钮 */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--charm-highlight-color);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* body 背景色改为透明，让背景图透出来 */
-  html.charm body {
-    background-color: transparent !important;
+  .back-to-top.visible { opacity: 1; visibility: visible; }
+  .back-to-top:hover { transform: translateY(-3px); }
+
+  @media (max-width: 768px) {
+    .back-to-top { bottom: 1rem; right: 1rem; width: 2rem; height: 2rem; font-size: 1rem; }
   }
+
 </style>
 
-<!-- 把构建时统计数据注入为 JS 全局变量，供 about 页面的统计块使用 -->
 <script define:vars={{ postCount, uniqueTagCount, totalChars, FOUNDED }}>
   window.__siteStats = { postCount, uniqueTagCount, totalChars, FOUNDED };
 </script>
 
 <script>
-  // 只在 about 页面执行
   if (location.pathname === "/about" || location.pathname === "/about/") {
     document.addEventListener("DOMContentLoaded", () => {
       const el = document.getElementById("site-stats-dynamic");
       if (!el) return;
-
       const { postCount, uniqueTagCount, totalChars, FOUNDED } = window.__siteStats ?? {};
       const now = new Date();
       const founded = new Date(FOUNDED);
       const runningDays = Math.floor((now - founded) / (1000 * 60 * 60 * 24));
       const lastUpdated = now.toISOString().split("T")[0];
-
       function booksEquivalent(chars) {
         if (chars < 30000) return "还不够一篇毕业论文 😅";
         if (chars < 110000) return `快赶上一本《活着》了（${(chars / 110000).toFixed(2)} 本）`;
         return `相当于 ${(chars / 110000).toFixed(1)} 本《活着》`;
       }
-
       el.innerHTML = `
         <li>📝 <span>文章总数</span><strong>${postCount} 篇</strong></li>
         <li>🏷️ <span>标签总数</span><strong>${uniqueTagCount} 个</strong></li>
@@ -104,4 +164,41 @@ const FOUNDED = "2026-04-01";
   }
 </script>
 
+<script is:inline>
+(function() {
+  var progressBar = null;
+  function initProgressBar() {
+    if (!progressBar) {
+      progressBar = document.createElement('div');
+      progressBar.className = 'reading-progress';
+      document.body.appendChild(progressBar);
+    }
+    progressBar.style.display = location.pathname.startsWith('/posts/') ? 'block' : 'none';
+  }
+  function updateProgress() {
+    if (!progressBar) return;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    progressBar.style.width = (docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0) + '%';
+  }
+  var backToTopBtn = null;
+  function initBackToTop() {
+    if (!backToTopBtn) {
+      backToTopBtn = document.createElement('button');
+      backToTopBtn.className = 'back-to-top';
+      backToTopBtn.setAttribute('aria-label', '返回顶部');
+      backToTopBtn.innerHTML = '↑';
+      backToTopBtn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+      document.body.appendChild(backToTopBtn);
+    }
+  }
+  function toggleBackToTop() { if (backToTopBtn) backToTopBtn.classList.toggle('visible', window.scrollY > 300); }
+  function init() { initProgressBar(); initBackToTop(); updateProgress(); toggleBackToTop(); }
+  window.addEventListener('scroll', function() { updateProgress(); toggleBackToTop(); }, { passive: true });
+  document.addEventListener('astro:page-load', function() { initProgressBar(); updateProgress(); toggleBackToTop(); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
 <script is:inline src="/scripts/anime-bg.js"></script>
+
