@@ -25,6 +25,8 @@ jobs:
 
       - name: Build playground
         run: pnpm run playground:build
+        env:
+          PUBLIC_WALINE_SERVER_URL: ${{ secrets.PUBLIC_WALINE_SERVER_URL }}
 
       - uses: peaceiris/actions-gh-pages@v4
         with:
