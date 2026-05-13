@@ -1,15 +1,8 @@
 ---
 import config from "charm:config";
 import { getCollection } from "astro:content";
-import {
-  BaseLayout,
-} from "charm:layouts";
-import {
-  PostHeader,
-  PostFooter,
-  Comments,
-  HomeSide,
-} from "charm:components";
+import { BaseLayout } from "charm:layouts";
+import { PostHeader, PostFooter, Comments, HomeSide } from "charm:components";
 import RightToc from "../../components/RightToc.astro";
 
 // 定义类型
@@ -26,8 +19,7 @@ export async function getStaticPaths() {
   const entries = await getCollection(
     "posts",
     ({ data }) =>
-      (!data.hidden) &&
-      (import.meta.env.PROD ? data.draft !== true : true),
+      !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
   );
   const sorted = entries.sort(
     (a, b) =>
@@ -41,7 +33,9 @@ export async function getStaticPaths() {
 }
 
 // 实现 flat2NestedHeadings
-function flat2NestedHeadings(flatHeadings: { slug: string; text: string; depth: number }[]): NestedHeading[] {
+function flat2NestedHeadings(
+  flatHeadings: { slug: string; text: string; depth: number }[],
+): NestedHeading[] {
   const result: NestedHeading[] = [];
   const stack: NestedHeading[] = [];
 
@@ -105,12 +99,8 @@ const hasToc =
     image: entry.data.image,
   }}
 >
-  <main class="three-column-main">
-    <!-- 左侧：完整侧边栏 -->
-    <div class="sidebar-wrapper">
-      <HomeSide />
-    </div>
-
+  <HomeSide />
+  <div class="content-area">
     <!-- 中间：文章内容 -->
     <div class="article-wrapper">
       <article data-pagefind-body>
@@ -122,60 +112,34 @@ const hasToc =
     </div>
 
     <!-- 右侧：目录 -->
-    {hasToc && <RightToc headings={nestedHeadings} title={config.side.toc?.title} />}
-  </main>
+    {
+      hasToc && (
+        <RightToc headings={nestedHeadings} title={config.side.toc?.title} />
+      )
+    }
+  </div>
 </BaseLayout>
 
 <style>
-  .three-column-main {
+  .content-area {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    width: auto;
-    margin: 0 clamp(1rem, 3vw, 4rem);
-    gap: clamp(1.5rem, 2vw, 2.5rem);
+    gap: 2rem;
+    min-width: 0;
+    padding: 3rem 0;
+    flex: 1;
   }
 
-  /* 侧边栏容器 - 不设置 height，让 sticky 正常工作 */
-  .sidebar-wrapper {
-    flex-shrink: 0;
-    min-width: 3rem;
-    padding-right: 1rem;
-  }
-
-  .sidebar-wrapper :global(.side) {
-    width: 14em !important;
-  }
-
-  .sidebar-wrapper :global(.side .footer) {
-    padding: 2rem 0 !important;
-  }
-
-  /* 中间文章内容 */
   .article-wrapper {
     flex: 1;
-    min-width: 16rem;
+    min-width: 0;
     max-width: 48rem;
-    padding: 3rem 0;
-  }
-
-  /* 响应式设计 */
-  @media (width <= 80rem) {
-    .three-column-main {
-      gap: clamp(1rem, 2vw, 2rem);
-    }
-  }
-
-  @media (width <= 64rem) {
-    .sidebar-wrapper {
-      display: none;
-    }
   }
 
   @media (width <= 42rem) {
-    .three-column-main {
+    .content-area {
       display: block;
-      margin: 0 1rem;
+      padding: 0 1rem;
     }
   }
 </style>
