@@ -1,95 +1,49 @@
 ---
-// 文章底部评论组件 - 懒加载版本
-// 用户滚动到距离评论区 800px 时开始预加载，到达时已 ready
+// 文章底部评论组件
 const { postEntry } = Astro.props;
 const serverURL = import.meta.env.PUBLIC_WALINE_SERVER_URL;
 const slug = postEntry.slug;
 ---
 
-<div class="waline-lazy-wrapper">
-  <div id="waline-container" data-serverurl={serverURL} data-path={'/' + slug}></div>
-  <div id="waline-placeholder" class="waline-placeholder">
-    <span class="waline-placeholder-text">评论区加载中...</span>
-  </div>
-</div>
+<div id="waline-container" data-serverurl={serverURL} data-path={'/' + slug}></div>
 
 <script>
-(function () {
-  var container = document.getElementById("waline-container");
-  var placeholder = document.getElementById("waline-placeholder");
-  if (!container || !placeholder) return;
-
-  var serverURL = container.dataset.serverurl;
-  var path = container.dataset.path;
-  var loaded = false;
-  var loading = false;
-
-  function loadWaline() {
-    if (loaded || loading) return;
-    loading = true;
-
-    // 加载 CSS
-    var link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/@waline/client@3/dist/waline.css";
-    document.head.appendChild(link);
-
-    // 动态导入 Waline
-    import("https://unpkg.com/@waline/client@3/dist/waline.js").then(function (mod) {
-      mod.init({
-        el: "#waline-container",
-        serverURL: serverURL,
-        path: path,
-        lang: "zh-CN",
-        reaction: true,
-        pageview: true,
-        dark: "html.charm.dark",
-        requiredMeta: ["nick", "mail"],
-      });
-      loaded = true;
-      placeholder.style.display = "none";
-    });
-  }
-
-  // Intersection Observer: 提前 800px 开始加载
-  var observer = new IntersectionObserver(
-    function (entries) {
-      if (entries[0].isIntersecting) {
-        loadWaline();
-        observer.disconnect();
-      }
-    },
-    { rootMargin: "800px" }
-  );
-
-  observer.observe(container);
-
-  // Astro View Transitions 支持
-  document.addEventListener("astro:page-load", function () {
-    var newContainer = document.getElementById("waline-container");
-    var newPlaceholder = document.getElementById("waline-placeholder");
-    if (newContainer && newPlaceholder && !loaded) {
-      observer.observe(newContainer);
-    }
+async function initWaline() {
+  const container = document.getElementById("waline-container");
+  if (!container || container.dataset.loaded) return;
+  
+  const serverURL = container.dataset.serverurl;
+  const path = container.dataset.path;
+  
+  // 动态导入 Waline (ESM)
+  const { init } = await import("https://unpkg.com/@waline/client@3/dist/waline.js");
+  
+  init({
+    el: "#waline-container",
+    serverURL: serverURL,
+    path: path,
+    lang: "zh-CN",
+    reaction: true,
+    pageview: true,
+    dark: "html.charm.dark",
+    requiredMeta: ["nick", "mail"],
   });
-})();
+  container.dataset.loaded = "true";
+}
+
+// 页面加载后立即初始化
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initWaline);
+} else {
+  initWaline();
+}
+
+// Astro View Transitions 支持
+document.addEventListener("astro:page-load", initWaline);
 </script>
 
 <style>
-.waline-lazy-wrapper {
+#waline-container {
   margin-top: 2rem;
-  position: relative;
-  min-height: 120px;
-}
-.waline-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  color: var(--charm-text-secondary, #666);
-  opacity: 0.6;
-}
-.waline-placeholder-text {
-  font-size: 0.875rem;
 }
 </style>

@@ -14,6 +14,8 @@
   const fetchQuote = () => {
     const textEl = document.getElementById("quote-text");
     const sourceEl = document.getElementById("quote-source");
+    if (!textEl || !sourceEl) return;
+    
     textEl.textContent = "加载中...";
     sourceEl.textContent = "";
 
@@ -35,9 +37,11 @@
 
   document.addEventListener("DOMContentLoaded", fetchQuote);
   document.addEventListener("astro:page-load", fetchQuote);
-  document
-    .getElementById("quote-refresh")
-    ?.addEventListener("click", fetchQuote);
+  
+  // 延迟绑定 click 事件
+  setTimeout(() => {
+    document.getElementById("quote-refresh")?.addEventListener("click", fetchQuote);
+  }, 100);
 </script>
 
 <style>

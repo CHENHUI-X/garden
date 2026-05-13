@@ -18,7 +18,7 @@ html.charm main #side-toc {
 
 /* 3. 主区域边距和间距 */
 html.charm main {
-  margin: 0 clamp(1rem, 2vw, 4rem) 0 clamp(0.5rem, 1.5vw, 3rem); /* 左小右小，紧凑布局 */
+  margin: 0 clamp(0.5rem, 1vw, 2rem) 0 clamp(0.5rem, 1.5vw, 3rem); /* 右边距缩小，目录更靠右 */
   gap: clamp(1.5rem, 2.5vw, 3rem); /* 减小侧边栏与正文间距 */
 }
 
@@ -26,7 +26,7 @@ html.charm main {
 @media (width >= 90rem) {
   /* 超宽屏: 增加边距避免正文过宽 */
   html.charm main {
-    margin: 0 clamp(2rem, 5vw, 8rem) 0 clamp(1rem, 3vw, 5rem);
+    margin: 0 clamp(1rem, 3vw, 5rem) 0 clamp(1rem, 3vw, 5rem);
   }
 }
 

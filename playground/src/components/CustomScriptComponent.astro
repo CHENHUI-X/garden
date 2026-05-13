@@ -90,10 +90,10 @@ const FOUNDED = "2026-05-01";
   }
 
   #anime-bg img.visible {
-    opacity: 0.18;
+    opacity: 0.35;
   }
   html.charm.dark #anime-bg img.visible {
-    opacity: 0.22;
+    opacity: 0.40;
   }
   html.charm body {
     background-color: transparent !important;
@@ -275,3 +275,8 @@ const FOUNDED = "2026-05-01";
 </script>
 
 <script is:inline src="/scripts/anime-bg.js"></script>
+
+<!-- Waline 评论系统 - 使用 modulepreload 预加载 -->
+<link rel="modulepreload" href="https://unpkg.com/@waline/client@3/dist/waline.js" />
+<link rel="preload" href="https://unpkg.com/@waline/client@3/dist/waline.css" as="style" />
+<link rel="stylesheet" href="https://unpkg.com/@waline/client@3/dist/waline.css" />
