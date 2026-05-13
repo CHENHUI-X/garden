@@ -1,32 +1,31 @@
 ---
-
+// GitHub 贡献图组件 - 优化版
 ---
 
 <div class="gh-contributions">
-  <img
-    src="https://ssr-contributions-svg.vercel.app/_/CHENHUI-X?chart=calendar&format=svg&dark=false"
-    alt="CHENHUI-X 的 GitHub 贡献图"
-    loading="lazy"
-    class="gh-img light-img"
-    width="720"
-    height="128"
-  />
-  <img
-    src="https://ssr-contributions-svg.vercel.app/_/CHENHUI-X?chart=calendar&format=svg&dark=true"
-    alt="CHENHUI-X 的 GitHub 贡献图"
-    loading="lazy"
-    class="gh-img dark-img"
-    width="720"
-    height="128"
-  />
-  <a
-    href="https://github.com/CHENHUI-X"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="gh-link"
-  >
-    @CHENHUI-X
-  </a>
+  <div class="gh-chart-wrapper">
+    <img
+      src="https://ghchart.rshah.org/CHENHUI-X"
+      alt="CHENHUI-X 的 GitHub 贡献图"
+      loading="lazy"
+      class="gh-img"
+      width="720"
+      height="104"
+    />
+  </div>
+  <div class="gh-footer">
+    <a
+      href="https://github.com/CHENHUI-X"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="gh-link"
+    >
+      <svg class="gh-icon" viewBox="0 0 24 24" width="14" height="14">
+        <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.78.84 1.231 1.91 1.231 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.214.694.825.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+      </svg>
+      <span>@CHENHUI-X</span>
+    </a>
+  </div>
 </div>
 
 <style>
@@ -34,31 +33,58 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
+
+  .gh-chart-wrapper {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0.4rem;
+    background: var(--charm-contrast-color-1);
+    padding: 0.5rem;
+  }
+
   .gh-img {
-    max-width: 100%;
+    width: 100%;
     height: auto;
-    border-radius: 0.35rem;
+    display: block;
+    border-radius: 0.25rem;
+    transition: transform 0.3s ease;
   }
-  .dark-img {
-    display: none;
+
+  .gh-chart-wrapper:hover .gh-img {
+    transform: scale(1.02);
   }
-  :global(.dark) .light-img {
-    display: none;
+
+  /* 暗色模式下反转颜色 */
+  :global(html.charm.dark) .gh-img {
+    filter: invert(1) hue-rotate(180deg);
+    opacity: 0.85;
   }
-  :global(.dark) .dark-img {
-    display: inline-block;
+
+  .gh-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
   }
+
   .gh-link {
-    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
     color: var(--charm-text-color);
     opacity: 0.6;
     text-decoration: none;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, color 0.2s ease;
   }
+
   .gh-link:hover {
     opacity: 1;
     color: var(--charm-highlight-color);
+  }
+
+  .gh-icon {
+    flex-shrink: 0;
   }
 </style>

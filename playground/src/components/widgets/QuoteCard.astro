@@ -2,37 +2,42 @@
 
 ---
 
-<div class="quote-card">
-  <blockquote>人无法同时拥有青春和对青春的感受</blockquote>
-</div>
-
-<div class="quote-card">
-  <blockquote>世界上最遥远的距离，是知道和做到</blockquote>
-</div>
-
-<div class="quote-card">
-  <blockquote>
-    大多数人在二十岁或三十岁就死了，他们变成了自己的影子，往后的生命只是不断地复制自己
-  </blockquote>
-</div>
-
-<div class="quote-card">
-  <blockquote>我们终此一生，就是要摆脱他人的期待，找到真正的自己</blockquote>
-</div>
-
-<div class="quote-card">
-  <blockquote>人生有三样东西是无法隐瞒的：咳嗽、贫穷和爱</blockquote>
+<div class="quote-card" id="quote-card">
+  <blockquote id="quote-text">加载中...</blockquote>
+  <div class="quote-footer">
+    <span id="quote-source"></span>
+    <button id="quote-refresh" title="换一句">⟳</button>
+  </div>
 </div>
 
 <script>
-  /* 每次刷新随机展示一条 */
-  const cards = document.querySelectorAll(".quote-card");
-  if (cards.length) {
-    const idx = Math.floor(Math.random() * cards.length);
-    cards.forEach((c, i) => {
-      c.style.display = i === idx ? "block" : "none";
-    });
-  }
+  const fetchQuote = () => {
+    const textEl = document.getElementById("quote-text");
+    const sourceEl = document.getElementById("quote-source");
+    textEl.textContent = "加载中...";
+    sourceEl.textContent = "";
+
+    fetch("https://v1.hitokoto.cn/?c=k&c=d&c=i&c=h")
+      .then((res) => res.json())
+      .then((data) => {
+        textEl.textContent = data.hitokoto;
+        let src = "";
+        if (data.from_who && data.from)
+          src = data.from_who + "《" + data.from + "》";
+        else if (data.from) src = "《" + data.from + "》";
+        else if (data.from_who) src = data.from_who;
+        sourceEl.textContent = src ? "——" + src : "";
+      })
+      .catch(() => {
+        textEl.textContent = "人无法同时拥有青春和对青春的感受";
+      });
+  };
+
+  document.addEventListener("DOMContentLoaded", fetchQuote);
+  document.addEventListener("astro:page-load", fetchQuote);
+  document
+    .getElementById("quote-refresh")
+    ?.addEventListener("click", fetchQuote);
 </script>
 
 <style>
@@ -50,5 +55,35 @@
     color: var(--charm-text-color);
     opacity: 0.85;
     font-style: italic;
+    min-height: 2.5rem;
+  }
+  .quote-card blockquote::before,
+  .quote-card blockquote::after {
+    content: none;
+  }
+  .quote-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.35rem;
+    font-size: 0.72rem;
+    opacity: 0.5;
+    color: var(--charm-text-color);
+  }
+  #quote-refresh {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: inherit;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+    transition: opacity 0.2s;
+    opacity: 0.6;
+    line-height: 1;
+  }
+  #quote-refresh:hover {
+    opacity: 1;
+    background: var(--charm-contrast-color-2);
   }
 </style>

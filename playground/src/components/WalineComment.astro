@@ -1,44 +1,95 @@
 ---
-// 文章底部评论组件
-// 接收 postEntry，使用 slug 作为 Waline 的 path 区分不同文章
+// 文章底部评论组件 - 懒加载版本
+// 用户滚动到距离评论区 800px 时开始预加载，到达时已 ready
 const { postEntry } = Astro.props;
 const serverURL = import.meta.env.PUBLIC_WALINE_SERVER_URL;
 const slug = postEntry.slug;
 ---
 
-<div id="waline-container" class="waline-wrapper" data-serverurl={serverURL} data-path={'/' + slug}></div>
+<div class="waline-lazy-wrapper">
+  <div id="waline-container" data-serverurl={serverURL} data-path={'/' + slug}></div>
+  <div id="waline-placeholder" class="waline-placeholder">
+    <span class="waline-placeholder-text">评论区加载中...</span>
+  </div>
+</div>
 
-<script is:inline>
+<script>
 (function () {
   var container = document.getElementById("waline-container");
-  if (!container) return;
+  var placeholder = document.getElementById("waline-placeholder");
+  if (!container || !placeholder) return;
+
   var serverURL = container.dataset.serverurl;
   var path = container.dataset.path;
+  var loaded = false;
+  var loading = false;
 
-  // 加载 Waline CSS
-  var link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "https://unpkg.com/@waline/client@3/dist/waline.css";
-  document.head.appendChild(link);
+  function loadWaline() {
+    if (loaded || loading) return;
+    loading = true;
 
-  // 动态导入 Waline 并初始化
-  import("https://unpkg.com/@waline/client@3/dist/waline.js").then(function (mod) {
-    mod.init({
-      el: "#waline-container",
-      serverURL: serverURL,
-      path: path,
-      lang: "zh-CN",
-      reaction: true,
-      pageview: true,
-      dark: "html.charm.dark",
-      requiredMeta: ["nick", "mail"], // 昵称和邮箱必填，关闭匿名
+    // 加载 CSS
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://unpkg.com/@waline/client@3/dist/waline.css";
+    document.head.appendChild(link);
+
+    // 动态导入 Waline
+    import("https://unpkg.com/@waline/client@3/dist/waline.js").then(function (mod) {
+      mod.init({
+        el: "#waline-container",
+        serverURL: serverURL,
+        path: path,
+        lang: "zh-CN",
+        reaction: true,
+        pageview: true,
+        dark: "html.charm.dark",
+        requiredMeta: ["nick", "mail"],
+      });
+      loaded = true;
+      placeholder.style.display = "none";
     });
+  }
+
+  // Intersection Observer: 提前 800px 开始加载
+  var observer = new IntersectionObserver(
+    function (entries) {
+      if (entries[0].isIntersecting) {
+        loadWaline();
+        observer.disconnect();
+      }
+    },
+    { rootMargin: "800px" }
+  );
+
+  observer.observe(container);
+
+  // Astro View Transitions 支持
+  document.addEventListener("astro:page-load", function () {
+    var newContainer = document.getElementById("waline-container");
+    var newPlaceholder = document.getElementById("waline-placeholder");
+    if (newContainer && newPlaceholder && !loaded) {
+      observer.observe(newContainer);
+    }
   });
 })();
 </script>
 
 <style>
-.waline-wrapper {
+.waline-lazy-wrapper {
   margin-top: 2rem;
+  position: relative;
+  min-height: 120px;
+}
+.waline-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--charm-text-secondary, #666);
+  opacity: 0.6;
+}
+.waline-placeholder-text {
+  font-size: 0.875rem;
 }
 </style>
