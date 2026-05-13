@@ -37,12 +37,14 @@ cd playground && pnpm preview
 - **`playground/src/content/specials/`** — 侧边栏页面，每个 .md 自动生成侧边栏入口（about, murmur, friends）
 - **`playground/src/components/CustomScriptComponent.astro`** — 全局 CSS（背景图样式、body 透明化）+ 二次元背景图注入（`anime-bg.js`）+ About 页面统计（构建时 `getCollection`）
 - **`playground/src/components/WalineComment.astro`** — 文章底部评论组件（CDN 加载 Waline，`requiredMeta: ["nick","mail"]` 关闭匿名）
+- **`playground/src/components/MobileWidgets.astro`** — 移动端底部组件（统计 + 标签云），仅移动端显示
 - **`playground/src/content/specials/murmur.md`** — 碎碎念页，含每条说说独立折叠评论区（inline script + `toggleComment` 全局函数）
 - **`playground/src/content/specials/friends.md`** — 友链页，CSS Grid 卡片网格，DiceBear pixel-art 风格头像
 - **`playground/src/content/specials/about.md`** — 关于页，含动态博客统计数据
 - **`playground/public/scripts/anime-bg.js`** — 二次元背景图切换脚本（30s 切换，夜轻 API + 赫萝 API 备用）
 - **`playground/src/styles/custom-charm.css`** — 自定义 CSS（目前为空，可添加自定义样式）
 - **`playground/.env`** — `PUBLIC_WALINE_SERVER_URL` 环境变量（gitignored，需在 CI 中单独配置）
+- **`package/src/components/MobileMenu.astro`** — 移动端菜单组件，含主题切换按钮
 - **`.github/workflows/deploy.yml`** — GitHub Actions 部署：checkout → pnpm setup → Node 22 → install → build → peaceiris/gh-pages（`cname: haibarai.dpdns.org`）
 
 ## Custom Components Registry
@@ -70,9 +72,15 @@ cd playground && pnpm preview
 
 - 夜轻 API 主用（`api.yppp.net/pc.php` 横屏 / `pe.php` 竖屏），赫萝 API 备用（`api.horosama.com`）
 - 30s 切换，双 img 淡入淡出（CSS transition 1.2s）
-- 透明度：亮色 `0.18` / 暗色 `0.22`
+- 透明度：亮色 `0.55` / 暗色 `0.50`
 - CSS 在 `CustomScriptComponent.astro`，JS 在 `public/scripts/anime-bg.js`
 - 兼容 Astro View Transitions：同时监听 `DOMContentLoaded` 和 `astro:page-load`
+
+## Mobile Features
+
+- **主题切换按钮**：移动端顶部导航栏右侧，和汉堡菜单按钮并排，支持亮/暗模式切换
+- **底部组件**：首页底部显示统计（文章数、标签数）和标签云，仅移动端可见（`MobileWidgets.astro`）
+- **移动端菜单**：全屏滑出式菜单，包含导航链接和社交链接
 
 ## Known Issues
 
