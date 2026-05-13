@@ -11,7 +11,7 @@ const totalChars = posts.reduce((sum, p) => {
   return sum + cleaned.length;
 }, 0);
 const postCount = posts.length;
-const FOUNDED = "2026-04-01";
+const FOUNDED = "2026-05-01";
 ---
 
 <style is:inline>
@@ -148,33 +148,91 @@ const FOUNDED = "2026-04-01";
 </script>
 
 <script>
-  if (location.pathname === "/about" || location.pathname === "/about/") {
-    document.addEventListener("DOMContentLoaded", () => {
-      const el = document.getElementById("site-stats-dynamic");
-      if (!el) return;
-      const { postCount, uniqueTagCount, totalChars, FOUNDED } =
-        window.__siteStats ?? {};
-      const now = new Date();
-      const founded = new Date(FOUNDED);
-      const runningDays = Math.floor((now - founded) / (1000 * 60 * 60 * 24));
-      const lastUpdated = now.toISOString().split("T")[0];
-      function booksEquivalent(chars) {
-        if (chars < 30000) return "还不够一篇毕业论文 😅";
-        if (chars < 110000)
-          return `快赶上一本《活着》了（${(chars / 110000).toFixed(2)} 本）`;
-        return `相当于 ${(chars / 110000).toFixed(1)} 本《活着》`;
+  function renderStats() {
+    const el = document.getElementById("site-stats-dynamic");
+    if (!el || el.dataset.loaded) return;
+    
+    const { postCount, uniqueTagCount, totalChars, FOUNDED } = window.__siteStats ?? {};
+    if (!postCount) return;
+    
+    const now = new Date();
+    const founded = new Date(FOUNDED);
+    const runningDays = Math.floor((now - founded) / (1000 * 60 * 60 * 24));
+    const lastUpdated = now.toISOString().split("T")[0];
+    
+    function booksEquivalent(chars) {
+      // 书籍字数数据（字数从少到多，10万字以内）
+      const books = [
+        { name: "《变形记》", chars: 20000 },
+        { name: "《动物农场》", chars: 30000 },
+        { name: "《小王子》", chars: 40000 },
+        { name: "《老人与海》", chars: 50000 },
+        { name: "《了不起的盖茨比》", chars: 50000 },
+        { name: "《边城》", chars: 60000 },
+        { name: "《麦田里的守望者》", chars: 70000 },
+        { name: "《呐喊》", chars: 70000 },
+        { name: "《活着》", chars: 110000 },
+        { name: "《骆驼祥子》", chars: 100000 },
+      ];
+      
+      // 找到最接近的书
+      let lower = null, upper = null;
+      for (let i = 0; i < books.length; i++) {
+        if (books[i].chars <= chars) lower = books[i];
+        if (books[i].chars > chars && !upper) upper = books[i];
       }
-      el.innerHTML = `
-        <li>📝 <span>文章总数</span><strong>${postCount} 篇</strong></li>
-        <li>🏷️ <span>标签总数</span><strong>${uniqueTagCount} 个</strong></li>
-        <li>✍️ <span>全站字数</span><strong>约 ${totalChars.toLocaleString("zh-CN")} 字</strong></li>
-        <li>📚 <span>废话产量</span><strong>${booksEquivalent(totalChars)}</strong></li>
-        <li>📅 <span>建站时间</span><strong>${FOUNDED}</strong></li>
-        <li>⏱️ <span>已运行</span><strong>${runningDays} 天</strong></li>
-        <li>🔄 <span>最后更新</span><strong>${lastUpdated}</strong></li>
-      `;
-    });
+      
+      // 生成描述
+      if (!lower) {
+        // 还没写到第一本书
+        const percent = Math.round((chars / books[0].chars) * 100);
+        return `相当于 ${books[0].name} 的 ${percent}%`;
+      }
+      
+      if (!upper) {
+        // 超过所有书
+        const times = (chars / books[books.length - 1].chars).toFixed(1);
+        return `超过 ${books[books.length - 1].name} ${times} 倍了！`;
+      }
+      
+      // 在两本书之间
+      const percent = Math.round(((chars - lower.chars) / (upper.chars - lower.chars)) * 100);
+      if (percent < 10) {
+        return `刚超过 ${lower.name}`;
+      } else if (percent < 50) {
+        return `超过 ${lower.name}，达到 ${upper.name} 的 ${percent}%`;
+      } else if (percent < 90) {
+        return `快赶上 ${upper.name} 了（${percent}%）`;
+      } else {
+        return `马上超越 ${upper.name}！`;
+      }
+    }
+    
+    el.innerHTML = `
+      <div class="stats-row">
+        <div>📝 <span>文章总数</span><strong>${postCount} 篇</strong></div>
+        <div>🏷️ <span>标签总数</span><strong>${uniqueTagCount} 个</strong></div>
+        <div>✍️ <span>全站字数</span><strong>约 ${totalChars.toLocaleString("zh-CN")} 字</strong></div>
+        <div>📚 <span>废话产量</span><strong>${booksEquivalent(totalChars)}</strong></div>
+      </div>
+      <div class="stats-row">
+        <div>📅 <span>建站时间</span><strong>${FOUNDED}</strong></div>
+        <div>⏱️ <span>已运行</span><strong>${runningDays} 天</strong></div>
+        <div>🔄 <span>最后更新</span><strong>${lastUpdated}</strong></div>
+      </div>
+    `;
+    el.dataset.loaded = "true";
   }
+  
+  // 立即执行（如果 DOM 已就绪）
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renderStats);
+  } else {
+    renderStats();
+  }
+  
+  // Astro View Transitions 支持
+  document.addEventListener("astro:page-load", renderStats);
 </script>
 
 <script is:inline>
