@@ -18,16 +18,12 @@ index: 1
 TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是当老板的感觉吗?
 
 (对了,今天是上班的第678天😐)
-
-<div class="murmur-reactions" data-path="/murmur/2026-05-12"></div>
 </div>
 
 <div class="murmur-item">
 <span class="murmur-date">2026-05-01</span>
 
 今天是上班的第666天。
-
-<div class="murmur-reactions" data-path="/murmur/2026-05-01"></div>
 </div>
 
 </div>
@@ -40,38 +36,6 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 
 <script is:inline>
 (function () {
-  var serverURL = window.__walineServerURL || "https://waline-comment-smoky.vercel.app";
-
-  // 初始化所有表情反应
-  function initReactions() {
-    document.querySelectorAll('.murmur-reactions').forEach(function(el) {
-      if (el.dataset.initialized) return;
-      el.dataset.initialized = "1";
-      
-      // 显示 loading
-      el.innerHTML = '<span style="opacity:0.5;font-size:0.85rem">加载中...</span>';
-      
-      import("https://unpkg.com/@waline/client@3/dist/waline.js").then(function(mod) {
-        el.innerHTML = "";
-        mod.init({
-          el: el,
-          serverURL: serverURL,
-          path: el.dataset.path,
-          reaction: true,
-          dark: "html.charm.dark",
-        });
-      }).catch(function() {
-        el.innerHTML = '<span style="opacity:0.5;font-size:0.85rem">加载失败</span>';
-      });
-    });
-  }
-
-  // 页面加载时初始化
-  initReactions();
-  
-  // View Transitions 支持
-  document.addEventListener('astro:page-load', initReactions);
-
   // 图片预览灯箱
   window.previewImage = function(img) {
     var lightbox = document.getElementById('image-lightbox');
@@ -145,28 +109,6 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
   color: var(--charm-highlight-color, #e06458);
   opacity: 1;
   margin-bottom: 0.5rem;
-}
-
-.murmur-reactions {
-  margin-top: 0.75rem;
-  min-height: 2rem;
-}
-
-/* 隐藏 Waline 评论输入区域，只保留 Reaction */
-.murmur-reactions .wl-header,
-.murmur-reactions .wl-editor,
-.murmur-reactions .wl-preview,
-.murmur-reactions .wl-comment-actions,
-.murmur-reactions .wl-info,
-.murmur-reactions .wl-quote,
-.murmur-reactions .wl-cards,
-.murmur-reactions .wl-recent {
-  display: none !important;
-}
-
-/* Reaction 区域样式调整 */
-.murmur-reactions .wl-reaction {
-  margin: 0;
 }
 
 /* 图片布局 */
