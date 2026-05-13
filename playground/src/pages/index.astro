@@ -3,6 +3,7 @@ import { BaseLayout } from "charm:layouts";
 import { HomeSide, HomePageHeader, PostList } from "charm:components";
 import { getCollection } from "astro:content";
 import RightHomeSidebar from "../components/RightHomeSidebar.astro";
+import MobileWidgets from "../components/MobileWidgets.astro";
 
 const entries = (
   await getCollection(
@@ -26,6 +27,7 @@ const page = p ? parseInt(p) : 0;
     <div class="post-list-area">
       <HomePageHeader />
       <PostList {page} {entries} />
+      <MobileWidgets />
     </div>
     <RightHomeSidebar />
   </div>
@@ -47,7 +49,7 @@ const page = p ? parseInt(p) : 0;
     max-width: 56rem;
   }
 
-  @media (width <= 42rem) {
+  @media (max-width: 42rem) {
     .home-content {
       display: block;
       padding: 0 1rem;

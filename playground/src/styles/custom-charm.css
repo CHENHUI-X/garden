@@ -23,27 +23,37 @@ html.charm main {
 }
 
 /* 4. 响应式断点优化 */
-@media (width >= 90rem) {
+/* 统一使用 max-width 语法，兼容性更好 */
+@media (min-width: 90rem) {
   /* 超宽屏: 增加边距避免正文过宽 */
   html.charm main {
     margin: 0 clamp(1rem, 3vw, 5rem) 0 clamp(1rem, 3vw, 5rem);
   }
 }
 
-@media (width <= 64rem) {
+@media (max-width: 64rem) {
   /* 中等屏幕: 动态计算内容宽度 */
   html.charm main .content-wrapper {
     max-width: calc(100vw - 22rem);
   }
 }
 
-@media (width <= 52rem) {
+@media (max-width: 52rem) {
   /* 小屏: 进一步紧凑 */
   html.charm main .content-wrapper {
     max-width: calc(100vw - 18rem);
   }
   html.charm main .side {
     width: 12em;
+  }
+}
+
+/* ========== 移动端 Fixed Header 遮挡问题 ========== */
+/* 移动端 main 需要 padding-top 避开 fixed header */
+@media (max-width: 42rem) {
+  html.charm main {
+    padding-top: 4rem; /* mobile-header 高度约 3rem + 1rem 间距 */
+    margin: 0 1rem;
   }
 }
 

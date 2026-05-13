@@ -11,6 +11,8 @@
 </div>
 
 <script>
+  let refreshBtn = null;
+  
   const fetchQuote = () => {
     const textEl = document.getElementById("quote-text");
     const sourceEl = document.getElementById("quote-source");
@@ -35,13 +37,22 @@
       });
   };
 
-  document.addEventListener("DOMContentLoaded", fetchQuote);
-  document.addEventListener("astro:page-load", fetchQuote);
-  
-  // 延迟绑定 click 事件
-  setTimeout(() => {
-    document.getElementById("quote-refresh")?.addEventListener("click", fetchQuote);
-  }, 100);
+  const bindRefreshBtn = () => {
+    const btn = document.getElementById("quote-refresh");
+    if (btn && btn !== refreshBtn) {
+      refreshBtn = btn;
+      btn.addEventListener("click", fetchQuote);
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchQuote();
+    bindRefreshBtn();
+  });
+  document.addEventListener("astro:page-load", () => {
+    fetchQuote();
+    bindRefreshBtn();
+  });
 </script>
 
 <style>

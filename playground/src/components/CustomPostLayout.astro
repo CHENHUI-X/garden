@@ -58,22 +58,21 @@ const hasToc =
     padding: 3rem 0;
   }
 
-  /* 响应式：中等屏幕 */
-  @media (width <= 80rem) {
+  @media (max-width: 80rem) {
     .three-column-layout {
       gap: clamp(1rem, 2vw, 2rem);
     }
   }
 
   /* 平板：侧边栏更窄 */
-  @media (width <= 64rem) {
+  @media (max-width: 64rem) {
     .left-sidebar {
       display: none;
     }
   }
 
   /* 移动端：单栏 */
-  @media (width <= 42rem) {
+  @media (max-width: 42rem) {
     .three-column-layout {
       display: block;
     }

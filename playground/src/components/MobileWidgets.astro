@@ -1,0 +1,131 @@
+---
+// 移动端底部 Widget（统计 + 标签）
+import { getCollection } from "astro:content";
+
+const allPosts = await getCollection(
+  "posts",
+  ({ data }) =>
+    !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
+);
+
+const totalPosts = allPosts.length;
+const allTags = new Set<string>();
+for (const post of allPosts) {
+  post.data.tags?.forEach((t) => allTags.add(t));
+}
+const tagsArray = [...allTags].slice(0, 12); // 移动端只显示前 12 个标签
+---
+
+<div class="mobile-widgets">
+  <div class="widget-section">
+    <h3 class="widget-title">📊 统计</h3>
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-value">{totalPosts}</span>
+        <span class="stat-label">文章</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{allTags.size}</span>
+        <span class="stat-label">标签</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget-section">
+    <h3 class="widget-title">🏷️ 标签</h3>
+    <div class="tags-cloud">
+      {tagsArray.map((tag) => (
+        <a href={`/tags/${tag}`} class="tag-link">{tag}</a>
+      ))}
+      {allTags.size > 12 && <span class="tag-more">+{allTags.size - 12}</span>}
+    </div>
+  </div>
+</div>
+
+<style>
+  .mobile-widgets {
+    display: none;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    border-top: 1px solid var(--charm-border, rgba(128, 128, 128, 0.15));
+  }
+
+  @media (max-width: 42rem) {
+    .mobile-widgets {
+      display: flex;
+    }
+  }
+
+  .widget-section {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .widget-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    color: var(--charm-text-color);
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--charm-highlight-color);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+
+  .tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-link {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    border-radius: 0.4rem;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--charm-text-color);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tag-link:hover {
+    background: var(--charm-highlight-color);
+    color: white;
+  }
+
+  .tag-more {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    align-self: center;
+  }
+
+  /* 暗色模式 */
+  :global(html.charm.dark) .widget-section {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+</style>
