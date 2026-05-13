@@ -9,7 +9,7 @@ export default charm({
     author: "CHENHUI",
     licenseId: "CC-BY-NC-SA-4.0",
     shootingStar: true,
-    font: "auto",
+    font: "disabled", // 禁用第三方字体，避免 CDN 不稳定
     side: {
       title: "IUHNEHC",
       sub: "",

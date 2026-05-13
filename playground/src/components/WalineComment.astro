@@ -1,5 +1,5 @@
 ---
-// 文章底部评论组件（懒加载版本）
+// 文章底部评论组件（懒加载 + 重试）
 const { postEntry } = Astro.props;
 const serverURL = import.meta.env.PUBLIC_WALINE_SERVER_URL;
 const slug = postEntry.slug;
@@ -24,11 +24,31 @@ const initWaline = async () => {
   const loading = container.querySelector(".waline-loading");
   if (loading) loading.remove();
   
+  // 先测试服务器连通性（3s 超时）
   try {
-    // 动态导入 Waline (ESM)
-    const { init } = await import("https://unpkg.com/@waline/client@3/dist/waline.js");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    await fetch(serverURL + "/api/comment?path=" + encodeURIComponent(path), {
+      method: "HEAD",
+      mode: "no-cors",
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+  } catch (e) {
+    // 连通性测试失败，仍然尝试加载（可能是 CORS 限制导致的假失败）
+    console.warn("[Waline] 服务器连通性测试失败，仍尝试加载:", e);
+  }
+  
+  try {
+    // 动态导入 Waline (ESM)，10s 超时
+    const walineModule = await Promise.race([
+      import("https://unpkg.com/@waline/client@3/dist/waline.js"),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Waline 加载超时")), 10000)
+      ),
+    ]);
     
-    init({
+    walineModule.init({
       el: "#waline-container",
       serverURL: serverURL,
       path: path,
@@ -40,7 +60,14 @@ const initWaline = async () => {
     });
     container.dataset.loaded = "true";
   } catch (e) {
-    container.innerHTML = '<p style="opacity:0.5;text-align:center;padding:1rem">评论加载失败，请刷新重试</p>';
+    console.error("[Waline] 加载失败:", e);
+    container.innerHTML = `
+      <div class="waline-error">
+        <p>评论加载失败</p>
+        <p class="waline-error-hint">可能是网络原因，请稍后重试</p>
+        <button class="waline-retry-btn" onclick="location.reload()">刷新页面</button>
+      </div>
+    `;
   }
 };
 
@@ -109,5 +136,37 @@ document.addEventListener("astro:page-load", setupLazyLoad);
   to {
     transform: rotate(360deg);
   }
+}
+
+.waline-error {
+  text-align: center;
+  padding: 2rem;
+  opacity: 0.7;
+}
+
+.waline-error p {
+  margin: 0.3rem 0;
+}
+
+.waline-error-hint {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.waline-retry-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid var(--charm-border, rgba(128, 128, 128, 0.3));
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--charm-text-color);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.waline-retry-btn:hover {
+  border-color: var(--charm-highlight-color);
+  color: var(--charm-highlight-color);
 }
 </style>
