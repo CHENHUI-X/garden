@@ -1,49 +1,113 @@
 ---
-// 文章底部评论组件
+// 文章底部评论组件（懒加载版本）
 const { postEntry } = Astro.props;
 const serverURL = import.meta.env.PUBLIC_WALINE_SERVER_URL;
 const slug = postEntry.slug;
 ---
 
-<div id="waline-container" data-serverurl={serverURL} data-path={'/' + slug}></div>
+<div id="waline-container" data-serverurl={serverURL} data-path={'/' + slug}>
+  <div class="waline-loading">
+    <span class="loading-spinner"></span>
+    <span>评论加载中...</span>
+  </div>
+</div>
 
 <script>
-async function initWaline() {
+const initWaline = async () => {
   const container = document.getElementById("waline-container");
   if (!container || container.dataset.loaded) return;
   
   const serverURL = container.dataset.serverurl;
   const path = container.dataset.path;
   
-  // 动态导入 Waline (ESM)
-  const { init } = await import("https://unpkg.com/@waline/client@3/dist/waline.js");
+  // 清除 loading 占位符
+  const loading = container.querySelector(".waline-loading");
+  if (loading) loading.remove();
   
-  init({
-    el: "#waline-container",
-    serverURL: serverURL,
-    path: path,
-    lang: "zh-CN",
-    reaction: true,
-    pageview: true,
-    dark: "html.charm.dark",
-    requiredMeta: ["nick", "mail"],
-  });
-  container.dataset.loaded = "true";
-}
+  try {
+    // 动态导入 Waline (ESM)
+    const { init } = await import("https://unpkg.com/@waline/client@3/dist/waline.js");
+    
+    init({
+      el: "#waline-container",
+      serverURL: serverURL,
+      path: path,
+      lang: "zh-CN",
+      reaction: true,
+      pageview: true,
+      dark: "html.charm.dark",
+      requiredMeta: ["nick", "mail"],
+    });
+    container.dataset.loaded = "true";
+  } catch (e) {
+    container.innerHTML = '<p style="opacity:0.5;text-align:center;padding:1rem">评论加载失败，请刷新重试</p>';
+  }
+};
 
-// 页面加载后立即初始化
+// 懒加载：评论区进入视口时才加载
+const setupLazyLoad = () => {
+  const container = document.getElementById("waline-container");
+  if (!container || container.dataset.loaded) return;
+  
+  // 检查是否支持 IntersectionObserver
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            initWaline();
+          }
+        });
+      },
+      { rootMargin: "200px" } // 提前 200px 开始加载
+    );
+    observer.observe(container);
+  } else {
+    // 降级：直接加载
+    initWaline();
+  }
+};
+
+// 页面加载后设置懒加载
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initWaline);
+  document.addEventListener("DOMContentLoaded", setupLazyLoad);
 } else {
-  initWaline();
+  setupLazyLoad();
 }
 
 // Astro View Transitions 支持
-document.addEventListener("astro:page-load", initWaline);
+document.addEventListener("astro:page-load", setupLazyLoad);
 </script>
 
 <style>
 #waline-container {
   margin-top: 2rem;
+  min-height: 100px;
+}
+
+.waline-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  opacity: 0.5;
+  font-size: 0.9rem;
+}
+
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--charm-border, rgba(128, 128, 128, 0.3));
+  border-top-color: var(--charm-highlight-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

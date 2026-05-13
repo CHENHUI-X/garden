@@ -43,16 +43,7 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 <script is:inline>
 (function () {
   var serverURL = "https://waline-comment-smoky.vercel.app";
-  var cssLoaded = false;
-
-  function loadCSS() {
-    if (cssLoaded) return;
-    cssLoaded = true;
-    var link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/@waline/client@3/dist/waline.css";
-    document.head.appendChild(link);
-  }
+  // CSS 已在全局预加载，无需重复加载
 
   window.toggleComment = function (id) {
     var container = document.getElementById(id);
@@ -64,12 +55,14 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
       return;
     }
 
-    loadCSS();
+    // 显示 loading 状态
     container.style.display = "block";
+    container.innerHTML = '<div style="padding:1rem;opacity:0.5;text-align:center">评论加载中...</div>';
     container.dataset.loaded = "1";
 
     import("https://unpkg.com/@waline/client@3/dist/waline.js").then(
       function (mod) {
+        container.innerHTML = "";
         mod.init({
           el: "#" + id,
           serverURL: serverURL,
@@ -80,7 +73,9 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
           requiredMeta: ["nick", "mail"],
         });
       }
-    );
+    ).catch(function() {
+      container.innerHTML = '<p style="opacity:0.5;text-align:center;padding:1rem">评论加载失败</p>';
+    });
   };
 
   // 图片预览灯箱
