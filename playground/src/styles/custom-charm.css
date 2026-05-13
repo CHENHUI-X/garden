@@ -55,7 +55,10 @@ html.charm.dark body {
 /* ========== 文章卡片悬停效果增强 ========== */
 .post-list .item-container {
   transform: translateX(0);
-  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .post-list .item-container:hover {

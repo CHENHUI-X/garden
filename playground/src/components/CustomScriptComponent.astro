@@ -5,7 +5,9 @@ const posts = await getCollection("posts", ({ data }) => !data.draft);
 const allTags = posts.flatMap((p) => p.data.tags ?? []);
 const uniqueTagCount = new Set(allTags).size;
 const totalChars = posts.reduce((sum, p) => {
-  const cleaned = (p.body ?? "").replace(/^---[\s\S]*?---/, "").replace(/[#*`>\[\]!]/g, "");
+  const cleaned = (p.body ?? "")
+    .replace(/^---[\s\S]*?---/, "")
+    .replace(/[#*`>\[\]!]/g, "");
   return sum + cleaned.length;
 }, 0);
 const postCount = posts.length;
@@ -76,28 +78,25 @@ const FOUNDED = "2026-04-01";
   }
 
   @media (orientation: landscape) and (min-width: 52rem) {
-    #anime-bg img { object-position: right center; }
+    #anime-bg img {
+      object-position: right center;
+    }
   }
 
   @media (orientation: portrait) {
-    #anime-bg img { object-position: center top; }
+    #anime-bg img {
+      object-position: center top;
+    }
   }
 
-  #anime-bg img.visible { opacity: 0.18; }
-  html.charm.dark #anime-bg img.visible { opacity: 0.22; }
-  html.charm body { background-color: transparent !important; }
-
-  /* 阅读进度条 */
-  .reading-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 0%;
-    height: 5px;
-    background: linear-gradient(90deg, #f66260, #e06458);
-    z-index: 99999;
-    transition: width 0.1s ease-out;
-    box-shadow: 0 2px 8px rgba(230, 100, 88, 0.6);
+  #anime-bg img.visible {
+    opacity: 0.18;
+  }
+  html.charm.dark #anime-bg img.visible {
+    opacity: 0.22;
+  }
+  html.charm body {
+    background-color: transparent !important;
   }
 
   /* 返回顶部按钮 */
@@ -115,21 +114,33 @@ const FOUNDED = "2026-04-01";
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s, transform 0.3s;
+    transition:
+      opacity 0.3s,
+      transform 0.3s;
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .back-to-top.visible { opacity: 1; visibility: visible; }
-  .back-to-top:hover { transform: translateY(-3px); }
-
-  @media (max-width: 768px) {
-    .back-to-top { bottom: 1rem; right: 1rem; width: 2rem; height: 2rem; font-size: 1rem; }
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  .back-to-top:hover {
+    transform: translateY(-3px);
   }
 
+  @media (max-width: 768px) {
+    .back-to-top {
+      bottom: 1rem;
+      right: 1rem;
+      width: 2rem;
+      height: 2rem;
+      font-size: 1rem;
+    }
+  }
 </style>
 
 <script define:vars={{ postCount, uniqueTagCount, totalChars, FOUNDED }}>
@@ -141,14 +152,16 @@ const FOUNDED = "2026-04-01";
     document.addEventListener("DOMContentLoaded", () => {
       const el = document.getElementById("site-stats-dynamic");
       if (!el) return;
-      const { postCount, uniqueTagCount, totalChars, FOUNDED } = window.__siteStats ?? {};
+      const { postCount, uniqueTagCount, totalChars, FOUNDED } =
+        window.__siteStats ?? {};
       const now = new Date();
       const founded = new Date(FOUNDED);
       const runningDays = Math.floor((now - founded) / (1000 * 60 * 60 * 24));
       const lastUpdated = now.toISOString().split("T")[0];
       function booksEquivalent(chars) {
         if (chars < 30000) return "还不够一篇毕业论文 😅";
-        if (chars < 110000) return `快赶上一本《活着》了（${(chars / 110000).toFixed(2)} 本）`;
+        if (chars < 110000)
+          return `快赶上一本《活着》了（${(chars / 110000).toFixed(2)} 本）`;
         return `相当于 ${(chars / 110000).toFixed(1)} 本《活着》`;
       }
       el.innerHTML = `
@@ -165,40 +178,42 @@ const FOUNDED = "2026-04-01";
 </script>
 
 <script is:inline>
-(function() {
-  var progressBar = null;
-  function initProgressBar() {
-    if (!progressBar) {
-      progressBar = document.createElement('div');
-      progressBar.className = 'reading-progress';
-      document.body.appendChild(progressBar);
+  (function () {
+    var backToTopBtn = null;
+    function initBackToTop() {
+      if (!backToTopBtn) {
+        backToTopBtn = document.createElement("button");
+        backToTopBtn.className = "back-to-top";
+        backToTopBtn.setAttribute("aria-label", "返回顶部");
+        backToTopBtn.innerHTML = "↑";
+        backToTopBtn.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+        document.body.appendChild(backToTopBtn);
+      }
     }
-    progressBar.style.display = location.pathname.startsWith('/posts/') ? 'block' : 'none';
-  }
-  function updateProgress() {
-    if (!progressBar) return;
-    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    progressBar.style.width = (docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0) + '%';
-  }
-  var backToTopBtn = null;
-  function initBackToTop() {
-    if (!backToTopBtn) {
-      backToTopBtn = document.createElement('button');
-      backToTopBtn.className = 'back-to-top';
-      backToTopBtn.setAttribute('aria-label', '返回顶部');
-      backToTopBtn.innerHTML = '↑';
-      backToTopBtn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
-      document.body.appendChild(backToTopBtn);
+    function toggleBackToTop() {
+      if (backToTopBtn)
+        backToTopBtn.classList.toggle("visible", window.scrollY > 300);
     }
-  }
-  function toggleBackToTop() { if (backToTopBtn) backToTopBtn.classList.toggle('visible', window.scrollY > 300); }
-  function init() { initProgressBar(); initBackToTop(); updateProgress(); toggleBackToTop(); }
-  window.addEventListener('scroll', function() { updateProgress(); toggleBackToTop(); }, { passive: true });
-  document.addEventListener('astro:page-load', function() { initProgressBar(); updateProgress(); toggleBackToTop(); });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-})();
+    function init() {
+      initBackToTop();
+      toggleBackToTop();
+    }
+    window.addEventListener(
+      "scroll",
+      function () {
+        toggleBackToTop();
+      },
+      { passive: true },
+    );
+    document.addEventListener("astro:page-load", function () {
+      toggleBackToTop();
+    });
+    if (document.readyState === "loading")
+      document.addEventListener("DOMContentLoaded", init);
+    else init();
+  })();
 </script>
 
 <script is:inline src="/scripts/anime-bg.js"></script>
-

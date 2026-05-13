@@ -24,6 +24,11 @@ pnpm run playground:build
 cd playground && pnpm preview
 ```
 
+## Git Workflow
+
+- **Commit 前必须跑 `pnpm run playground:build`**，确认构建通过后方可提交
+- 提交信息遵循现有 commit 风格（简短、中英文混合）
+
 ## Key Architecture
 
 - **`playground/charm.theme.ts`** — 主题配置中心：站点信息、侧边栏、自定义组件注册（`config`、`overrides.custom`）
@@ -44,10 +49,10 @@ cd playground && pnpm preview
 
 在 `charm.theme.ts` 的 `overrides.custom` 注册，路径基于 `playground/`：
 
-| 键名 | 用途 | 注入位置 |
-|------|------|----------|
-| `CustomScriptComponent` | 全局 CSS + 背景图 + 统计 | `<head>` 末尾 |
-| `CustomPostHeaderBottom` | 多语言切换提示 | 文章标题下方 |
+| 键名                     | 用途                          | 注入位置              |
+| ------------------------ | ----------------------------- | --------------------- |
+| `CustomScriptComponent`  | 全局 CSS + 背景图 + 统计      | `<head>` 末尾         |
+| `CustomPostHeaderBottom` | 多语言切换提示                | 文章标题下方          |
 | `CustomPostFooterBottom` | 评论区（WalineComment.astro） | 文章底部 License 之后 |
 
 ## Waline 评论系统
