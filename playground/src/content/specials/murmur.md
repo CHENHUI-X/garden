@@ -19,8 +19,7 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 
 (对了,今天是上班的第678天😐)
 
-<button class="murmur-toggle" onclick="toggleComment('murmur-2026-05-12')">💬 评论</button>
-<div id="murmur-2026-05-12" class="murmur-comment-box"></div>
+<div class="murmur-reactions" data-path="/murmur/2026-05-12"></div>
 </div>
 
 <div class="murmur-item">
@@ -28,8 +27,7 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 
 今天是上班的第666天。
 
-<button class="murmur-toggle" onclick="toggleComment('murmur-2026-05-01')">💬 评论</button>
-<div id="murmur-2026-05-01" class="murmur-comment-box"></div>
+<div class="murmur-reactions" data-path="/murmur/2026-05-01"></div>
 </div>
 
 </div>
@@ -43,40 +41,36 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 <script is:inline>
 (function () {
   var serverURL = window.__walineServerURL || "https://waline-comment-smoky.vercel.app";
-  // CSS 已在全局预加载，无需重复加载
 
-  window.toggleComment = function (id) {
-    var container = document.getElementById(id);
-    if (!container) return;
-
-    if (container.dataset.loaded) {
-      container.style.display =
-        container.style.display === "none" ? "block" : "none";
-      return;
-    }
-
-    // 显示 loading 状态
-    container.style.display = "block";
-    container.innerHTML = '<div style="padding:1rem;opacity:0.5;text-align:center">评论加载中...</div>';
-    container.dataset.loaded = "1";
-
-    import("https://unpkg.com/@waline/client@3/dist/waline.js").then(
-      function (mod) {
-        container.innerHTML = "";
+  // 初始化所有表情反应
+  function initReactions() {
+    document.querySelectorAll('.murmur-reactions').forEach(function(el) {
+      if (el.dataset.initialized) return;
+      el.dataset.initialized = "1";
+      
+      // 显示 loading
+      el.innerHTML = '<span style="opacity:0.5;font-size:0.85rem">加载中...</span>';
+      
+      import("https://unpkg.com/@waline/client@3/dist/waline.js").then(function(mod) {
+        el.innerHTML = "";
         mod.init({
-          el: "#" + id,
+          el: el,
           serverURL: serverURL,
-          path: "/murmur/" + id.replace("murmur-", ""),
-          lang: "zh-CN",
+          path: el.dataset.path,
           reaction: true,
           dark: "html.charm.dark",
-          requiredMeta: ["nick", "mail"],
         });
-      }
-    ).catch(function() {
-      container.innerHTML = '<p style="opacity:0.5;text-align:center;padding:1rem">评论加载失败</p>';
+      }).catch(function() {
+        el.innerHTML = '<span style="opacity:0.5;font-size:0.85rem">加载失败</span>';
+      });
     });
-  };
+  }
+
+  // 页面加载时初始化
+  initReactions();
+  
+  // View Transitions 支持
+  document.addEventListener('astro:page-load', initReactions);
 
   // 图片预览灯箱
   window.previewImage = function(img) {
@@ -153,27 +147,26 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
   margin-bottom: 0.5rem;
 }
 
-.murmur-toggle {
-  display: inline-block;
-  margin-top: 0.6rem;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.78rem;
-  border: 1px solid var(--charm-border, rgba(128,128,128,0.25));
-  border-radius: 0.5rem;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.2s;
+.murmur-reactions {
+  margin-top: 0.75rem;
+  min-height: 2rem;
 }
 
-.murmur-toggle:hover {
-  opacity: 1;
+/* 隐藏 Waline 评论输入区域，只保留 Reaction */
+.murmur-reactions .wl-header,
+.murmur-reactions .wl-editor,
+.murmur-reactions .wl-preview,
+.murmur-reactions .wl-comment-actions,
+.murmur-reactions .wl-info,
+.murmur-reactions .wl-quote,
+.murmur-reactions .wl-cards,
+.murmur-reactions .wl-recent {
+  display: none !important;
 }
 
-.murmur-comment-box {
-  display: none;
-  margin-top: 1rem;
+/* Reaction 区域样式调整 */
+.murmur-reactions .wl-reaction {
+  margin: 0;
 }
 
 /* 图片布局 */
