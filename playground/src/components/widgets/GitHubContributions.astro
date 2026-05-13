@@ -1,0 +1,64 @@
+---
+
+---
+
+<div class="gh-contributions">
+  <img
+    src="https://ssr-contributions-svg.vercel.app/_/CHENHUI-X?chart=calendar&format=svg&dark=false"
+    alt="CHENHUI-X 的 GitHub 贡献图"
+    loading="lazy"
+    class="gh-img light-img"
+    width="720"
+    height="128"
+  />
+  <img
+    src="https://ssr-contributions-svg.vercel.app/_/CHENHUI-X?chart=calendar&format=svg&dark=true"
+    alt="CHENHUI-X 的 GitHub 贡献图"
+    loading="lazy"
+    class="gh-img dark-img"
+    width="720"
+    height="128"
+  />
+  <a
+    href="https://github.com/CHENHUI-X"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="gh-link"
+  >
+    @CHENHUI-X
+  </a>
+</div>
+
+<style>
+  .gh-contributions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .gh-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.35rem;
+  }
+  .dark-img {
+    display: none;
+  }
+  :global(.dark) .light-img {
+    display: none;
+  }
+  :global(.dark) .dark-img {
+    display: inline-block;
+  }
+  .gh-link {
+    font-size: 0.8rem;
+    color: var(--charm-text-color);
+    opacity: 0.6;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+  .gh-link:hover {
+    opacity: 1;
+    color: var(--charm-highlight-color);
+  }
+</style>

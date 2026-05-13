@@ -1,0 +1,56 @@
+---
+import { BaseLayout } from "charm:layouts";
+import { HomeSide, HomePageHeader, PostList } from "charm:components";
+import { getCollection } from "astro:content";
+import RightHomeSidebar from "../components/RightHomeSidebar.astro";
+
+const entries = (
+  await getCollection(
+    "posts",
+    ({ data }) =>
+      !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
+  )
+).sort(
+  (a, b) =>
+    (b.data.updated ?? b.data.published).valueOf() -
+    (a.data.updated ?? a.data.published).valueOf(),
+);
+
+const p = Astro.url.searchParams.get("p");
+const page = p ? parseInt(p) : 0;
+---
+
+<BaseLayout>
+  <HomeSide useH1 />
+  <div class="home-content">
+    <div class="post-list-area">
+      <HomePageHeader />
+      <PostList {page} {entries} />
+    </div>
+    <RightHomeSidebar />
+  </div>
+</BaseLayout>
+
+<style>
+  .home-content {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    flex: 1;
+    min-width: 0;
+    padding: 3rem 0;
+  }
+
+  .post-list-area {
+    flex: 1;
+    min-width: 0;
+    max-width: 56rem;
+  }
+
+  @media (width <= 42rem) {
+    .home-content {
+      display: block;
+      padding: 0 1rem;
+    }
+  }
+</style>

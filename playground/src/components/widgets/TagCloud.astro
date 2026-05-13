@@ -1,0 +1,76 @@
+---
+import { getCollection } from "astro:content";
+
+const allPosts = await getCollection(
+  "posts",
+  ({ data }) =>
+    !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
+);
+
+const tagCounts = new Map<string, number>();
+for (const post of allPosts) {
+  post.data.tags?.forEach((t) => tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1));
+}
+
+const maxCount = Math.max(...tagCounts.values(), 1);
+const sortedTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+
+function getSizeClass(count: number): string {
+  const ratio = count / maxCount;
+  if (ratio >= 0.8) return "size-lg";
+  if (ratio >= 0.4) return "size-md";
+  return "size-sm";
+}
+---
+
+<div class="tag-cloud">
+  {
+    sortedTags.length > 0 ? (
+      sortedTags.map(([tag, count]) => (
+        <a href={`/tags/${tag}`} class={`tag-item ${getSizeClass(count)}`}>
+          {tag}
+        </a>
+      ))
+    ) : (
+      <span class="empty">暂无标签</span>
+    )
+  }
+</div>
+
+<style>
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.5rem;
+    align-items: center;
+  }
+  .tag-item {
+    text-decoration: none;
+    color: var(--charm-text-color);
+    opacity: 0.8;
+    transition: all 0.2s ease;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+    line-height: 1.4;
+  }
+  .tag-item:hover {
+    opacity: 1;
+    color: var(--charm-highlight-color);
+    background: var(--charm-highlight-color-1);
+  }
+  .size-lg {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .size-md {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .size-sm {
+    font-size: 0.78rem;
+  }
+  .empty {
+    font-size: 0.85rem;
+    opacity: 0.5;
+  }
+</style>

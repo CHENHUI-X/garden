@@ -1,0 +1,64 @@
+---
+import BlogStats from "./widgets/BlogStats.astro";
+import TagCloud from "./widgets/TagCloud.astro";
+import CategoryList from "./widgets/CategoryList.astro";
+import GitHubContributions from "./widgets/GitHubContributions.astro";
+---
+
+<aside class="home-right-sidebar">
+  <section class="widget-section">
+    <h3 class="widget-title">博客统计</h3>
+    <BlogStats />
+  </section>
+
+  <section class="widget-section">
+    <h3 class="widget-title">标签</h3>
+    <TagCloud />
+  </section>
+
+  <section class="widget-section">
+    <h3 class="widget-title">分类</h3>
+    <CategoryList />
+  </section>
+
+  <section class="widget-section">
+    <h3 class="widget-title">GitHub</h3>
+    <GitHubContributions />
+  </section>
+</aside>
+
+<style>
+  .home-right-sidebar {
+    width: clamp(12em, 14em, 16em);
+    flex-shrink: 0;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .widget-section {
+    background: var(--charm-contrast-color-1);
+    border-radius: 0.6rem;
+    padding: 0.85rem;
+    border: 1px solid var(--charm-contrast-color-2);
+  }
+
+  .widget-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.65rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--charm-contrast-color-2);
+    color: var(--charm-text-color);
+  }
+
+  @media (width <= 64rem) {
+    .home-right-sidebar {
+      display: none;
+    }
+  }
+</style>

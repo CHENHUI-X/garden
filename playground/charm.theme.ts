@@ -58,6 +58,7 @@ export default charm({
     },
   },
   pages: {
+    "/": false,
     "/posts/[...slug]": false,
   },
   overrides: {
