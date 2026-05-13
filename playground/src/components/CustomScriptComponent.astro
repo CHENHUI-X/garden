@@ -143,8 +143,9 @@ const FOUNDED = "2026-05-01";
   }
 </style>
 
-<script define:vars={{ postCount, uniqueTagCount, totalChars, FOUNDED }}>
+<script define:vars={{ postCount, uniqueTagCount, totalChars, FOUNDED, WALINE_SERVER: import.meta.env.PUBLIC_WALINE_SERVER_URL }}>
   window.__siteStats = { postCount, uniqueTagCount, totalChars, FOUNDED };
+  window.__walineServerURL = WALINE_SERVER;
 </script>
 
 <script>
@@ -280,3 +281,6 @@ const FOUNDED = "2026-05-01";
 <link rel="modulepreload" href="https://unpkg.com/@waline/client@3/dist/waline.js" />
 <link rel="preload" href="https://unpkg.com/@waline/client@3/dist/waline.css" as="style" />
 <link rel="stylesheet" href="https://unpkg.com/@waline/client@3/dist/waline.css" />
+
+<!-- TagCloud 词云预加载 -->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js" as="script" />

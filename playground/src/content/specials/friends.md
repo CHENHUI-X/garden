@@ -15,7 +15,7 @@ index: 2
 <div class="friends-grid">
 
 <a class="friend-card" href="https://xuchenhui.cc/" target="_blank" rel="noopener noreferrer">
-  <img src="https://xuchenhui.cc/favicon.ico" alt="CHENHUI" onerror="this.src='https://api.dicebear.com/7.x/pixel-art/svg?seed=chenhui'" />
+  <img src="https://xuchenhui.cc/favicon.ico" alt="CHENHUI" onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/pixel-art/svg?seed=chenhui'" />
   <div class="friend-info">
     <span class="friend-name">CHENHUI · 技术博客</span>
     <span class="friend-desc">算法、工程、折腾记录</span>

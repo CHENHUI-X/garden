@@ -42,7 +42,7 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 
 <script is:inline>
 (function () {
-  var serverURL = "https://waline-comment-smoky.vercel.app";
+  var serverURL = window.__walineServerURL || "https://waline-comment-smoky.vercel.app";
   // CSS 已在全局预加载，无需重复加载
 
   window.toggleComment = function (id) {
