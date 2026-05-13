@@ -1,0 +1,1 @@
+import{h as e}from"./handle-toggle-click.7U0XlR-S.js";document.getElementById("mobile-theme-toggle")?.addEventListener("click",e);document.addEventListener("astro:after-swap",()=>{document.getElementById("mobile-theme-toggle")?.addEventListener("click",e)});
