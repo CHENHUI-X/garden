@@ -7,7 +7,7 @@ html.charm main .content-wrapper {
 
 /* 2. 侧边栏宽度: 15-18em 弹性 */
 html.charm main .side {
-  width: clamp(15em, 16em, 18em); /* 原 clamp(16em, 20em, 24em) */
+  width: clamp(13em, 14em, 16em); /* 缩小侧边栏宽度 */
   flex-shrink: 0;
 }
 
@@ -18,7 +18,7 @@ html.charm main #side-toc {
 
 /* 3. 主区域边距和间距 */
 html.charm main {
-  margin: 0 clamp(1.5rem, 5vw, 6rem); /* 减小左右边距 */
+  margin: 0 clamp(1rem, 2vw, 4rem) 0 clamp(0.5rem, 1.5vw, 3rem); /* 左小右小，紧凑布局 */
   gap: clamp(1.5rem, 2.5vw, 3rem); /* 减小侧边栏与正文间距 */
 }
 
@@ -26,7 +26,7 @@ html.charm main {
 @media (width >= 90rem) {
   /* 超宽屏: 增加边距避免正文过宽 */
   html.charm main {
-    margin: 0 clamp(3rem, 10vw, 12rem);
+    margin: 0 clamp(2rem, 5vw, 8rem) 0 clamp(1rem, 3vw, 5rem);
   }
 }
 
@@ -43,7 +43,7 @@ html.charm main {
     max-width: calc(100vw - 18rem);
   }
   html.charm main .side {
-    width: 14em;
+    width: 12em;
   }
 }
 

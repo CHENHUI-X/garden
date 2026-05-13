@@ -16,7 +16,10 @@ export interface Props {
 const { headings, title = "目录" } = Astro.props;
 
 // 将嵌套标题扁平化为带层级信息的列表
-function flattenHeadings(headings: NestedHeading[], level: number = 0): { slug: string; text: string; level: number }[] {
+function flattenHeadings(
+  headings: NestedHeading[],
+  level: number = 0,
+): { slug: string; text: string; level: number }[] {
   const result: { slug: string; text: string; level: number }[] = [];
   for (const h of headings) {
     result.push({ slug: h.slug, text: h.text, level });
@@ -30,22 +33,24 @@ function flattenHeadings(headings: NestedHeading[], level: number = 0): { slug: 
 const flatHeadings = flattenHeadings(headings);
 ---
 
-{flatHeadings.length > 0 && (
-  <div class="right-toc-wrapper">
-    <div class="toc-title">{title}</div>
-    <ul class="toc-list">
-      {flatHeadings.map((item) => (
-        <li
-          class="toc-heading"
-          data-toc-slug={item.slug}
-          style={`padding-left: ${item.level * 0.75}rem;`}
-        >
-          <a href={`#${item.slug}`}>{item.text}</a>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+{
+  flatHeadings.length > 0 && (
+    <div class="right-toc-wrapper">
+      <div class="toc-title">{title}</div>
+      <ul class="toc-list">
+        {flatHeadings.map((item) => (
+          <li
+            class="toc-heading"
+            data-toc-slug={item.slug}
+            style={`padding-left: ${item.level * 0.75}rem;`}
+          >
+            <a href={`#${item.slug}`}>{item.text}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 <style>
   .right-toc-wrapper {
@@ -55,7 +60,7 @@ const flatHeadings = flattenHeadings(headings);
     flex-shrink: 0;
     max-height: calc(100vh - 4rem);
     overflow-y: auto;
-    margin-left: 3.5rem;
+    margin-left: 1rem;
     padding-right: 1.5rem;
   }
 
@@ -100,7 +105,11 @@ const flatHeadings = flattenHeadings(headings);
   .toc-heading.toc-heading-in-view a {
     opacity: 1;
     border-left-color: var(--charm-highlight-color);
-    background: linear-gradient(90deg, var(--charm-highlight-color-1), transparent);
+    background: linear-gradient(
+      90deg,
+      var(--charm-highlight-color-1),
+      transparent
+    );
   }
 
   /* 响应式：中等屏幕隐藏右侧目录 */
@@ -113,24 +122,31 @@ const flatHeadings = flattenHeadings(headings);
 
 <script>
   const initTocHighlight = () => {
-    const articleHeadings = document.querySelectorAll('article[data-pagefind-body] h2, article[data-pagefind-body] h3, article[data-pagefind-body] h4, article[data-pagefind-body] h5, article[data-pagefind-body] h6');
+    const articleHeadings = document.querySelectorAll(
+      "article[data-pagefind-body] h2, article[data-pagefind-body] h3, article[data-pagefind-body] h4, article[data-pagefind-body] h5, article[data-pagefind-body] h6",
+    );
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const slug = entry.target.id;
-          const tocItem = document.querySelector(`.right-toc-wrapper .toc-heading[data-toc-slug="${slug}"]`);
+          const tocItem = document.querySelector(
+            `.right-toc-wrapper .toc-heading[data-toc-slug="${slug}"]`,
+          );
           if (tocItem) {
-            tocItem.classList.toggle('toc-heading-in-view', entry.isIntersecting);
+            tocItem.classList.toggle(
+              "toc-heading-in-view",
+              entry.isIntersecting,
+            );
           }
         });
       },
-      { threshold: 0.1, rootMargin: '-20px 0px -80% 0px' }
+      { threshold: 0.1, rootMargin: "-20px 0px -80% 0px" },
     );
 
     articleHeadings.forEach((heading) => observer.observe(heading));
   };
 
-  document.addEventListener('DOMContentLoaded', initTocHighlight);
-  document.addEventListener('astro:page-load', initTocHighlight);
+  document.addEventListener("DOMContentLoaded", initTocHighlight);
+  document.addEventListener("astro:page-load", initTocHighlight);
 </script>

@@ -12,8 +12,8 @@ export default charm({
     font: "auto",
     side: {
       title: "IUHNEHC",
-      sub: "吾生也有涯，而知也无涯",
-      bio: "这里是一些日常的碎碎念和想法。",
+      sub: "",
+      bio: "人无法同时拥有青春和对青春的感受",
       navHome: {
         title: "首页",
         link: "/",
