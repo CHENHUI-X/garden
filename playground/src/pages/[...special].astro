@@ -1,0 +1,90 @@
+---
+import { BaseLayout } from "charm:layouts";
+import { HomeSide } from "charm:components";
+import { getCollection } from "astro:content";
+import RightMurmurSidebar from "../components/RightMurmurSidebar.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection(
+    "specials",
+    ({ data }) =>
+      !data.disabled && (import.meta.env.PROD ? true : !data.disabled),
+  );
+  return entries.map((entry) => ({
+    params: { special: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const isMurmur = entry.slug === "murmur";
+
+// 从 murmur body 提取日期
+const murmurDates: string[] = [];
+if (isMurmur) {
+  const body = entry.body ?? "";
+  const dateRegex = /<span class="murmur-date">(\d{4}-\d{2}-\d{2})<\/span>/g;
+  let match;
+  while ((match = dateRegex.exec(body)) !== null) {
+    murmurDates.push(match[1]);
+  }
+}
+---
+
+<BaseLayout
+  meta={{
+    title: entry.data.title,
+    description: entry.data.description,
+  }}
+>
+  <HomeSide />
+  {
+    isMurmur ? (
+      <div class="murmur-layout">
+        <div class="murmur-content">
+          <Content />
+        </div>
+        <RightMurmurSidebar dates={murmurDates} />
+      </div>
+    ) : (
+      <div class="special-content">
+        <Content />
+      </div>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .murmur-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    flex: 1;
+    min-width: 0;
+    padding: 3rem 0;
+  }
+
+  .murmur-content {
+    flex: 1;
+    min-width: 0;
+    max-width: 56rem;
+  }
+
+  .special-content {
+    padding: 3rem 0;
+    flex: 1;
+    min-width: 0;
+    max-width: 56rem;
+  }
+
+  @media (width <= 42rem) {
+    .murmur-layout {
+      display: block;
+      padding: 0 1rem;
+    }
+    .special-content {
+      padding: 0 1rem;
+    }
+  }
+</style>

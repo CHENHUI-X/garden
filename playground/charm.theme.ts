@@ -60,6 +60,7 @@ export default charm({
   pages: {
     "/": false,
     "/posts/[...slug]": false,
+    "/[...special]": false,
   },
   overrides: {
     components: {

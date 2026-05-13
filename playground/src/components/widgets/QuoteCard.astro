@@ -1,0 +1,54 @@
+---
+
+---
+
+<div class="quote-card">
+  <blockquote>人无法同时拥有青春和对青春的感受</blockquote>
+</div>
+
+<div class="quote-card">
+  <blockquote>世界上最遥远的距离，是知道和做到</blockquote>
+</div>
+
+<div class="quote-card">
+  <blockquote>
+    大多数人在二十岁或三十岁就死了，他们变成了自己的影子，往后的生命只是不断地复制自己
+  </blockquote>
+</div>
+
+<div class="quote-card">
+  <blockquote>我们终此一生，就是要摆脱他人的期待，找到真正的自己</blockquote>
+</div>
+
+<div class="quote-card">
+  <blockquote>人生有三样东西是无法隐瞒的：咳嗽、贫穷和爱</blockquote>
+</div>
+
+<script>
+  /* 每次刷新随机展示一条 */
+  const cards = document.querySelectorAll(".quote-card");
+  if (cards.length) {
+    const idx = Math.floor(Math.random() * cards.length);
+    cards.forEach((c, i) => {
+      c.style.display = i === idx ? "block" : "none";
+    });
+  }
+</script>
+
+<style>
+  .quote-card {
+    margin: 0;
+  }
+  .quote-card blockquote {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    border-left: 3px solid var(--charm-highlight-color);
+    background: var(--charm-contrast-color-2);
+    border-radius: 0 0.4rem 0.4rem 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--charm-text-color);
+    opacity: 0.85;
+    font-style: italic;
+  }
+</style>

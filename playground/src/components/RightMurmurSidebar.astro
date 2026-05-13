@@ -1,0 +1,58 @@
+---
+import MurmurStats from "./widgets/MurmurStats.astro";
+import QuoteCard from "./widgets/QuoteCard.astro";
+
+export interface Props {
+  dates: string[];
+}
+
+const { dates } = Astro.props;
+---
+
+<aside class="murmur-right-sidebar">
+  <section class="widget-section">
+    <h3 class="widget-title">碎碎念统计</h3>
+    <MurmurStats {dates} />
+  </section>
+
+  <section class="widget-section">
+    <h3 class="widget-title">一言</h3>
+    <QuoteCard />
+  </section>
+</aside>
+
+<style>
+  .murmur-right-sidebar {
+    width: clamp(12em, 14em, 16em);
+    flex-shrink: 0;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .widget-section {
+    background: var(--charm-contrast-color-1);
+    border-radius: 0.6rem;
+    padding: 0.85rem;
+    border: 1px solid var(--charm-contrast-color-2);
+  }
+
+  .widget-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.65rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--charm-contrast-color-2);
+    color: var(--charm-text-color);
+  }
+
+  @media (width <= 64rem) {
+    .murmur-right-sidebar {
+      display: none;
+    }
+  }
+</style>
