@@ -1,0 +1,65 @@
+---
+// 友链统计组件
+---
+
+<div class="friends-stats">
+  <div class="stat-item">
+    <span class="stat-icon">👥</span>
+    <div class="stat-info">
+      <span class="stat-value" id="friends-count">1</span>
+      <span class="stat-label">位朋友</span>
+    </div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-icon">🔗</span>
+    <div class="stat-info">
+      <span class="stat-value">1</span>
+      <span class="stat-label">个外链</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function updateCount() {
+  const cards = document.querySelectorAll('.friend-card');
+  const countEl = document.getElementById('friends-count');
+  if (countEl && cards.length) {
+    countEl.textContent = cards.length;
+  }
+}
+document.addEventListener('DOMContentLoaded', updateCount);
+document.addEventListener('astro:page-load', updateCount);
+</script>
+
+<style>
+  .friends-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+    background: var(--charm-contrast-color-2);
+    border-radius: 0.4rem;
+  }
+  .stat-icon {
+    font-size: 1.1rem;
+  }
+  .stat-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+  }
+  .stat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--charm-highlight-color);
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+</style>

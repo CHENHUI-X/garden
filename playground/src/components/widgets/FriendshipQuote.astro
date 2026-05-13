@@ -1,0 +1,56 @@
+---
+// 友情语录组件
+---
+
+<div class="friendship-quote">
+  <blockquote id="friend-quote">海内存知己，天涯若比邻</blockquote>
+  <cite id="friend-author">—— 王勃</cite>
+</div>
+
+<script>
+const quotes = [
+  { text: '海内存知己，天涯若比邻', author: '王勃' },
+  { text: '人生得一知己足矣，斯世当以同怀视之', author: '鲁迅' },
+  { text: '朋友是自己可以在他面前做回自己的人', author: '佚名' },
+  { text: '真挚的友谊犹如健康，不到失去时，无法体味其珍贵', author: '佚名' },
+  { text: '友谊是两颗心真诚相待，而不是一颗心对另一颗心的敲打', author: '鲁迅' },
+  { text: '朋友这种关系，最美在于锦上添花', author: '三毛' },
+  { text: '有朋自远方来，不亦乐乎', author: '孔子' },
+  { text: '君子之交淡如水', author: '庄子' },
+];
+
+function showRandomQuote() {
+  const quoteEl = document.getElementById('friend-quote');
+  const authorEl = document.getElementById('friend-author');
+  if (!quoteEl || !authorEl) return;
+
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  quoteEl.textContent = quote.text;
+  authorEl.textContent = '—— ' + quote.author;
+}
+
+document.addEventListener('DOMContentLoaded', showRandomQuote);
+document.addEventListener('astro:page-load', showRandomQuote);
+</script>
+
+<style>
+  .friendship-quote {
+    text-align: center;
+    padding: 0.5rem;
+  }
+  .friendship-quote blockquote {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--charm-text-color);
+    opacity: 0.85;
+    font-style: italic;
+  }
+  .friendship-quote cite {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    opacity: 0.5;
+    font-style: normal;
+  }
+</style>

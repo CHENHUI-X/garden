@@ -1,0 +1,76 @@
+---
+// 随机访问友链组件
+---
+
+<div class="random-visit">
+  <button id="random-friend-btn" class="random-btn">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+    </svg>
+    <span>随机访问</span>
+  </button>
+  <p class="random-hint">去看看朋友在写什么</p>
+</div>
+
+<script>
+function setupRandomVisit() {
+  const btn = document.getElementById('random-friend-btn');
+  if (!btn) return;
+
+  btn.onclick = () => {
+    const cards = document.querySelectorAll('.friend-card');
+    if (cards.length === 0) {
+      alert('还没有友链哦');
+      return;
+    }
+    const randomCard = cards[Math.floor(Math.random() * cards.length)];
+    const href = randomCard.getAttribute('href');
+    const name = randomCard.querySelector('.friend-name')?.textContent || '朋友';
+    if (href && confirm(`要去 ${name} 那里逛逛吗？`)) {
+      window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  };
+}
+
+document.addEventListener('DOMContentLoaded', setupRandomVisit);
+document.addEventListener('astro:page-load', setupRandomVisit);
+</script>
+
+<style>
+  .random-visit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .random-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    background: linear-gradient(135deg, var(--charm-highlight-color), color-mix(in srgb, var(--charm-highlight-color) 80%, #fff));
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .random-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .random-btn:active {
+    transform: translateY(0);
+  }
+  .random-btn svg {
+    flex-shrink: 0;
+  }
+  .random-hint {
+    font-size: 0.72rem;
+    opacity: 0.5;
+    margin: 0;
+  }
+</style>

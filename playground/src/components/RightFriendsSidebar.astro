@@ -1,29 +1,36 @@
 ---
-import MurmurStats from "./widgets/MurmurStats.astro";
-import QuoteCard from "./widgets/QuoteCard.astro";
-
-export interface Props {
-  dates: string[];
-}
-
-const { dates } = Astro.props;
+// 朋友们页面右侧边栏
+import FriendsStats from "./widgets/FriendsStats.astro";
+import RandomVisit from "./widgets/RandomVisit.astro";
+import FriendshipQuote from "./widgets/FriendshipQuote.astro";
+import ApplyInfo from "./widgets/ApplyInfo.astro";
 ---
 
-<aside class="murmur-right-sidebar">
+<aside class="friends-right-sidebar">
   <section class="widget-section">
-    <h3 class="widget-title">碎碎念统计</h3>
-    <MurmurStats {dates} />
+    <h3 class="widget-title">友链统计</h3>
+    <FriendsStats />
   </section>
 
   <section class="widget-section">
-    <h3 class="widget-title">一言</h3>
-    <QuoteCard />
+    <h3 class="widget-title">随机串门</h3>
+    <RandomVisit />
+  </section>
+
+  <section class="widget-section">
+    <h3 class="widget-title">友情寄语</h3>
+    <FriendshipQuote />
+  </section>
+
+  <section class="widget-section">
+    <h3 class="widget-title">申请友链</h3>
+    <ApplyInfo />
   </section>
 </aside>
 
 <style>
-  .murmur-right-sidebar {
-    width: clamp(12em, 14em, 16em);
+  .friends-right-sidebar {
+    width: clamp(14em, 16em, 18em);
     flex-shrink: 0;
     position: sticky;
     top: 2rem;
@@ -95,7 +102,7 @@ const { dates } = Astro.props;
   }
 
   @media (width <= 64rem) {
-    .murmur-right-sidebar {
+    .friends-right-sidebar {
       display: none;
     }
   }

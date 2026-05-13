@@ -3,6 +3,7 @@ import { BaseLayout } from "charm:layouts";
 import { HomeSide } from "charm:components";
 import { getCollection } from "astro:content";
 import RightMurmurSidebar from "../components/RightMurmurSidebar.astro";
+import RightFriendsSidebar from "../components/RightFriendsSidebar.astro";
 
 export async function getStaticPaths() {
   const entries = await getCollection(
@@ -19,6 +20,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const isMurmur = entry.slug === "murmur";
+const isFriends = entry.slug === "friends";
 
 // 从 murmur body 提取日期
 const murmurDates: string[] = [];
@@ -41,22 +43,31 @@ if (isMurmur) {
   <HomeSide />
   {
     isMurmur ? (
-      <div class="murmur-layout">
-        <div class="murmur-content">
+      <div class="sidebar-layout">
+        <div class="main-content">
           <Content />
         </div>
         <RightMurmurSidebar dates={murmurDates} />
       </div>
+    ) : isFriends ? (
+      <div class="sidebar-layout">
+        <div class="main-content">
+          <Content />
+        </div>
+        <RightFriendsSidebar />
+      </div>
     ) : (
-      <div class="special-content">
-        <Content />
+      <div class="sidebar-layout">
+        <div class="main-content">
+          <Content />
+        </div>
       </div>
     )
   }
 </BaseLayout>
 
 <style>
-  .murmur-layout {
+  .sidebar-layout {
     display: flex;
     flex-direction: row;
     gap: 2rem;
@@ -65,25 +76,15 @@ if (isMurmur) {
     padding: 3rem 0;
   }
 
-  .murmur-content {
-    flex: 1;
-    min-width: 0;
-    max-width: 56rem;
-  }
-
-  .special-content {
-    padding: 3rem 0;
+  .main-content {
     flex: 1;
     min-width: 0;
     max-width: 56rem;
   }
 
   @media (width <= 42rem) {
-    .murmur-layout {
+    .sidebar-layout {
       display: block;
-      padding: 0 1rem;
-    }
-    .special-content {
       padding: 0 1rem;
     }
   }

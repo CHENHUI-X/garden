@@ -2,7 +2,6 @@
 import BlogStats from "./widgets/BlogStats.astro";
 import TagCloud from "./widgets/TagCloud.astro";
 import CategoryList from "./widgets/CategoryList.astro";
-import GitHubContributions from "./widgets/GitHubContributions.astro";
 ---
 
 <aside class="home-right-sidebar">
@@ -20,16 +19,11 @@ import GitHubContributions from "./widgets/GitHubContributions.astro";
     <h3 class="widget-title">分类</h3>
     <CategoryList />
   </section>
-
-  <section class="widget-section">
-    <h3 class="widget-title">GitHub</h3>
-    <GitHubContributions />
-  </section>
 </aside>
 
 <style>
   .home-right-sidebar {
-    width: clamp(12em, 14em, 16em);
+    width: clamp(14em, 16em, 18em);
     flex-shrink: 0;
     position: sticky;
     top: 2rem;
@@ -37,23 +31,67 @@ import GitHubContributions from "./widgets/GitHubContributions.astro";
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.5rem;
+    padding-right: 0.5rem;
   }
 
   .widget-section {
-    background: var(--charm-contrast-color-1);
-    border-radius: 0.6rem;
-    padding: 0.85rem;
-    border: 1px solid var(--charm-contrast-color-2);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .widget-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
   .widget-title {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    margin: 0 0 0.65rem;
-    padding-bottom: 0.45rem;
-    border-bottom: 1px solid var(--charm-contrast-color-2);
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--charm-text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .widget-title::before {
+    content: "";
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--charm-highlight-color);
+  }
+
+  /* 暗色模式 */
+  :global(html.charm.dark) .widget-section {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  :global(html.charm.dark) .widget-section:hover {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  :global(html.charm.dark) .widget-title {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
   }
 
   @media (width <= 64rem) {
