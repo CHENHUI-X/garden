@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **域名**: `https://haibarai.dpdns.org`（GitHub Pages + Cloudflare）
 - **技术博客**: `https://xuchenhui.cc`（共用 Waline 评论服务）
 - **作者**: CHENHUI
-- **建站时间**: 2026-04-01
+- **建站时间**: 2026-05-01
 
 ## Commands
 
