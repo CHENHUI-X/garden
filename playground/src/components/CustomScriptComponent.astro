@@ -1,7 +1,7 @@
 ---
 // This component is injected into the end of <head>
 import { getCollection } from "astro:content";
-const posts = await getCollection("posts", ({ data }) => !data.draft);
+const posts = await getCollection("posts", ({ data }) => data && !data.draft);
 const allTags = posts.flatMap((p) => p.data.tags ?? []);
 const uniqueTagCount = new Set(allTags).size;
 const totalChars = posts.reduce((sum, p) => {
@@ -19,34 +19,35 @@ const FOUNDED = "2026-05-01";
   /* 使用更高优先级的选择器覆盖 Astro scoped CSS */
 
   /* 1. 正文内容区宽度: 64rem (1024px) */
-  html.charm.main body main .content-wrapper.content-wrapper {
+  html.charm body main .content-wrapper.content-wrapper {
     max-width: 64rem !important;
   }
   /* 2. 侧边栏宽度: 15-18em 弹性 */
-  html.charm.main body main .side.side {
+  html.charm body main .side.side {
     width: clamp(15em, 16em, 18em) !important;
     flex-shrink: 0;
   }
-  /* 3. 主区域间距 */
-  html.charm.main body main {
-    gap: clamp(1.5rem, 2.5vw, 3rem) !important;
+  /* 3. 主区域间距 + 边距: 侧边栏离正文更近，布局整体居中 */
+  html.charm body main {
+    gap: clamp(0.5rem, 1vw, 1.5rem) !important;
+    margin: 0 clamp(2rem, 4vw, 8rem) !important;
   }
   /* 4. 响应式优化 */
   @media (min-width: 90rem) {
-    html.charm.main body main {
-      margin: 0 clamp(3rem, 10vw, 12rem) !important;
+    html.charm body main {
+      margin: 0 clamp(1.5rem, 5vw, 8rem) !important;
     }
   }
   @media (max-width: 64rem) {
-    html.charm.main body main .content-wrapper.content-wrapper {
+    html.charm body main .content-wrapper.content-wrapper {
       max-width: calc(100vw - 22rem) !important;
     }
   }
   @media (max-width: 52rem) {
-    html.charm.main body main .content-wrapper.content-wrapper {
+    html.charm body main .content-wrapper.content-wrapper {
       max-width: calc(100vw - 18rem) !important;
     }
-    html.charm.main body main .side.side {
+    html.charm body main .side.side {
       width: 14em !important;
     }
   }
@@ -90,10 +91,10 @@ const FOUNDED = "2026-05-01";
   }
 
   #anime-bg img.visible {
-    opacity: 0.55;
+    opacity: 0.30;
   }
   html.charm.dark #anime-bg img.visible {
-    opacity: 0.50;
+    opacity: 0.25;
   }
   html.charm body {
     background-color: transparent !important;
@@ -140,6 +141,42 @@ const FOUNDED = "2026-05-01";
       height: 2rem;
       font-size: 1rem;
     }
+  }
+
+  /* ========== 侧边栏整体排版优化 ========== */
+
+  /* 1. 图标列与 IUHNEHC 之间 */
+  html.charm .side .center {
+    gap: 1rem !important;
+  }
+
+  /* 2. 去掉 <ul> 默认 padding, 宽度留少许余白 */
+  html.charm .side-home {
+    max-width: 95% !important;
+    padding-left: 0 !important;
+  }
+
+  /* 3. 大标题保持紧凑，副标题与其右侧对齐 */
+  html.charm .side-home-title {
+    display: inline !important;
+  }
+  html.charm .side-home-bio {
+    margin: 1rem 0 !important;
+  }
+
+  /* 4. footer 内边距缩小 */
+  html.charm .side .footer {
+    padding: 2rem 0 !important;
+  }
+
+  /* 5. 主题切换按钮与其他按钮对齐 */
+  html.charm .side .footer #theme-toggle {
+    margin-right: 0 !important;
+    scale: 1 !important;
+  }
+  html.charm .side .footer #theme-toggle .icon {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
   }
 </style>
 
@@ -275,7 +312,26 @@ const FOUNDED = "2026-05-01";
   })();
 </script>
 
-<script is:inline src="/scripts/anime-bg.js"></script>
+<script is:inline>
+  (function () {
+    function syncTitleWidth() {
+      var t = document.querySelector(".side-home-title");
+      var b = document.querySelector(".side-home-bio");
+      if (!t || !b || b.dataset.widthSynced) return;
+      b.style.maxWidth = "";
+      b.style.width = "";
+      var w = t.getBoundingClientRect().width;
+      if (w > 0) {
+        b.style.width = w + "px";
+        b.dataset.widthSynced = "true";
+      }
+    }
+    if (document.readyState === "loading")
+      document.addEventListener("DOMContentLoaded", syncTitleWidth);
+    else syncTitleWidth();
+    document.addEventListener("astro:page-load", syncTitleWidth);
+  })();
+</script><script is:inline src="/scripts/anime-bg.js"></script>
 
 <!-- Waline 评论系统 - 使用 modulepreload 预加载 -->
 <link rel="modulepreload" href="https://unpkg.com/@waline/client@3/dist/waline.js" />

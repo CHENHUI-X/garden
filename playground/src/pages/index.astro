@@ -9,7 +9,7 @@ const entries = (
   await getCollection(
     "posts",
     ({ data }) =>
-      !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
+      data && !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
   )
 ).sort(
   (a, b) =>
@@ -37,7 +37,7 @@ const page = p ? parseInt(p) : 0;
   .home-content {
     display: flex;
     flex-direction: row;
-    gap: 2rem;
+    gap: 1rem;
     flex: 1;
     min-width: 0;
     padding: 3rem 0;
@@ -46,7 +46,6 @@ const page = p ? parseInt(p) : 0;
   .post-list-area {
     flex: 1;
     min-width: 0;
-    max-width: 56rem;
   }
 
   @media (max-width: 42rem) {

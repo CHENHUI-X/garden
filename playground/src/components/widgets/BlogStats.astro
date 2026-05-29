@@ -4,7 +4,7 @@ import { getCollection } from "astro:content";
 const allPosts = await getCollection(
   "posts",
   ({ data }) =>
-    !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
+    data && !data.hidden && (import.meta.env.PROD ? data.draft !== true : true),
 );
 
 const totalPosts = allPosts.length;
