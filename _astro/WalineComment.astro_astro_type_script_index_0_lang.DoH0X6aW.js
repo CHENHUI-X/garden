@@ -1,7 +1,0 @@
-import{_ as l}from"./preload-helper.BlTxHScW.js";const c=async()=>{const e=document.getElementById("waline-container");if(!e||e.dataset.loaded)return;const n=e.dataset.serverurl,o=e.dataset.path,a=e.querySelector(".waline-loading");a&&a.remove();try{const t=new AbortController,i=setTimeout(()=>t.abort(),3e3);await fetch(n+"/api/comment?path="+encodeURIComponent(o),{method:"HEAD",mode:"no-cors",signal:t.signal}),clearTimeout(i)}catch(t){console.warn("[Waline] 服务器连通性测试失败，仍尝试加载:",t)}try{(await Promise.race([l(()=>import("https://unpkg.com/@waline/client@3/dist/waline.js"),[]),new Promise((i,s)=>setTimeout(()=>s(new Error("Waline 加载超时")),1e4))])).init({el:"#waline-container",serverURL:n,path:o,lang:"zh-CN",reaction:!0,pageview:!0,dark:"html.charm.dark",requiredMeta:["nick","mail"]}),e.dataset.loaded="true"}catch(t){console.error("[Waline] 加载失败:",t),e.innerHTML=`
-      <div class="waline-error">
-        <p>评论加载失败</p>
-        <p class="waline-error-hint">可能是网络原因，请稍后重试</p>
-        <button class="waline-retry-btn" onclick="location.reload()">刷新页面</button>
-      </div>
-    `}},r=()=>{const e=document.getElementById("waline-container");if(!(!e||e.dataset.loaded))if("IntersectionObserver"in window){const n=new IntersectionObserver(o=>{o.forEach(a=>{a.isIntersecting&&(n.disconnect(),c())})},{rootMargin:"200px"});n.observe(e)}else c()};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",r):r();document.addEventListener("astro:page-load",r);
