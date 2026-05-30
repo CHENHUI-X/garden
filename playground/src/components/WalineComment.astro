@@ -57,6 +57,9 @@ const initWaline = async () => {
       pageview: true,
       dark: "html.charm.dark",
       requiredMeta: ["nick", "mail"],
+      locale: {
+        reactionTitle: "日常博客，交流分享～",
+      },
     });
     container.dataset.loaded = "true";
   } catch (e) {
