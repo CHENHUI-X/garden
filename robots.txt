@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://haibarai.dpdns.org/sitemap-index.xml
