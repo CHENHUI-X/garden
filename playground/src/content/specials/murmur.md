@@ -38,36 +38,6 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 
 </div>
 
-<!-- 图片预览灯箱 -->
-<div id="image-lightbox" class="lightbox" onclick="closeLightbox()">
-  <img id="lightbox-img" src="" alt="">
-  <span class="lightbox-close">×</span>
-</div>
-
-<script is:inline>
-(function () {
-  // 图片预览灯箱
-  window.previewImage = function(img) {
-    var lightbox = document.getElementById('image-lightbox');
-    var lightboxImg = document.getElementById('lightbox-img');
-    lightboxImg.src = img.src;
-    lightbox.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  };
-
-  window.closeLightbox = function() {
-    var lightbox = document.getElementById('image-lightbox');
-    lightbox.classList.remove('active');
-    document.body.style.overflow = '';
-  };
-
-  // ESC 关闭灯箱
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeLightbox();
-  });
-})();
-</script>
-
 <style>
 /* 时间轴容器 */
 .murmur-feed {

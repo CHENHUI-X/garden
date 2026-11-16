@@ -25,6 +25,11 @@ export default charm({
       },
       footer: [
         {
+          title: "搜索 (Cmd+K)",
+          link: "/search",
+          icon: "solar:magnifer-linear",
+        },
+        {
           title: "GitHub",
           link: "https://github.com/CHENHUI-X",
           icon: "simple-icons:github",
