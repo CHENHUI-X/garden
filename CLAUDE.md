@@ -72,7 +72,7 @@ cd playground && pnpm preview
 
 - 夜轻 API 主用（`api.yppp.net/pc.php` 横屏 / `pe.php` 竖屏），赫萝 API 备用（`api.horosama.com`）
 - 30s 切换，双 img 淡入淡出（CSS transition 1.2s）
-- 透明度：亮色 `0.30` / 暗色 `0.25`
+- 透明度：亮色 `0.16` / 暗色 `0.18`
 - CSS 在 `CustomScriptComponent.astro`，JS 在 `public/scripts/anime-bg.js`
 - 兼容 Astro View Transitions：同时监听 `DOMContentLoaded` 和 `astro:page-load`
 
