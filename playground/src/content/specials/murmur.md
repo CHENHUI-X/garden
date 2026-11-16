@@ -72,53 +72,78 @@ TMD,用了AI之后干的活越来越多了! 不过指挥AI干活真爽,这就是
 /* 时间轴容器 */
 .murmur-feed {
   position: relative;
-  padding-left: 2rem;
+  padding-left: 2.25rem;
 }
 
-/* 左侧垂直时间线 */
+/* 左侧垂直时间线 (淡渐变) */
 .murmur-feed::before {
   content: "";
   position: absolute;
   left: 0.5rem;
-  top: 0;
-  bottom: 0;
+  top: 1rem;
+  bottom: 1rem;
   width: 2px;
-  background: var(--charm-border, rgba(128,128,128,0.2));
+  background: linear-gradient(180deg, var(--charm-highlight-color, #e06458), rgba(128,128,128,0.2) 20%, rgba(128,128,128,0.2) 80%, transparent);
 }
 
 .murmur-item {
   position: relative;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid var(--charm-border, rgba(128,128,128,0.1));
-  line-height: 1.75;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.4rem;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  line-height: 1.8;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.murmur-item:last-child {
-  border-bottom: none;
+html.charm.dark .murmur-item {
+  background: rgba(30, 32, 40, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* 每条说说的节点 */
+.murmur-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+  border-color: rgba(224, 100, 88, 0.3);
+}
+
+/* 每条说说的发光节点 */
 .murmur-item::before {
   content: "";
   position: absolute;
-  left: -1.5rem;
+  left: -2.1rem;
   top: 1.5rem;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: var(--charm-highlight-color, #e06458);
   border: 2px solid var(--charm-background-color, #fcfaf2);
-  box-shadow: 0 0 0 2px var(--charm-border, rgba(128,128,128,0.2));
+  box-shadow: 0 0 0 3px rgba(224, 100, 88, 0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* 日期样式 */
+.murmur-item:hover::before {
+  transform: scale(1.3);
+  box-shadow: 0 0 10px var(--charm-highlight-color, #e06458);
+}
+
+/* 日期胶囊徽章 */
 .murmur-date {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--charm-highlight-color, #e06458);
-  opacity: 1;
-  margin-bottom: 0.5rem;
+  background: rgba(224, 100, 88, 0.1);
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  margin-bottom: 0.65rem;
+  letter-spacing: 0.02em;
 }
 
 /* 图片布局 */

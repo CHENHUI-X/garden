@@ -108,3 +108,45 @@ html.charm.dark .post-list .item-container:hover {
     0 4px 20px rgba(0, 0, 0, 0.3),
     inset 0 0 0 1px var(--charm-highlight-color-2);
 }
+
+/* ========== 标签胶囊药丸 (Pill) 设计 ========== */
+.tag-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 9999px !important;
+  background: rgba(128, 128, 128, 0.08) !important;
+  border: 1px solid rgba(128, 128, 128, 0.15) !important;
+  font-size: 0.825rem !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.tag-item:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: var(--charm-highlight-color) !important;
+  color: #ffffff !important;
+  border-color: var(--charm-highlight-color) !important;
+  box-shadow: 0 4px 12px rgba(224, 100, 88, 0.25);
+}
+
+/* ========== 全局纤细现代滚动条 ========== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.25);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--charm-highlight-color, rgba(128, 128, 128, 0.5));
+}

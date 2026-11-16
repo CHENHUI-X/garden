@@ -41,26 +41,42 @@ index: 2
 .friend-card {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--charm-border, rgba(128,128,128,0.15));
+  gap: 0.85rem;
+  padding: 0.875rem 1.1rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.2s, transform 0.2s;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.charm.dark .friend-card {
+  background: rgba(30, 32, 40, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .friend-card:hover {
-  border-color: var(--charm-accent, rgba(128,128,128,0.4));
-  transform: translateY(-2px);
+  border-color: var(--charm-highlight-color);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(224, 100, 88, 0.15);
 }
 
 .friend-card img {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.6rem;
+  height: 2.6rem;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.friend-card:hover img {
+  transform: rotate(8deg) scale(1.08);
 }
 
 .friend-info {

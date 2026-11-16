@@ -100,47 +100,230 @@ const FOUNDED = "2026-05-01";
     background-color: transparent !important;
   }
 
-  /* 返回顶部按钮 */
+  /* ========== 顶部流动阅读进度条 ========== */
+  #reading-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2.5px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--charm-highlight-color), #ff8e72, #e06458);
+    z-index: 99999;
+    pointer-events: none;
+    transition: width 0.08s ease-out;
+    box-shadow: 0 0 8px rgba(224, 100, 88, 0.4);
+  }
+
+  /* ========== 返回顶部按钮 (毛玻璃与微动效) ========== */
   .back-to-top {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
     border-radius: 50%;
-    border: none;
-    background: var(--charm-highlight-color);
-    color: white;
-    font-size: 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--charm-highlight-color);
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
+    transform: translateY(12px) scale(0.9);
     transition:
-      opacity 0.3s,
-      transform 0.3s;
+      opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0.3s,
+      background 0.25s,
+      box-shadow 0.25s,
+      color 0.25s,
+      border-color 0.25s;
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
+  html.charm.dark .back-to-top {
+    background: rgba(30, 32, 40, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+
   .back-to-top.visible {
     opacity: 1;
     visibility: visible;
+    transform: translateY(0) scale(1);
   }
+
   .back-to-top:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px) scale(1.08);
+    background: var(--charm-highlight-color);
+    color: #ffffff;
+    border-color: var(--charm-highlight-color);
+    box-shadow: 0 8px 24px rgba(224, 100, 88, 0.35);
+  }
+
+  .back-to-top:active {
+    transform: translateY(-1px) scale(0.96);
   }
 
   @media (max-width: 42rem) {
     .back-to-top {
-      bottom: 1rem;
-      right: 1rem;
-      width: 2rem;
-      height: 2rem;
-      font-size: 1rem;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      width: 2.25rem;
+      height: 2.25rem;
     }
+  }
+
+  /* ========== 动效与微交互 ========== */
+
+  /* 1. 主题切换按钮动效优化 */
+  #theme-toggle {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease !important;
+  }
+  #theme-toggle:hover {
+    transform: rotate(25deg) scale(1.15) !important;
+  }
+  #theme-toggle:active {
+    transform: rotate(180deg) scale(0.9) !important;
+  }
+
+  /* 2. 进入微动效 */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .post-list .item-container,
+  .widget-section {
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .post-list .item-container:nth-child(1) { animation-delay: 0.04s; }
+  .post-list .item-container:nth-child(2) { animation-delay: 0.08s; }
+  .post-list .item-container:nth-child(3) { animation-delay: 0.12s; }
+  .post-list .item-container:nth-child(4) { animation-delay: 0.16s; }
+
+  /* 3. 正文超链接平滑下划线动效 */
+  article a:not(.anchor):not(.license-link) {
+    position: relative;
+    text-decoration: none !important;
+    color: var(--charm-highlight-color) !important;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  article a:not(.anchor):not(.license-link)::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background: var(--charm-highlight-color);
+    transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  article a:not(.anchor):not(.license-link):hover::after {
+    width: 100%;
+  }
+
+  /* 4. 引用块优雅重绘 */
+  article blockquote {
+    position: relative;
+    margin: 1.5rem 0 !important;
+    padding: 1rem 1.25rem 1rem 2.8rem !important;
+    font-size: 1rem !important;
+    font-style: normal !important;
+    line-height: 1.8 !important;
+    background: rgba(var(--charm-background-rgb, 255, 255, 255), 0.4) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(128, 128, 128, 0.1) !important;
+    border-left: 4px solid var(--charm-highlight-color) !important;
+    border-radius: 0.6rem !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  }
+  html.charm.dark article blockquote {
+    background: rgba(30, 32, 40, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-left: 4px solid var(--charm-highlight-color) !important;
+  }
+  article blockquote::before {
+    content: "“" !important;
+    position: absolute !important;
+    top: 0.35rem !important;
+    left: 0.75rem !important;
+    font-family: Georgia, serif !important;
+    font-size: 2.8rem !important;
+    line-height: 1 !important;
+    color: var(--charm-highlight-color) !important;
+    opacity: 0.35 !important;
+  }
+
+  /* 5. macOS 风格代码块 */
+  .code-block {
+    position: relative;
+    border-radius: 0.75rem !important;
+    overflow: hidden;
+    border: 1px solid rgba(128, 128, 128, 0.18);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    margin: 1.5rem 0 !important;
+  }
+  html.charm.dark .code-block {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  }
+  .code-block .code-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.85rem !important;
+    background: rgba(128, 128, 128, 0.08) !important;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  }
+  .code-block .code-header::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff5f56;
+    box-shadow: 15px 0 0 #ffbd2e, 30px 0 0 #27c93f;
+    margin-right: 38px;
+    flex-shrink: 0;
+  }
+
+  /* 6. 中文排版优化 */
+  article {
+    line-height: 1.85 !important;
+    letter-spacing: 0.015em;
+  }
+  article p {
+    margin-bottom: 1.35rem !important;
+  }
+  article h1, article h2, article h3 {
+    letter-spacing: 0.01em;
+    scroll-margin-top: 5rem;
+  }
+  article h2 {
+    margin-top: 2rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+  article h3 {
+    margin-top: 1.6rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  article hr {
+    margin: 2.25rem 0 !important;
+    border: none !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, var(--charm-border, rgba(128, 128, 128, 0.2)), transparent) !important;
   }
 
   /* ========== 侧边栏整体排版优化 ========== */
@@ -276,39 +459,53 @@ const FOUNDED = "2026-05-01";
 <script is:inline>
   (function () {
     var backToTopBtn = null;
+    var progressBar = null;
+
     function initBackToTop() {
       if (!backToTopBtn) {
         backToTopBtn = document.createElement("button");
         backToTopBtn.className = "back-to-top";
         backToTopBtn.setAttribute("aria-label", "返回顶部");
-        backToTopBtn.innerHTML = "↑";
+        backToTopBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>';
         backToTopBtn.addEventListener("click", function () {
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
         document.body.appendChild(backToTopBtn);
       }
     }
-    function toggleBackToTop() {
-      if (backToTopBtn)
-        backToTopBtn.classList.toggle("visible", window.scrollY > 300);
+
+    function initProgressBar() {
+      if (!progressBar) {
+        progressBar = document.createElement("div");
+        progressBar.id = "reading-progress-bar";
+        document.body.appendChild(progressBar);
+      }
     }
+
+    function onScroll() {
+      if (backToTopBtn) {
+        backToTopBtn.classList.toggle("visible", window.scrollY > 280);
+      }
+      if (progressBar) {
+        var total = document.documentElement.scrollHeight - window.innerHeight;
+        var p = total > 0 ? (window.scrollY / total) * 100 : 0;
+        progressBar.style.width = Math.min(100, Math.max(0, p)) + "%";
+      }
+    }
+
     function init() {
       initBackToTop();
-      toggleBackToTop();
+      initProgressBar();
+      onScroll();
     }
-    window.addEventListener(
-      "scroll",
-      function () {
-        toggleBackToTop();
-      },
-      { passive: true },
-    );
-    document.addEventListener("astro:page-load", function () {
-      toggleBackToTop();
-    });
-    if (document.readyState === "loading")
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("astro:page-load", init);
+    if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", init);
-    else init();
+    } else {
+      init();
+    }
   })();
 </script>
 
