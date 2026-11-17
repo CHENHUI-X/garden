@@ -418,6 +418,154 @@ const FOUNDED = "2026-05-01";
     width: 1.5rem !important;
     height: 1.5rem !important;
   }
+
+  /* 6. 桌面端侧边栏搜索 hover 提示 Cmd+K */
+  @media (min-width: 42.01rem) {
+    html.charm .side .footer a[href="/search"]:hover .title::after {
+      content: " (⌘K)";
+      opacity: 0.75;
+      font-size: 0.8em;
+    }
+  }
+
+  /* ========== 移动端抽屉菜单优化 (毛玻璃磨砂背景 + 底部图标不折行) ========== */
+  .mobile-menu {
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    background-color: rgba(255, 255, 255, 0.88) !important;
+  }
+
+  html.charm.dark .mobile-menu {
+    background-color: rgba(18, 20, 26, 0.92) !important;
+  }
+
+  .mobile-menu .menu-content {
+    max-width: 340px !important;
+    width: 90% !important;
+  }
+
+  .mobile-menu .social-links {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: clamp(0.5rem, 2.5vw, 1.2rem) !important;
+    width: 100% !important;
+  }
+
+  .mobile-menu .social-link {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+
+  .mobile-menu .social-link .icon {
+    width: 1.35rem !important;
+    height: 1.35rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .mobile-menu .social-link span {
+    white-space: nowrap !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.02em !important;
+    opacity: 0.9 !important;
+  }
+
+  /* ========== Pagefind 搜索页全面美化 (毛玻璃胶囊搜索框 + 结果卡片拟态) ========== */
+  .pagefind-ui-container {
+    margin-top: 1.5rem;
+  }
+
+  .pagefind-ui .pagefind-ui__search-input {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 9999px !important;
+    padding: 0.75rem 1.25rem 0.75rem 3rem !important;
+    font-size: 1rem !important;
+    color: var(--charm-text-color) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.25s ease !important;
+  }
+
+  html.charm.dark .pagefind-ui .pagefind-ui__search-input {
+    background: rgba(30, 32, 40, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    color: #e2e8f0 !important;
+  }
+
+  .pagefind-ui .pagefind-ui__search-input:focus {
+    border-color: var(--charm-highlight-color) !important;
+    box-shadow: 0 0 0 3px rgba(224, 100, 88, 0.25), 0 8px 24px rgba(224, 100, 88, 0.12) !important;
+  }
+
+  .pagefind-ui .pagefind-ui__search-clear {
+    border-radius: 9999px !important;
+    background: rgba(224, 100, 88, 0.12) !important;
+    color: var(--charm-highlight-color) !important;
+    padding: 0.25rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    border: 1px solid rgba(224, 100, 88, 0.2) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .pagefind-ui .pagefind-ui__search-clear:hover {
+    background: var(--charm-highlight-color) !important;
+    color: #ffffff !important;
+  }
+
+  .pagefind-ui .pagefind-ui__result {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: 1rem !important;
+    padding: 1.25rem 1.5rem !important;
+    margin-bottom: 1.25rem !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important;
+    transition: all 0.25s ease !important;
+  }
+
+  html.charm.dark .pagefind-ui .pagefind-ui__result {
+    background: rgba(30, 32, 40, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .pagefind-ui .pagefind-ui__result:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+    border-color: rgba(224, 100, 88, 0.3) !important;
+  }
+
+  .pagefind-ui .pagefind-ui__result-link {
+    color: var(--charm-highlight-color) !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    text-decoration: none !important;
+  }
+
+  .pagefind-ui .pagefind-ui__result-excerpt {
+    color: var(--charm-text-color) !important;
+    opacity: 0.8 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.7 !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .pagefind-ui mark {
+    background: rgba(224, 100, 88, 0.2) !important;
+    color: var(--charm-highlight-color) !important;
+    border-radius: 2px !important;
+    padding: 0 2px !important;
+  }
 </style>
 
 <script define:vars={{ postCount, uniqueTagCount, totalChars, FOUNDED, WALINE_SERVER: import.meta.env.PUBLIC_WALINE_SERVER_URL }}>

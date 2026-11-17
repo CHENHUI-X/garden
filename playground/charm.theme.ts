@@ -25,7 +25,7 @@ export default charm({
       },
       footer: [
         {
-          title: "搜索 (Cmd+K)",
+          title: "搜索",
           link: "/search",
           icon: "solar:magnifer-linear",
         },
