@@ -62,25 +62,31 @@ html.charm.dark body {
   /* your custom css for dark mode */
 }
 
-/* ========== 文章卡片悬停效果增强 ========== */
+/* ========== 文章卡片悬停与触感动效增强 (微上浮 + 深度光晕 + 物理按压) ========== */
 .post-list .item-container {
-  transform: translateX(0);
+  transform: translateY(0) translateX(0) scale(1);
   transition:
-    transform 0.3s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
     background 0.3s ease,
-    box-shadow 0.3s ease;
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
 }
 
 .post-list .item-container:hover {
-  transform: translateX(8px);
+  transform: translateY(-3px) translateX(4px);
   background: linear-gradient(
     135deg,
     var(--charm-highlight-color-1),
     transparent
   );
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 12px 28px -4px rgba(0, 0, 0, 0.09),
     inset 0 0 0 1px var(--charm-highlight-color-2);
+}
+
+.post-list .item-container:active {
+  transform: translateY(-1px) translateX(2px) scale(0.99);
+  transition-duration: 0.1s;
 }
 
 .post-list .item-container h3 {
@@ -96,7 +102,7 @@ html.charm.dark body {
   width: 0;
   height: 2px;
   background: var(--charm-highlight-color);
-  transition: width 0.3s ease;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .post-list .item-container:hover h3::after {
@@ -105,7 +111,7 @@ html.charm.dark body {
 
 html.charm.dark .post-list .item-container:hover {
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.3),
+    0 14px 32px rgba(0, 0, 0, 0.35),
     inset 0 0 0 1px var(--charm-highlight-color-2);
 }
 
@@ -131,6 +137,11 @@ html.charm.dark .post-list .item-container:hover {
   box-shadow: 0 4px 12px rgba(224, 100, 88, 0.25);
 }
 
+.tag-item:active {
+  transform: translateY(0) scale(0.96) !important;
+  transition-duration: 0.08s !important;
+}
+
 /* ========== 全局纤细现代滚动条 ========== */
 ::-webkit-scrollbar {
   width: 6px;
@@ -151,11 +162,11 @@ html.charm.dark .post-list .item-container:hover {
   background: var(--charm-highlight-color, rgba(128, 128, 128, 0.5));
 }
 
-/* ========== 页面切换平滑淡入动效 ========== */
+/* ========== 页面切换平滑淡入动效 (阻尼自然滑入) ========== */
 @keyframes pageFadeIn {
   from {
-    opacity: 0.85;
-    transform: translateY(4px);
+    opacity: 0;
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -164,5 +175,5 @@ html.charm.dark .post-list .item-container:hover {
 }
 
 html.charm main {
-  animation: pageFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: pageFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
