@@ -1,0 +1,368 @@
+---
+import { MUSIC_CONFIG } from "../../config/music";
+
+interface MurmurItem {
+  date: string;
+  paragraphs: string[];
+  rawText: string;
+}
+
+interface FriendItem {
+  name: string;
+  desc: string;
+  href: string;
+  avatar: string;
+}
+
+interface Props {
+  avatarSrc: string;
+  postCount: number;
+  totalChars: number;
+  murmurs: MurmurItem[];
+  friends: FriendItem[];
+  daysOnline: number;
+}
+
+const { avatarSrc, postCount, totalChars, murmurs, friends, daysOnline } = Astro.props;
+const tilts = ["-1.1deg", "0.9deg", "-0.7deg", "1.2deg"];
+---
+
+<!-- ==========================================================================
+     MODAL 1: 个人信息 / ABOUT DOSSIER
+     ========================================================================== -->
+<section
+  id="modal-about"
+  class="sheet-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-label="关于 CHENHUI"
+>
+  <header class="sheet-topbar">
+    <div>
+      <button type="button" class="box lbl" data-close-modal aria-label="关闭关于弹窗">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke-linecap="round" />
+        </svg>
+        <span>CLOSE / 关闭</span>
+      </button>
+    </div>
+    <div class="sheet-title-center">
+      <span class="sheet-title-cn">关于我</span>
+      <span class="sheet-title-en">PERSONAL DOSSIER · 01</span>
+    </div>
+    <div class="sheet-top-right">
+      <span class="lbl hide-xs" style="color:var(--muted)">IUHNEHC · 01</span>
+    </div>
+  </header>
+
+  <div class="sheet-scroll">
+    <div class="sheet-container">
+      <div class="about-grid">
+        <!-- Left: Framed Polaroid & Archival Specs -->
+        <aside class="about-dossier-card">
+          <div class="about-portrait-frame">
+            <img src={avatarSrc} alt="CHENHUI 头像" width="512" height="512" loading="lazy" />
+          </div>
+          <ul class="about-spec-list">
+            <li><span class="spec-k">AUTHOR</span><span class="spec-v">CHENHUI</span></li>
+            <li><span class="spec-k">BIRTH</span><span class="spec-v">1999 · 双鱼座</span></li>
+            <li><span class="spec-k">MBTI</span><span class="spec-v">INFJ</span></li>
+            <li><span class="spec-k">LOCATION</span><span class="spec-v">BEIJING</span></li>
+            <li><span class="spec-k">FOUNDED</span><span class="spec-v">2026-05-01</span></li>
+          </ul>
+        </aside>
+
+        <!-- Right: Editorial Story + Count-up Stats + GitHub Chart + Links -->
+        <div class="about-prose-col">
+          <div>
+            <span class="lbl" style="color:var(--accent);display:block;margin-bottom:10px">HELLO, STRANGER</span>
+            <h2 class="about-hero-heading">
+              嗨，我是 <em>CHENHUI</em>。
+            </h2>
+            <p class="about-lead">
+              一个 1999 年生人，双鱼座，INFJ。脑子里装不下太多东西，就写下来，于是有了 IUHNEHC —— 不保证更新频率，不保证内容质量，但都是真实的。
+            </p>
+          </div>
+
+          <div class="about-story-cards">
+            <article class="story-note">
+              <h3>平时在干嘛 · DAILY</h3>
+              <p>
+                喜欢一个人骑自行车出去转，不用目的地，走到哪算哪。路上看到好看的风景就停下来，用手机拍一拍——一直想买相机，但每次看完价格就默默关掉了页面。
+              </p>
+            </article>
+            <article class="story-note">
+              <h3>这里有什么 · ARCHIVE</h3>
+              <p>
+                偶尔读读书，写点童年和生活里的碎碎念。可能是今天骑车看到的一片云，可能是读书时划到的一句话，也可能是某个突然冒出来的奇怪想法。
+              </p>
+            </article>
+          </div>
+
+          <div class="stats-ribbon" aria-label="博客统计数据">
+            <div class="stat-tile">
+              <span class="stat-num" data-count-target={postCount}>{postCount}</span>
+              <span class="stat-lbl">收录长文</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-num" data-count-target={murmurs.length}>{murmurs.length}</span>
+              <span class="stat-lbl">碎碎念</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-num" data-count-target={totalChars}>{totalChars.toLocaleString()}</span>
+              <span class="stat-lbl">累计字数</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-num" id="stat-days-num" data-count-target={daysOnline}>{daysOnline}</span>
+              <span class="stat-lbl">运行天数</span>
+            </div>
+          </div>
+
+          <div class="gh-panel">
+            <div class="gh-panel-head">
+              <span class="lbl" style="color:var(--muted)">GITHUB CONTRIBUTIONS · @CHENHUI-X</span>
+              <a href="https://github.com/CHENHUI-X" target="_blank" rel="noopener noreferrer" class="lbl" style="color:var(--accent);text-decoration:none">
+                VIEW PROFILE ↗
+              </a>
+            </div>
+            <img
+              src="https://ghchart.rshah.org/CHENHUI-X"
+              alt="CHENHUI-X 的 GitHub 贡献图"
+              loading="lazy"
+            />
+          </div>
+
+          <div class="social-row">
+            <a class="social-chip" href="https://github.com/CHENHUI-X" target="_blank" rel="noopener noreferrer">
+              <span>GitHub</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a class="social-chip" href="https://space.bilibili.com/294132471" target="_blank" rel="noopener noreferrer">
+              <span>Bilibili</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a class="social-chip" href={MUSIC_CONFIG.neteaseProfileUrl} target="_blank" rel="noopener noreferrer">
+              <span>网易云音乐</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a class="social-chip" href="https://xuchenhui.cc/" target="_blank" rel="noopener noreferrer">
+              <span>技术博客 xuchenhui.cc</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a class="social-chip" href="mailto:chenhui2422.xu@gmail.com">
+              <span>Email</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     MODAL 2: 碎碎念 / MURMUR PINBOARD
+     ========================================================================== -->
+<section
+  id="modal-murmur"
+  class="sheet-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-label="碎碎念便签墙"
+>
+  <header class="sheet-topbar">
+    <div>
+      <button type="button" class="box lbl" data-close-modal aria-label="关闭碎碎念弹窗">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke-linecap="round" />
+        </svg>
+        <span>CLOSE / 关闭</span>
+      </button>
+    </div>
+    <div class="sheet-title-center">
+      <span class="sheet-title-cn">碎碎念</span>
+      <span class="sheet-title-en">LOOSE MEMOS · 03</span>
+    </div>
+    <div class="sheet-top-right">
+      <span class="lbl hide-xs" style="color:var(--muted)">IUHNEHC · 03</span>
+    </div>
+  </header>
+
+  <div class="sheet-scroll">
+    <div class="sheet-container">
+      <div class="murmur-intro">
+        <div>
+          <span class="lbl" style="color:var(--accent);display:block;margin-bottom:8px">FIELD NOTES · {murmurs.length} SLIPS</span>
+          <h2>生活里的随手记</h2>
+          <p>每一张便签都直接同步自 <code>murmur.md</code>，点击下方「展开评论」可直接留言。</p>
+        </div>
+      </div>
+
+      <div class="murmur-board">
+        {
+          murmurs.map((item, idx) => (
+            <article class="pin-note" style={`--rot: ${tilts[idx % tilts.length]}`}>
+              <div class="pin-note-head">
+                <time class="pin-date">{item.date}</time>
+                <span class="pin-idx">NO.{String(murmurs.length - idx).padStart(2, "0")}</span>
+              </div>
+              <div class="pin-body">
+                {item.paragraphs.map((p) => (
+                  <p>{p}</p>
+                ))}
+              </div>
+              <div class="pin-actions">
+                <button
+                  type="button"
+                  class="pin-cmt-btn"
+                  data-murmur-cmt={item.date}
+                  aria-expanded="false"
+                  aria-controls={`murmur-wl-${item.date}`}
+                >
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M2.5 3.5h11v7.5H6l-3.5 2.5v-10z" stroke-linejoin="round" />
+                  </svg>
+                  <span>展开评论</span>
+                </button>
+                <span class="lbl" style="color:var(--muted);font-size:9.5px">/murmur/{item.date}</span>
+              </div>
+              <div id={`murmur-wl-${item.date}`} class="pin-waline-slot"></div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     MODAL 3: 朋友们 / FRIENDS POSTCARD TRAY
+     ========================================================================== -->
+<section
+  id="modal-friends"
+  class="sheet-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-label="朋友们明信片盒"
+>
+  <header class="sheet-topbar">
+    <div>
+      <button type="button" class="box lbl" data-close-modal aria-label="关闭朋友们弹窗">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke-linecap="round" />
+        </svg>
+        <span>CLOSE / 关闭</span>
+      </button>
+    </div>
+    <div class="sheet-title-center">
+      <span class="sheet-title-cn">朋友们</span>
+      <span class="sheet-title-en">POSTCARD BOX · 04</span>
+    </div>
+    <div class="sheet-top-right">
+      <span class="lbl hide-xs" style="color:var(--muted)">IUHNEHC · 04</span>
+    </div>
+  </header>
+
+  <div class="sheet-scroll">
+    <div class="sheet-container">
+      <div class="murmur-intro">
+        <div>
+          <span class="lbl" style="color:var(--cobalt);display:block;margin-bottom:8px">AIRMAIL · NEIGHBORS</span>
+          <h2>认识的、关注的、有意思的人们</h2>
+          <p>像贴在门廊上的明信片，点开一张，去他们的站里串个门。</p>
+        </div>
+      </div>
+
+      <div class="friends-tray">
+        {
+          friends.map((f, idx) => (
+            <a class="friend-postcard" href={f.href} target="_blank" rel="noopener noreferrer">
+              <div class="fp-head">
+                <img
+                  class="fp-avatar"
+                  src={f.avatar}
+                  alt={f.name}
+                  loading="lazy"
+                  onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/pixel-art/svg?seed=chenhui'"
+                />
+                <div>
+                  <h3 class="fp-name">{f.name}</h3>
+                  <p class="fp-desc">{f.desc}</p>
+                </div>
+              </div>
+              <div class="fp-foot">
+                <span>POSTMARK · NO.{String(idx + 1).padStart(2, "0")}</span>
+                <span class="fp-visit">串门去 ↗</span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="exchange-box">
+        <div>
+          <h3>寄来一张明信片 · 交换友链</h3>
+          <p>发邮件给我：<code>chenhui2422.xu@gmail.com</code>，附上你的站名、链接和一句介绍就好。</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button type="button" id="btn-copy-email" class="box lbl">复制邮箱</button>
+          <a href="mailto:chenhui2422.xu@gmail.com" class="social-chip" style="padding:7px 14px;font-size:12px">写邮件 ↗</a>
+          <span id="copy-email-toast" class="copy-toast" role="status" aria-live="polite">已复制到剪贴板</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     MODAL 4: 站内检索 / PAPER ARCHIVE SEARCH
+     ========================================================================== -->
+<section
+  id="modal-search"
+  class="sheet-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-label="纸间检索"
+>
+  <header class="sheet-topbar">
+    <div>
+      <button type="button" class="box lbl" data-close-modal aria-label="关闭搜索">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke-linecap="round" />
+        </svg>
+        <span>CLOSE / 关闭</span>
+      </button>
+    </div>
+    <div class="sheet-title-center">
+      <span class="sheet-title-cn">检索档案</span>
+      <span class="sheet-title-en">ARCHIVE SEARCH</span>
+    </div>
+    <div class="sheet-top-right">
+      <span class="lbl hide-xs" style="color:var(--muted)">⌘K / /</span>
+    </div>
+  </header>
+
+  <div class="sheet-scroll">
+    <div class="sheet-container search-shell">
+      <div class="search-input-wrap">
+        <svg class="search-ico" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="8" cy="8" r="5" />
+          <path d="M11.8 11.8L16 16" stroke-linecap="round" />
+        </svg>
+        <input
+          id="studio-search-input"
+          type="search"
+          class="search-input"
+          placeholder="搜索随笔、关键词、标签或碎碎念..."
+          autocomplete="off"
+        />
+      </div>
+      <div id="studio-search-meta" class="lbl search-meta"></div>
+      <div id="studio-search-results" class="search-results"></div>
+    </div>
+  </div>
+</section>

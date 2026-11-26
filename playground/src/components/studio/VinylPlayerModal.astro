@@ -1,0 +1,316 @@
+---
+import { MUSIC_CONFIG } from "../../config/music";
+
+interface Props {
+  avatarSrc: string;
+}
+
+const { avatarSrc } = Astro.props;
+const defaultPlaylistUrl = `https://music.163.com/#/playlist?id=${MUSIC_CONFIG.playlistId}`;
+---
+
+<!-- ==========================================================================
+     HI-FI COLLECTOR EDITION ANALOG VINYL TURNTABLE & NETEASE PLAYLIST SHEET
+     ========================================================================== -->
+<section
+  id="modal-vinyl"
+  class="sheet-modal vinyl-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-label="IUHNEHC 网易云 Hi-Fi 黑胶留声机"
+>
+  <!-- Living Album-Cover Ambient Aura Backdrop (Apple Music inspired) -->
+  <div class="vinyl-aura-bg" aria-hidden="true">
+    <img data-vinyl-aura src={avatarSrc} alt="" />
+    <div class="vinyl-aura-veil"></div>
+  </div>
+
+  <header class="sheet-topbar vinyl-topbar">
+    <div>
+      <button type="button" class="box lbl" data-close-modal aria-label="收起唱片机（音乐继续播放）">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke-linecap="round" />
+        </svg>
+        <span>收起<span class="hide-xs"> · 继续播放</span></span>
+      </button>
+    </div>
+
+    <div class="sheet-title-center">
+      <span class="sheet-title-cn">黑胶留声机</span>
+      <span class="sheet-title-en">HI-FI ANALOG DECK · NETEASE</span>
+    </div>
+
+    <div class="sheet-top-right">
+      <button type="button" class="box lbl" data-toggle-iframe-mode style="white-space:nowrap">
+        <span>官方外链<span class="hide-xs">模式</span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="sheet-scroll vinyl-scroll">
+    <div class="sheet-container">
+      <div class="vinyl-grid">
+        <!-- LEFT: Collector's Walnut & Brass Analog Turntable Console -->
+        <div class="vinyl-deck-card" data-vinyl-deck>
+          <!-- Walnut Top Trim + Corner Brass Rivets -->
+          <div class="deck-walnut-bar" aria-hidden="true">
+            <span class="deck-rivet"></span>
+            <span class="deck-engraving lbl">IUHNEHC · STUDIO HI-FI SERIES 01</span>
+            <span class="deck-rivet"></span>
+          </div>
+
+          <div class="deck-top-meta">
+            <span class="deck-led-wrap lbl">
+              <span class="deck-led" aria-hidden="true"></span>
+              <span class="deck-rpm" data-rpm-readout>33⅓ RPM · HI-FI</span>
+            </span>
+            <div class="deck-hw-switches">
+              <button type="button" class="hw-chip lbl" data-vinyl-rpm aria-pressed="false" title="切换 33⅓ / 45 RPM 转速">33⅓ RPM</button>
+              <button type="button" class="hw-chip lbl" data-vinyl-crackle aria-pressed="false" title="叠加真实黑胶温暖底噪">黑胶底噪</button>
+            </div>
+          </div>
+
+          <!-- LP Cardboard Sleeve + Slide-Out 12-Inch Grooved Vinyl + Brass Tonearm -->
+          <div class="lp-stage">
+            <button
+              type="button"
+              class="lp-interactive"
+              data-vinyl-disc-btn
+              aria-label="点击黑胶封套或唱片切换播放/暂停"
+            >
+              <!-- Slide-Out 12-inch Grooved Vinyl Record -->
+              <span class="lp-vinyl-carrier">
+                <span class="vinyl-glow-halo" aria-hidden="true"></span>
+                <span class="vinyl-disc">
+                  <span class="vinyl-grooves" aria-hidden="true"></span>
+                  <span class="vinyl-iridescence" aria-hidden="true"></span>
+                  <span class="vinyl-label">
+                    <img data-vinyl-cover src={avatarSrc} alt="当前曲目唱片标" width="120" height="120" />
+                    <span class="vinyl-spindle" aria-hidden="true"></span>
+                  </span>
+                </span>
+                <span class="vinyl-specular" aria-hidden="true"></span>
+              </span>
+
+              <!-- Square Laminated Cardboard Album Sleeve -->
+              <span class="lp-sleeve">
+                <img data-vinyl-cover src={avatarSrc} alt="当前专辑封面" width="240" height="240" />
+                <span class="lp-sleeve-crease" aria-hidden="true"></span>
+                <span class="lp-sleeve-sheen" aria-hidden="true"></span>
+                <span class="lp-sleeve-sticker lbl" aria-hidden="true">LP · 180G</span>
+              </span>
+            </button>
+
+            <!-- Articulated Brushed-Brass Tonearm (tracks progressively across grooves!) -->
+            <div class="vinyl-tonearm" aria-hidden="true">
+              <div class="arm-gimbal">
+                <span class="arm-gimbal-cap"></span>
+              </div>
+              <div class="arm-shaft">
+                <div class="arm-headshell">
+                  <span class="arm-stylus"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dual Warm-Amber Analog VU Meters + Harmonic Spectrum Canvas -->
+          <div class="hifi-meter-bay" aria-hidden="true">
+            <div class="vu-dial">
+              <svg class="vu-scale" viewBox="0 0 96 44">
+                <path d="M12 38 A 40 40 0 0 1 68 14" fill="none" stroke="rgba(42,32,20,0.45)" stroke-width="1.3" />
+                <path d="M68 14 A 40 40 0 0 1 85 25" fill="none" stroke="#c84b31" stroke-width="2" />
+                <text x="14" y="25" font-size="6.5" fill="rgba(42,32,20,0.65)">-20</text>
+                <text x="44" y="13" font-size="6.5" fill="rgba(42,32,20,0.65)">0</text>
+                <text x="72" y="17" font-size="6.5" fill="#c84b31">+3</text>
+                <text x="48" y="34" text-anchor="middle" font-size="7.5" font-weight="700" fill="rgba(42,32,20,0.55)">VU · L</text>
+              </svg>
+              <span class="vu-needle" data-vu-left></span>
+              <span class="vu-pivot"></span>
+            </div>
+
+            <div class="eq-canvas-box">
+              <canvas id="vinyl-eq-canvas" width="168" height="44"></canvas>
+            </div>
+
+            <div class="vu-dial">
+              <svg class="vu-scale" viewBox="0 0 96 44">
+                <path d="M12 38 A 40 40 0 0 1 68 14" fill="none" stroke="rgba(42,32,20,0.45)" stroke-width="1.3" />
+                <path d="M68 14 A 40 40 0 0 1 85 25" fill="none" stroke="#c84b31" stroke-width="2" />
+                <text x="14" y="25" font-size="6.5" fill="rgba(42,32,20,0.65)">-20</text>
+                <text x="44" y="13" font-size="6.5" fill="rgba(42,32,20,0.65)">0</text>
+                <text x="72" y="17" font-size="6.5" fill="#c84b31">+3</text>
+                <text x="48" y="34" text-anchor="middle" font-size="7.5" font-weight="700" fill="rgba(42,32,20,0.55)">VU · R</text>
+              </svg>
+              <span class="vu-needle" data-vu-right></span>
+              <span class="vu-pivot"></span>
+            </div>
+          </div>
+
+          <!-- Active Track Meta & Mini 2-Line Lyric Preview -->
+          <div class="deck-now">
+            <h2 class="deck-track-title" data-vinyl-title>准备放歌…</h2>
+            <p class="deck-track-artist" data-vinyl-artist>点击唱片封套或播放键落针收听</p>
+            <div class="deck-lyrics" aria-live="polite">
+              <p class="lyric-cur" data-lyric-cur>「黑胶滑出、唱针落盘，翻书时音乐全程相伴」</p>
+              <p class="lyric-next" data-lyric-next></p>
+            </div>
+            <p class="deck-status-note" data-vinyl-status role="status"></p>
+          </div>
+
+          <!-- Glowing Scrubbable Progress Bar -->
+          <div class="deck-progress-row">
+            <span class="lbl deck-time" data-vinyl-cur>00:00</span>
+            <input
+              type="range"
+              class="deck-range"
+              data-vinyl-progress
+              min="0"
+              max="1000"
+              value="0"
+              aria-label="播放进度"
+            />
+            <span class="lbl deck-time" data-vinyl-dur>00:00</span>
+          </div>
+
+          <!-- Tactile Hi-Fi Transport Deck -->
+          <div class="deck-controls">
+            <button type="button" class="deck-mini-btn lbl" data-vinyl-mode title="切换播放模式">顺序</button>
+
+            <div class="deck-main-transport">
+              <button type="button" class="deck-icon-btn" data-vinyl-prev aria-label="上一首">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <rect x="2.5" y="3" width="2" height="10" rx="0.5" />
+                  <path d="M13 3.2L5.5 8 13 12.8V3.2z" />
+                </svg>
+              </button>
+
+              <button type="button" class="deck-play-btn" data-vinyl-play aria-label="开始播放">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M4.5 2.8L13 8l-8.5 5.2V2.8z" />
+                </svg>
+              </button>
+
+              <button type="button" class="deck-icon-btn" data-vinyl-next aria-label="下一首">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M3 3.2L10.5 8 3 12.8V3.2z" />
+                  <rect x="11.5" y="3" width="2" height="10" rx="0.5" />
+                </svg>
+              </button>
+            </div>
+
+            <label class="deck-vol-wrap" aria-label="音量调节">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <path d="M2.5 6.2h2.8L9 3v10L5.3 9.8H2.5V6.2z" stroke-linejoin="round" />
+                <path d="M11.6 5.6a3.4 3.4 0 0 1 0 4.8" stroke-linecap="round" />
+              </svg>
+              <input
+                type="range"
+                class="deck-vol-range"
+                data-vinyl-volume
+                min="0"
+                max="100"
+                value="65"
+                aria-label="音量"
+              />
+            </label>
+          </div>
+        </div>
+
+        <!-- RIGHT: NetEase Follow Card + Switchable Tracklist / Immersive Lyrics -->
+        <div class="vinyl-right-col">
+          <!-- Creator & NetEase Follow Banner -->
+          <div class="netease-card">
+            <div class="netease-identity">
+              <img class="netease-avatar" src={avatarSrc} alt={MUSIC_CONFIG.neteaseNickname} width="50" height="50" />
+              <div style="min-width:0">
+                <div class="netease-badge-row">
+                  <span class="netease-pill-badge">
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                      <circle cx="8" cy="8" r="7" opacity="0.22" />
+                      <path d="M10.8 4.2v5.4a2.2 2.2 0 1 1-1.3-2V5.7L6.5 6.4v4a2.2 2.2 0 1 1-1.3-2V5.3l5.6-1.1z" />
+                    </svg>
+                    <span>网易云歌单</span>
+                  </span>
+                  <span class="lbl" data-vinyl-count style="color:var(--muted)">载入中…</span>
+                </div>
+                <h3 class="netease-title">{MUSIC_CONFIG.playlistTitle}</h3>
+                <p class="netease-sub">{MUSIC_CONFIG.playlistSubtitle}</p>
+              </div>
+            </div>
+
+            <div class="netease-actions">
+              <a
+                class="netease-cta-primary"
+                href={MUSIC_CONFIG.neteaseProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>去网易云关注 {MUSIC_CONFIG.neteaseNickname}</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+
+              <a
+                class="netease-cta-ghost"
+                data-netease-playlist-link
+                href={defaultPlaylistUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>打开原歌单 ↗</span>
+              </a>
+
+              <button type="button" class="netease-cta-ghost" data-toggle-playlist-switch>
+                <span>换歌单 ID</span>
+              </button>
+            </div>
+
+            <!-- Live Playlist ID Switcher -->
+            <div class="playlist-switch-box" data-playlist-switch-box>
+              <input
+                type="text"
+                class="playlist-switch-input"
+                data-playlist-switch-input
+                placeholder="粘贴你的网易云歌单链接或数字 ID，按回车即刻加载…"
+              />
+              <button type="button" class="box lbl" data-apply-playlist-switch>载入</button>
+              <button type="button" class="box lbl" data-reset-playlist>默认</button>
+            </div>
+          </div>
+
+          <!-- Optional Official NetEase Iframe Fallback -->
+          <div class="vinyl-iframe-box" data-vinyl-iframe-box></div>
+
+          <!-- Dual-View Panel: Tracklist <-> Immersive Synced Lyrics -->
+          <div class="tracklist-panel">
+            <div class="tracklist-head">
+              <div class="vinyl-tab-group" role="tablist" aria-label="歌单与歌词切换">
+                <button type="button" class="vinyl-pane-tab is-active" data-vinyl-tab="list" role="tab">
+                  歌单列表
+                </button>
+                <button type="button" class="vinyl-pane-tab" data-vinyl-tab="lyrics" role="tab">
+                  沉浸歌词
+                </button>
+              </div>
+              <span class="lbl hide-xs" style="color:var(--muted)">点击曲目或歌词行跳转</span>
+            </div>
+
+            <div class="tracklist-scroll" data-vinyl-pane="list" data-vinyl-list>
+              <div class="vinyl-loading">
+                <span class="vinyl-spinner" aria-hidden="true"></span>
+                <span>等待载入网易云歌单…</span>
+              </div>
+            </div>
+
+            <div class="lyrics-stage is-hidden" data-vinyl-pane="lyrics" data-lyrics-stage>
+              <div class="lyrics-empty">开始播放后将同步滚动歌词…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script id="studio-music-config" type="application/json" set:html={JSON.stringify(MUSIC_CONFIG)} />

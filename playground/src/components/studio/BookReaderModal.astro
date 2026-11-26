@@ -1,0 +1,117 @@
+---
+interface Props {
+  walineServerUrl: string;
+}
+
+const { walineServerUrl } = Astro.props;
+---
+
+<section
+  id="modal-book"
+  class="book-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-label="IUHNEHC 随想录交互书册"
+  data-waline-server={walineServerUrl}
+>
+  <!-- Top Editorial Reader Bar -->
+  <header class="book-topbar">
+    <div class="book-top-left">
+      <button type="button" class="box lbl" data-close-modal aria-label="返回晾衣线">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M10 3L5 8l5 5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>返回<span class="hide-xs"> / ESC</span></span>
+      </button>
+    </div>
+
+    <nav class="book-top-center" aria-label="书册章节导航">
+      <button type="button" class="book-tab active" data-book-jump="cover">封面</button>
+      <button type="button" class="book-tab" data-book-jump="toc"><span class="hide-xs">扉页·</span>目录</button>
+      <button type="button" class="book-tab" data-book-jump="read">正文</button>
+    </nav>
+
+    <div class="book-top-right">
+      <button
+        type="button"
+        class="ctrl-btn book-vinyl-btn"
+        data-open-modal="vinyl"
+        aria-label="打开黑胶唱片机"
+        title="黑胶唱片机 (M)"
+      >
+        <svg class="vinyl-mini-svg" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.4" />
+          <circle cx="9" cy="9" r="4.8" stroke="currentColor" stroke-width="0.7" opacity="0.45" />
+          <circle cx="9" cy="9" r="2.6" fill="var(--accent)" />
+          <circle cx="9" cy="9" r="0.85" fill="var(--paper)" />
+        </svg>
+      </button>
+      <button type="button" class="ctrl-btn" data-font-dec aria-label="缩小字号" title="缩小字号">
+        <span class="lbl" style="letter-spacing:0">A-</span>
+      </button>
+      <button type="button" class="ctrl-btn" data-font-inc aria-label="放大字号" title="放大字号">
+        <span class="lbl" style="letter-spacing:0">A+</span>
+      </button>
+      <button type="button" class="ctrl-btn" data-copy-book-link aria-label="复制当前书册链接" title="复制链接分享">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M6.5 9.5l3-3M5 7.5l-1.5 1.5a2.1 2.1 0 1 0 3 3L8 10.5M11 8.5l1.5-1.5a2.1 2.1 0 1 0-3-3L8 5.5" stroke-linecap="round" />
+        </svg>
+        <span class="ctrl-label" data-copy-book-label>分享</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 3D Hardcover Book Stage -->
+  <div class="book-stage">
+    <button type="button" class="book-nav-arrow book-nav-prev" aria-label="上一页" disabled>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M11 4L6 9l5 5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+
+    <div class="book-shell is-closed">
+      <div class="book-shadow" aria-hidden="true"></div>
+      <div class="book-board" aria-hidden="true"></div>
+      <div class="book-edge-left" aria-hidden="true"></div>
+      <div class="book-edge-right" aria-hidden="true"></div>
+      <div class="book-ribbon" aria-hidden="true"></div>
+
+      <div class="book-spread">
+        <div class="book-slot book-slot-left"></div>
+        <div class="book-slot book-slot-right"></div>
+      </div>
+
+      <div class="book-crease" aria-hidden="true"></div>
+      <div class="flip-cast-shadow flip-cast-left" aria-hidden="true"></div>
+      <div class="flip-cast-shadow flip-cast-right" aria-hidden="true"></div>
+    </div>
+
+    <button type="button" class="book-nav-arrow book-nav-next" aria-label="下一页">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M7 4l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Bottom Reading Progress & Controls -->
+  <footer class="book-bottombar">
+    <span class="lbl book-hint-desktop" style="color:var(--muted)">拖拽书页 · 点击页边 · ← / → 翻页</span>
+    <div class="mobile-turn-group">
+      <button type="button" class="mobile-turn-btn" data-mobile-prev aria-label="上一页">← 上页</button>
+    </div>
+    <div class="book-progress-wrap">
+      <div class="book-progress-track" aria-hidden="true">
+        <div class="book-progress-fill"></div>
+      </div>
+      <span class="lbl" data-book-indicator style="color:var(--ink);white-space:nowrap">封面</span>
+    </div>
+    <div class="mobile-turn-group">
+      <button type="button" class="mobile-turn-btn" data-mobile-next aria-label="下一页">下页 →</button>
+    </div>
+    <span class="lbl book-hint-desktop" style="color:var(--muted)">IUHNEHC · VOL.01</span>
+  </footer>
+</section>
+
+<!-- Offscreen pagination measurement box -->
+<div id="book-measure-sandbox" aria-hidden="true"></div>

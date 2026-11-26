@@ -1,0 +1,1675 @@
+/* ============================================================================
+   IUHNEHC — Hi-Fi Collector's Edition Analog Vinyl Turntable & NetEase Deck
+   Features:
+   - Living Apple-Music-style album-cover ambient aura backdrop
+   - Brushed walnut & brass console plinth with hardware RPM & Crackle switches
+   - Cardboard LP record sleeve + slide-out 12-inch iridescent grooved vinyl
+   - Progressive tracking brushed-brass tonearm
+   - Dual illuminated warm-amber Analog VU Meters + 28-bar Harmonic Spectrum
+   - Dual-view Tracklist <-> Immersive Apple-Music scrolling synced lyrics
+   - Upgraded Walnut-and-Brass Corner Vintage Mini Turntable
+   ============================================================================ */
+
+@keyframes vinylSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes eqPulse {
+  0%,
+  100% {
+    transform: scaleY(0.28);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes haloBreath {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.03);
+  }
+}
+
+/* Top bar & Book topbar mini spinning vinyl icon */
+.vinyl-top-btn .vinyl-mini-svg,
+.book-vinyl-btn .vinyl-mini-svg {
+  animation: vinylSpin 7s linear infinite;
+  animation-play-state: paused;
+}
+
+.vinyl-top-btn.is-playing .vinyl-mini-svg,
+.book-vinyl-btn.is-playing .vinyl-mini-svg {
+  animation-play-state: running;
+}
+
+.vinyl-top-btn.is-playing,
+.book-vinyl-btn.is-playing {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ============================================================================
+   Modal Shell & Living Album-Cover Ambient Aura
+   ============================================================================ */
+
+.vinyl-modal {
+  z-index: 95;
+  background: var(--sheet);
+}
+
+.vinyl-aura-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.vinyl-aura-bg img {
+  position: absolute;
+  inset: -14%;
+  width: 128%;
+  height: 128%;
+  object-fit: cover;
+  filter: blur(68px) saturate(1.55);
+  opacity: 0.2;
+  transform: scale(1.06);
+  transition: opacity 0.9s var(--ease);
+}
+
+html.dark .vinyl-aura-bg img {
+  opacity: 0.34;
+  filter: blur(74px) saturate(1.65) brightness(0.75);
+}
+
+.vinyl-modal.is-playing .vinyl-aura-bg img {
+  opacity: 0.28;
+}
+
+html.dark .vinyl-modal.is-playing .vinyl-aura-bg img {
+  opacity: 0.44;
+}
+
+.vinyl-aura-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 28% 36%, transparent 0%, var(--sheet) 82%),
+    linear-gradient(180deg, var(--sheet) 0%, transparent 18%, transparent 82%, var(--sheet) 100%);
+  opacity: 0.86;
+}
+
+.vinyl-topbar,
+.vinyl-scroll {
+  position: relative;
+  z-index: 2;
+}
+
+.vinyl-topbar {
+  background: rgba(246, 244, 239, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+html.dark .vinyl-topbar {
+  background: rgba(27, 25, 22, 0.78);
+}
+
+.vinyl-grid {
+  display: grid;
+  grid-template-columns: 454px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+/* ============================================================================
+   Left Column: Walnut & Brass Hi-Fi Analog Turntable Console
+   ============================================================================ */
+
+.vinyl-deck-card {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--rule-strong);
+  border-radius: 14px;
+  padding: 0 22px 22px;
+  box-shadow:
+    var(--shadow-deep),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+html.dark .vinyl-deck-card {
+  background: linear-gradient(175deg, #24201c 0%, #1b1815 100%);
+  box-shadow:
+    var(--shadow-deep),
+    inset 0 1px 0 rgba(255, 240, 214, 0.08);
+}
+
+/* Walnut woodgrain top fascia with miniature brass rivets */
+.deck-walnut-bar {
+  margin: 0 -22px 14px;
+  padding: 9px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #3c291b 0%, #523926 32%, #442f1f 68%, #332216 100%);
+  border-bottom: 1px solid rgba(235, 217, 189, 0.22);
+  color: rgba(242, 228, 202, 0.85);
+}
+
+.deck-rivet {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f5e6c8, #9c7d50 72%, #594326);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.deck-engraving {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  opacity: 0.85;
+}
+
+.deck-top-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.deck-led-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+}
+
+.deck-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.45;
+  transition: background-color 0.35s var(--ease), box-shadow 0.35s var(--ease), opacity 0.35s var(--ease);
+}
+
+.vinyl-deck-card.is-playing .deck-led {
+  background: var(--accent);
+  opacity: 1;
+  box-shadow: 0 0 0 4px var(--accent-soft), 0 0 12px var(--accent);
+}
+
+.deck-hw-switches {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hw-chip {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 4px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  color: var(--muted);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  transition: all 0.22s var(--ease);
+}
+
+.hw-chip:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.hw-chip[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(200, 75, 49, 0.38);
+}
+
+/* ============================================================================
+   Cardboard LP Sleeve + Slide-Out 12-Inch Grooved Vinyl + Brass Tonearm
+   ============================================================================ */
+
+.lp-stage {
+  position: relative;
+  width: 100%;
+  height: 234px;
+  margin: 4px auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 16px;
+}
+
+.lp-interactive {
+  position: relative;
+  width: 214px;
+  height: 214px;
+  display: block;
+}
+
+/* Square laminated cardboard LP album sleeve */
+.lp-sleeve {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #1f1c19;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    12px 18px 34px -12px rgba(14, 10, 6, 0.48),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: transform 0.65s var(--ease-expo);
+}
+
+.lp-sleeve img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Authentic left spine fold crease */
+.lp-sleeve-crease {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 14px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(0, 0, 0, 0.28) 38%,
+    rgba(255, 255, 255, 0.14) 56%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Subtle laminated glossy sleeve sheen */
+.lp-sleeve-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.22) 0%, transparent 42%, rgba(0, 0, 0, 0.14) 100%);
+  pointer-events: none;
+}
+
+.lp-sleeve-sticker {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: rgba(20, 18, 16, 0.72);
+  color: #f2e4ca;
+  border: 1px solid rgba(242, 228, 202, 0.35);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+}
+
+/* Slide-Out 12-Inch Grooved Vinyl Record */
+.lp-vinyl-carrier {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 200px;
+  height: 200px;
+  z-index: 2;
+  display: block;
+  transform: translate3d(38%, 0, 0);
+  transition: transform 0.82s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lp-interactive:hover .lp-vinyl-carrier {
+  transform: translate3d(46%, 0, 0);
+}
+
+.vinyl-deck-card.is-playing .lp-vinyl-carrier {
+  transform: translate3d(62%, 0, 0);
+}
+
+.vinyl-deck-card.is-playing .lp-sleeve {
+  transform: translate3d(-6px, 0, 0) scale(0.985);
+}
+
+/* Warm breathing harmonic halo behind spinning vinyl */
+.vinyl-glow-halo {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 75, 49, 0.32) 32%, rgba(232, 186, 114, 0.16) 58%, transparent 74%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s var(--ease);
+}
+
+.vinyl-deck-card.is-playing .vinyl-glow-halo {
+  opacity: 1;
+  animation: haloBreath 2.6s ease-in-out infinite;
+}
+
+.vinyl-disc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #121110;
+  border: 2px solid #090808;
+  box-shadow: 0 14px 32px -8px rgba(10, 8, 6, 0.58);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vinylSpin 14s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.vinyl-deck-card.is-rpm45 .vinyl-disc {
+  animation-duration: 8.5s;
+}
+
+.vinyl-deck-card.is-playing .vinyl-disc {
+  animation-play-state: running;
+}
+
+.vinyl-grooves {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    #141312 0px,
+    #141312 1.8px,
+    #252320 2.4px,
+    #141312 3.2px
+  );
+  opacity: 0.94;
+}
+
+/* Subtle iridescent gold/vermilion vinyl lacquer gleam */
+.vinyl-iridescence {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 12deg,
+    transparent 0deg,
+    rgba(235, 200, 140, 0.14) 24deg,
+    rgba(200, 75, 49, 0.12) 44deg,
+    transparent 74deg,
+    transparent 185deg,
+    rgba(130, 172, 235, 0.12) 210deg,
+    rgba(235, 200, 140, 0.12) 232deg,
+    transparent 262deg
+  );
+  pointer-events: none;
+}
+
+.vinyl-specular {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 34deg,
+    transparent 0deg,
+    rgba(255, 248, 235, 0.22) 22deg,
+    transparent 48deg,
+    transparent 180deg,
+    rgba(255, 248, 235, 0.15) 204deg,
+    transparent 234deg
+  );
+}
+
+.vinyl-label {
+  position: relative;
+  z-index: 3;
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #2b2620;
+  box-shadow: 0 0 0 1px rgba(235, 217, 189, 0.35);
+  background: #221f1b;
+  display: block;
+}
+
+.vinyl-label img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vinyl-spindle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f5ebd6, #8f7753 75%);
+  border: 1.5px solid #1b1815;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+/* Articulated Brushed-Brass Tonearm (tracks progressively inward!) */
+.vinyl-tonearm {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 44px;
+  height: 162px;
+  transform-origin: 22px 22px;
+  transform: rotate(-16deg);
+  transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.vinyl-deck-card.is-playing .vinyl-tonearm {
+  transform: rotate(var(--arm-angle, 16deg));
+}
+
+.arm-gimbal {
+  width: 38px;
+  height: 38px;
+  margin: 3px auto 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ece0c8, #9b8361 70%, #5b4a35);
+  border: 1px solid rgba(22, 18, 12, 0.35);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arm-gimbal-cap {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #23201c;
+  border: 1.5px solid #e4d4b7;
+}
+
+.arm-shaft {
+  position: relative;
+  width: 4.5px;
+  height: 102px;
+  margin: -5px auto 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8b7658, #eee1c9 48%, #7c674a);
+  box-shadow: 3px 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+.arm-headshell {
+  position: absolute;
+  bottom: -16px;
+  left: -8px;
+  width: 17px;
+  height: 26px;
+  border-radius: 3px 3px 5px 5px;
+  background: linear-gradient(160deg, var(--accent), #8e2a17);
+  transform: rotate(22deg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
+}
+
+.arm-stylus {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: #f5ebd6;
+}
+
+/* ============================================================================
+   Dual Illuminated Warm-Amber Analog VU Meters + Harmonic Spectrum Canvas
+   ============================================================================ */
+
+.hifi-meter-bay {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 96px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(22, 18, 14, 0.08), rgba(22, 18, 14, 0.03));
+  border: 1px solid var(--rule);
+}
+
+html.dark .hifi-meter-bay {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.36), rgba(0, 0, 0, 0.18));
+}
+
+.vu-dial {
+  position: relative;
+  height: 46px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #efe4c8 0%, #f8f0dc 62%, #e6d7b4 100%);
+  border: 1.5px solid #3c3226;
+  box-shadow: inset 0 2px 8px rgba(42, 28, 12, 0.26);
+  overflow: hidden;
+  transition: box-shadow 0.45s var(--ease), background 0.45s var(--ease);
+}
+
+.vinyl-deck-card.is-playing .vu-dial {
+  background: linear-gradient(180deg, #fae7be 0%, #fff4d8 58%, #f2d59c 100%);
+  box-shadow:
+    inset 0 0 12px rgba(240, 165, 58, 0.42),
+    0 0 12px -4px rgba(240, 165, 58, 0.45);
+}
+
+.vu-scale {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.vu-needle {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 1.8px;
+  height: 41px;
+  margin-left: -0.9px;
+  background: #c84b31;
+  border-radius: 1px;
+  transform-origin: bottom center;
+  transform: rotate(-42deg);
+  will-change: transform;
+}
+
+.vu-pivot {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: #2c241b;
+  border: 1.5px solid #d4bf99;
+}
+
+.eq-canvas-box {
+  height: 46px;
+  border-radius: 5px;
+  background: rgba(20, 16, 12, 0.05);
+  border: 1px solid var(--rule);
+  padding: 2px 6px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+html.dark .eq-canvas-box {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+#vinyl-eq-canvas {
+  width: 100%;
+  height: 40px;
+  display: block;
+}
+
+/* ============================================================================
+   Track Info, Lyrics Preview, Glowing Scrubber & Transport Controls
+   ============================================================================ */
+
+.deck-now {
+  text-align: center;
+  margin-bottom: 12px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.deck-track-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deck-track-artist {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.deck-lyrics {
+  margin-top: 10px;
+  padding: 9px 10px;
+  min-height: 50px;
+  border-top: 1px dashed var(--rule);
+  border-bottom: 1px dashed var(--rule);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.lyric-cur {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 13.5px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lyric-next {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 11.5px;
+  color: var(--muted);
+  opacity: 0.72;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deck-status-note {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  display: none;
+}
+
+.deck-status-note.is-shown {
+  display: block;
+}
+
+.deck-status-note.is-warn {
+  color: var(--accent);
+}
+
+.deck-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  min-width: 0;
+}
+
+.deck-time {
+  color: var(--muted);
+  font-size: 10px;
+  min-width: 36px;
+  flex-shrink: 0;
+}
+
+.deck-range,
+.deck-vol-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--rule);
+  height: 4px;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.deck-range {
+  flex: 1;
+  background: linear-gradient(90deg, var(--accent) var(--prog, 0%), var(--rule) var(--prog, 0%));
+}
+
+.deck-range::-webkit-slider-thumb,
+.deck-vol-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--card);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+}
+
+.deck-controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.deck-mini-btn {
+  justify-self: start;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 10.5px;
+  transition: all 0.2s var(--ease);
+}
+
+.deck-mini-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.deck-main-transport {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.deck-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s var(--ease);
+}
+
+.deck-icon-btn:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.deck-play-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px -6px rgba(200, 75, 49, 0.6);
+  transition: transform 0.22s var(--ease-spring), filter 0.2s var(--ease);
+}
+
+.deck-play-btn:hover {
+  transform: scale(1.07);
+}
+
+.deck-play-btn:active {
+  transform: scale(0.95);
+}
+
+.deck-vol-wrap {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.deck-vol-range {
+  width: 66px;
+}
+
+/* ============================================================================
+   Right Column: NetEase Creator Card + Tracklist / Immersive Lyrics Tabs
+   ============================================================================ */
+
+.vinyl-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.netease-card {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 20px 22px;
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.netease-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.netease-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-soft);
+  flex-shrink: 0;
+}
+
+.netease-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.netease-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.netease-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.netease-sub {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.netease-actions {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.netease-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px -8px rgba(200, 75, 49, 0.55);
+  transition: transform 0.22s var(--ease), filter 0.22s var(--ease);
+}
+
+.netease-cta-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.netease-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s var(--ease);
+}
+
+.netease-cta-ghost:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.playlist-switch-box {
+  display: none;
+  margin-top: 12px;
+  gap: 8px;
+  align-items: center;
+}
+
+.playlist-switch-box.is-open {
+  display: flex;
+}
+
+.playlist-switch-input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 3px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  color: var(--ink);
+  font-size: 12.5px;
+  outline: none;
+}
+
+.vinyl-iframe-box {
+  display: none;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background: var(--card);
+}
+
+.vinyl-iframe-box.is-open {
+  display: block;
+}
+
+.tracklist-panel {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tracklist-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.vinyl-tab-group {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(128, 120, 108, 0.1);
+}
+
+.vinyl-pane-tab {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.22s var(--ease);
+}
+
+.vinyl-pane-tab.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.tracklist-scroll {
+  height: 420px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+}
+
+.tracklist-scroll.is-hidden,
+.lyrics-stage.is-hidden {
+  display: none;
+}
+
+.track-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 34px 38px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  text-align: left;
+  transition: background-color 0.2s var(--ease);
+}
+
+.track-row:hover {
+  background: rgba(128, 120, 108, 0.09);
+}
+
+.track-row.is-active {
+  background: var(--accent-soft);
+}
+
+.track-num {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.track-row.is-active .track-num {
+  color: var(--accent);
+}
+
+.track-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: var(--paper-deep);
+}
+
+.track-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.track-name {
+  font-family: var(--font-serif);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-artist {
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 13px;
+  opacity: 0;
+}
+
+.track-row.is-active .track-eq {
+  opacity: 0.45;
+}
+
+.track-row.is-active.is-playing .track-eq {
+  opacity: 1;
+}
+
+.track-eq i {
+  display: block;
+  width: 2.5px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: bottom center;
+  transform: scaleY(0.35);
+}
+
+.track-row.is-playing .track-eq i:nth-child(1) {
+  animation: eqPulse 0.72s ease-in-out infinite;
+}
+.track-row.is-playing .track-eq i:nth-child(2) {
+  animation: eqPulse 0.58s ease-in-out 0.16s infinite;
+}
+.track-row.is-playing .track-eq i:nth-child(3) {
+  animation: eqPulse 0.84s ease-in-out 0.3s infinite;
+}
+
+/* Immersive Apple-Music–Style Multi-Line Scrolling Synced Lyrics */
+.lyrics-stage {
+  height: 420px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 44px 24px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 82%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 82%, transparent 100%);
+}
+
+.lrc-line {
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-serif);
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  opacity: 0.36;
+  transform-origin: left center;
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease-expo), color 0.3s var(--ease);
+}
+
+.lrc-line:hover {
+  opacity: 0.75;
+}
+
+.lrc-line.is-current {
+  opacity: 1;
+  font-size: 19.5px;
+  font-weight: 600;
+  color: var(--accent);
+  transform: translateX(4px);
+}
+
+.lyrics-empty,
+.vinyl-loading,
+.vinyl-empty {
+  padding: 44px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.vinyl-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--rule);
+  border-top-color: var(--accent);
+  animation: vinylSpin 0.8s linear infinite;
+}
+
+/* ============================================================================
+   Clothesline Hanging Artifact 05: Vintage LP Vinyl Record Sleeve (留声机挂件)
+   ============================================================================ */
+
+.art-vinyl-hang {
+  position: relative;
+  width: clamp(144px, 11.6vw, 178px);
+  aspect-ratio: 1;
+}
+
+/* Peeking glossy grooved black vinyl record tucked behind sleeve */
+.hang-vinyl-disc-wrap {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  z-index: 1;
+  transform: translate3d(24%, 0, 0);
+  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hanger:hover .hang-vinyl-disc-wrap {
+  transform: translate3d(34%, 0, 0);
+}
+
+.art-vinyl-hang.is-playing .hang-vinyl-disc-wrap {
+  transform: translate3d(42%, 0, 0);
+}
+
+.hang-vinyl-disc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #121110;
+  border: 1.5px solid #080808;
+  box-shadow: 0 12px 26px -8px rgba(14, 10, 6, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vinylSpin 11s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.art-vinyl-hang.is-playing .hang-vinyl-disc {
+  animation-play-state: running;
+}
+
+.hang-vinyl-grooves {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    #141312 0px,
+    #141312 1.8px,
+    #26231f 2.4px,
+    #141312 3.2px
+  );
+}
+
+.hang-vinyl-label {
+  position: relative;
+  z-index: 2;
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #2b2620;
+}
+
+.hang-vinyl-label img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hang-vinyl-pin {
+  position: absolute;
+  z-index: 3;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f0e2c6;
+  border: 1px solid #161513;
+}
+
+/* Front Square Laminated Cardboard LP Record Sleeve */
+.hang-vinyl-sleeve {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #221e1a;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.hang-sleeve-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.65s var(--ease-expo);
+}
+
+.hanger:hover .hang-sleeve-cover {
+  transform: scale(1.05);
+}
+
+.hang-sleeve-crease {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.3) 45%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hang-sleeve-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(16, 13, 10, 0.34) 0%, transparent 42%, rgba(16, 13, 10, 0.82) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hang-sleeve-top {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hang-lp-pill {
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: rgba(20, 17, 14, 0.72);
+  color: #f4e6cc;
+  border: 1px solid rgba(244, 230, 204, 0.32);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+}
+
+.hang-vu-dots {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.art-vinyl-hang.is-playing .hang-vu-dots {
+  opacity: 1;
+}
+
+.hang-vu-dots i {
+  display: block;
+  width: 2px;
+  height: 100%;
+  background: #ff8569;
+  border-radius: 1px;
+  transform-origin: bottom center;
+}
+
+.art-vinyl-hang.is-playing .hang-vu-dots i:nth-child(1) {
+  animation: eqPulse 0.65s ease-in-out infinite;
+}
+.art-vinyl-hang.is-playing .hang-vu-dots i:nth-child(2) {
+  animation: eqPulse 0.52s ease-in-out 0.15s infinite;
+}
+.art-vinyl-hang.is-playing .hang-vu-dots i:nth-child(3) {
+  animation: eqPulse 0.78s ease-in-out 0.28s infinite;
+}
+
+.hang-sleeve-bottom {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.hang-sleeve-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hang-sleeve-title {
+  font-family: var(--font-serif);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fffaf2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+}
+
+.hang-sleeve-sub {
+  font-size: 9.5px;
+  color: rgba(255, 245, 230, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hang-vinyl-play {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(200, 75, 49, 0.55);
+  transition: transform 0.22s var(--ease-spring), filter 0.2s ease;
+}
+
+.hang-vinyl-play:hover {
+  transform: scale(1.12);
+  filter: brightness(1.08);
+}
+
+.hang-vinyl-play:active {
+  transform: scale(0.94);
+}
+
+/* ============================================================================
+   Responsive Layout for Tablet & Mobile <= 767px
+   ============================================================================ */
+
+@media (max-width: 960px) {
+  .vinyl-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .vinyl-deck-card {
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .vinyl-deck-card {
+    padding: 0 14px 18px;
+  }
+
+  .deck-walnut-bar {
+    margin: 0 -14px 12px;
+    padding: 8px 14px;
+  }
+
+  .lp-stage {
+    height: 186px;
+    padding-left: 6px;
+  }
+
+  .lp-interactive {
+    width: 168px;
+    height: 168px;
+  }
+
+  .lp-vinyl-carrier {
+    top: 5px;
+    left: 5px;
+    width: 158px;
+    height: 158px;
+    transform: translate3d(34%, 0, 0);
+  }
+
+  .vinyl-deck-card.is-playing .lp-vinyl-carrier {
+    transform: translate3d(54%, 0, 0);
+  }
+
+  .vinyl-tonearm {
+    height: 132px;
+    right: 2px;
+    top: 2px;
+    transform-origin: 22px 19px;
+  }
+
+  .arm-gimbal {
+    width: 32px;
+    height: 32px;
+  }
+
+  .arm-shaft {
+    height: 76px;
+  }
+
+  .hifi-meter-bay {
+    grid-template-columns: 78px minmax(0, 1fr) 78px;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .vu-dial {
+    height: 38px;
+  }
+
+  .vu-needle {
+    height: 33px;
+  }
+
+  .eq-canvas-box {
+    height: 38px;
+  }
+
+  #vinyl-eq-canvas {
+    height: 32px;
+  }
+
+  .netease-card {
+    padding: 15px;
+  }
+
+  .tracklist-scroll,
+  .lyrics-stage {
+    height: 320px;
+  }
+
+  .art-vinyl-hang {
+    width: 122px;
+  }
+
+  .hang-vinyl-sleeve {
+    padding: 7px;
+  }
+
+  .hang-lp-pill {
+    font-size: 7.5px;
+    padding: 1.5px 5px;
+  }
+
+  .hang-sleeve-title {
+    font-size: 11px;
+  }
+
+  .hang-sleeve-sub {
+    font-size: 8.5px;
+  }
+
+  .hang-vinyl-play {
+    width: 24px;
+    height: 24px;
+  }
+
+  .deck-vol-wrap {
+    display: none;
+  }
+
+  .deck-controls {
+    grid-template-columns: auto 1fr;
+  }
+
+  .deck-main-transport {
+    justify-self: end;
+  }
+}
+
+/* Compact 3-item bottom clothesline scaling on narrow phones <= 520px */
+@media (max-width: 520px) {
+  .art-memo-stack {
+    width: 96px !important;
+  }
+
+  .memo-front {
+    padding: 8px 8px 7px !important;
+  }
+
+  .memo-header {
+    margin-bottom: 5px !important;
+  }
+
+  .memo-date {
+    font-size: 8px !important;
+  }
+
+  .memo-count-pill {
+    display: none;
+  }
+
+  .memo-body {
+    font-size: 9.5px !important;
+    line-height: 1.5 !important;
+    min-height: 44px !important;
+    -webkit-line-clamp: 3 !important;
+  }
+
+  .memo-footer {
+    font-size: 8px !important;
+    margin-top: 5px !important;
+    padding-top: 4px !important;
+  }
+
+  .art-postcard {
+    width: 98px !important;
+    padding: 7px !important;
+  }
+
+  .postcard-title {
+    font-size: 11.5px !important;
+  }
+
+  .postcard-lines {
+    font-size: 8px !important;
+  }
+
+  .postcard-stamp {
+    width: 22px !important;
+    height: 25px !important;
+    font-size: 6.5px !important;
+  }
+
+  .postcard-airmail {
+    font-size: 7px !important;
+    padding: 1px 3px !important;
+  }
+
+  .postcard-postmark {
+    font-size: 7.5px !important;
+  }
+
+  .art-vinyl-hang {
+    width: 88px;
+  }
+
+  .hang-vinyl-disc-wrap {
+    transform: translate3d(18%, 0, 0);
+  }
+
+  .art-vinyl-hang.is-playing .hang-vinyl-disc-wrap {
+    transform: translate3d(26%, 0, 0);
+  }
+
+  .hang-sleeve-sub {
+    display: none;
+  }
+
+  .hang-tag {
+    font-size: 8px !important;
+    letter-spacing: 0.04em !important;
+  }
+}
