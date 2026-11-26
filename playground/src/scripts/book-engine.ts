@@ -145,6 +145,11 @@ export class BookEngine {
     this.posts = templates.map((tpl) => {
       const container = document.createElement("div");
       container.appendChild(tpl.content.cloneNode(true));
+      const paragraphs = container.querySelectorAll("p");
+      const lastParagraph = paragraphs[paragraphs.length - 1];
+      if (lastParagraph && /^(——|---|\-\-)\s*/.test((lastParagraph.textContent || "").trim())) {
+        lastParagraph.classList.add("article-signoff");
+      }
       const charCount = Number(tpl.dataset.chars || "0");
       this.totalChars += charCount;
       return {
@@ -515,7 +520,7 @@ export class BookEngine {
             </blockquote>
           </div>
           <div class="front-colophon">
-            <div>2026.05.01 · BEIJING</div>
+            <div>2026.05.01</div>
             <div>收录文章 ${this.posts.length} 篇 · 共计 ${this.totalChars.toLocaleString()} 字 · 著 / CHENHUI</div>
           </div>
         </div>

@@ -104,6 +104,7 @@ export class ClotheslineEngine {
   private lastPluckTime = 0;
   private paused = false;
   private resizePending = false;
+  private tierGlideUntil = 0;
 
   constructor(stage: HTMLElement, canvas: HTMLCanvasElement, sound: StudioSound, cb: ClotheslineCallbacks) {
     this.stage = stage;
@@ -305,8 +306,9 @@ export class ClotheslineEngine {
 
     if (newW === this.width && newH === this.height && newDpr === this.dpr) return;
 
-    // Crossing 767px (1 rope <-> 2 ropes): lightweight rebuild + smooth card glide into new tier
+    // Crossing 767px (1 rope <-> 2 ropes): lightweight rebuild + brief 260ms card glide into new tier
     if (newMobile !== this.isMobile || this.ropes.length === 0) {
+      this.tierGlideUntil = performance.now() + 260;
       this.setupLayout(true);
       return;
     }
@@ -429,16 +431,32 @@ export class ClotheslineEngine {
           const rope = this.ropes[this.dragRopeIdx];
           const n = rope?.nodes[this.dragNodeIdx];
           if (n && !n.pinned) {
-            const maxPullY = this.isMobile ? 85 : 130;
-            const targetY = Math.max(70, Math.min(this.height - 140, this.py));
-            n.x += (this.px - n.x) * 0.35;
-            n.y += (Math.min(targetY, n.y + maxPullY) - n.y) * 0.45;
+            const minY = this.isMobile ? 66 : 92;
+            const maxPullY = this.isMobile ? 80 : 120;
+            const targetY = Math.max(minY, Math.min(this.height - 140, this.py));
+            const dxPull = (this.px - n.x) * 0.32;
+            const dyPull = (Math.min(targetY, n.y + maxPullY) - n.y) * 0.42;
+            n.x += dxPull;
+            n.y += dyPull;
+            // Sympathetic pull on immediate neighbors keeps the quadratic Bezier smooth & welded to clips
+            const prev = rope.nodes[this.dragNodeIdx - 1];
+            const next = rope.nodes[this.dragNodeIdx + 1];
+            if (prev && !prev.pinned) {
+              prev.x += dxPull * 0.42;
+              prev.y += dyPull * 0.42;
+            }
+            if (next && !next.pinned) {
+              next.x += dxPull * 0.42;
+              next.y += dyPull * 0.42;
+            }
           }
           return;
         }
 
-        // Aerodynamic cursor wind wake
+        // Aerodynamic cursor wind wake (capped impulse keeps lively bounce without whipping into topbar)
         if (!this.reducedMotion && vx * vx + vy * vy > 4) {
+          const cvx = Math.max(-22, Math.min(22, vx));
+          const cvy = Math.max(-18, Math.min(18, vy));
           for (let r = 0; r < this.ropes.length; r++) {
             const nodes = this.ropes[r].nodes;
             for (let i = 1; i < nodes.length - 1; i++) {
@@ -447,9 +465,9 @@ export class ClotheslineEngine {
               const dy = n.y - this.py;
               const distSq = dx * dx + dy * dy;
               if (distSq < 12100) {
-                const force = (1 - Math.sqrt(distSq) / 110) * 0.16;
-                n.x += vx * force;
-                n.y += vy * force * 0.65;
+                const force = (1 - Math.sqrt(distSq) / 110) * 0.14;
+                n.x += cvx * force;
+                n.y += cvy * force * 0.55;
               }
             }
           }
@@ -642,6 +660,9 @@ export class ClotheslineEngine {
         n.y += vy + gravity * n.mass + windY;
       }
 
+      const minY = this.isMobile ? 64 : 88;
+      const maxY = this.height - 130;
+
       // 8 iterations with fast Math.sqrt gives crisp taut linen at minimal CPU cost
       for (let iter = 0; iter < 8; iter++) {
         for (let i = 0; i < nodes.length - 1; i++) {
@@ -667,6 +688,18 @@ export class ClotheslineEngine {
             p2.x += dx * diff;
             p2.y += dy * diff;
           }
+        }
+      }
+
+      // Soft vertical ceiling keeps the rope below the top header brand even during hard shakes
+      for (let i = 1; i < nodes.length - 1; i++) {
+        const n = nodes[i];
+        if (n.y < minY) {
+          n.y = minY;
+          if (n.oy > n.y) n.oy = n.y + (n.oy - n.y) * 0.35;
+        } else if (n.y > maxY) {
+          n.y = maxY;
+          if (n.oy < n.y) n.oy = n.y - (n.y - n.oy) * 0.35;
         }
       }
     }
@@ -699,38 +732,44 @@ export class ClotheslineEngine {
   }
 
   private renderDOM(dt = 0.016): void {
-    const hangOffsetY = this.isMobile ? 14 : 18;
-    const glide = dt >= 0.5 || this.reducedMotion ? 1 : 1 - Math.exp(-15 * dt);
+    const gliding = performance.now() < this.tierGlideUntil && !this.reducedMotion && dt < 0.5;
+    const glide = gliding ? 1 - Math.exp(-15 * dt) : 1;
     for (const item of this.items) {
       const { rope, nodeIdx } = this.getAnchorForItem(item);
       if (!rope) continue;
       const n = rope.nodes[nodeIdx];
+      const prev = rope.nodes[Math.max(0, nodeIdx - 1)];
+      const next = rope.nodes[Math.min(rope.nodes.length - 1, nodeIdx + 1)];
+      // Exact point on the drawn quadratic Bezier curve (B(0.5) = 0.125*prev + 0.75*n + 0.125*next)
+      const curveX = 0.125 * prev.x + 0.75 * n.x + 0.125 * next.x;
+      const curveY = 0.125 * prev.y + 0.75 * n.y + 0.125 * next.y;
+
       if (!Number.isFinite(item.dispX) || glide >= 1) {
-        item.dispX = n.x;
-        item.dispY = n.y;
+        item.dispX = curveX;
+        item.dispY = curveY;
       } else {
-        const dx = n.x - item.dispX;
-        const dy = n.y - item.dispY;
+        const dx = curveX - item.dispX;
+        const dy = curveY - item.dispY;
         if (dx * dx + dy * dy < 0.04) {
-          item.dispX = n.x;
-          item.dispY = n.y;
+          item.dispX = curveX;
+          item.dispY = curveY;
         } else {
           item.dispX += dx * glide;
           item.dispY += dy * glide;
         }
       }
-      const ty = item.dispY + hangOffsetY;
+
       if (
         Math.abs(item.dispX - item.lastTx) < 0.04 &&
-        Math.abs(ty - item.lastTy) < 0.04 &&
+        Math.abs(item.dispY - item.lastTy) < 0.04 &&
         Math.abs(item.angle - item.lastDeg) < 0.02
       ) {
         continue;
       }
       item.lastTx = item.dispX;
-      item.lastTy = ty;
+      item.lastTy = item.dispY;
       item.lastDeg = item.angle;
-      item.el.style.transform = `translate3d(${item.dispX.toFixed(1)}px, ${ty.toFixed(1)}px, 0) translateX(-50%) rotate(${item.angle.toFixed(2)}deg)`;
+      item.el.style.transform = `translate3d(${item.dispX.toFixed(1)}px, ${item.dispY.toFixed(1)}px, 0) translateX(-50%) rotate(${item.angle.toFixed(2)}deg)`;
     }
   }
 

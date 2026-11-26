@@ -469,6 +469,7 @@ html.dark .ghost-word {
 .hanger-btn {
   position: relative;
   display: block;
+  padding-top: 16px;
   text-align: left;
   transform-origin: 50% 0%;
   will-change: transform;
@@ -491,12 +492,13 @@ html.dark .ghost-word {
   transition-duration: 0.12s;
 }
 
-/* Wooden Clothespin SVG (zero filter:drop-shadow per frame -> baked vector shadow) */
+/* Wooden Clothespin SVG: spring jaws welded directly at y=0 (exact rope curve point) */
 .clothespin {
   position: absolute;
-  top: -24px;
+  top: -18px;
   left: 50%;
   transform: translateX(-50%);
+  transform-origin: 50% 42%;
   width: 26px;
   height: 44px;
   z-index: 30;
@@ -507,11 +509,11 @@ html.dark .ghost-word {
 .clothespin-book {
   width: 32px;
   height: 46px;
-  top: -25px;
+  top: -19px;
 }
 
 .hanger:hover .clothespin {
-  transform: translateX(-50%) translateY(-2px) rotate(-4deg);
+  transform: translateX(-50%) rotate(-2.5deg);
 }
 
 /* Subtle index tag below each hanging object */
@@ -2849,6 +2851,16 @@ html.dark .curl-stage.is-mirror .curl-back-sheen {
   text-indent: 0;
 }
 
+.page-body p.article-signoff {
+  text-indent: 0;
+  text-align: right;
+  margin-top: 1.4em;
+  font-family: var(--font-serif);
+  font-size: 0.9em;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
 .page-body h2,
 .page-body h3 {
   font-family: var(--font-serif);
@@ -4107,14 +4119,18 @@ html.dark .pin-waline-slot .wl-panel {
     font-size: 9px;
   }
 
+  .hanger-btn {
+    padding-top: 12px;
+  }
+
   .clothespin {
-    top: -19px;
+    top: -14px;
     width: 20px;
     height: 34px;
   }
 
   .clothespin-book {
-    top: -20px;
+    top: -15px;
     width: 25px;
     height: 36px;
   }
