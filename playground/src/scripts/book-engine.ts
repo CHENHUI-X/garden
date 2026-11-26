@@ -79,6 +79,9 @@ export class BookEngine {
   private inkRevealed = false;
   private walineMountedFor = "";
   private walineModPromise: Promise<{ init: (opts: Record<string, unknown>) => void }> | null = null;
+  private imageRatioCache = new Map<string, number>();
+  private preloadedImageSrcs = new Set<string>();
+  private lightboxEl: HTMLElement | null = null;
 
   private static readonly EDITORIAL_REACTIONS = [
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23f7ece8' stroke='%23c84b31' stroke-width='1.1'/%3E%3Cpath d='M12 16.8s-4.7-2.9-4.7-6.3a2.7 2.7 0 0 1 4.7-1.8 2.7 2.7 0 0 1 4.7 1.8c0 3.4-4.7 6.3-4.7 6.3z' fill='%23c84b31'/%3E%3C/svg%3E",
@@ -145,6 +148,46 @@ export class BookEngine {
     this.posts = templates.map((tpl) => {
       const container = document.createElement("div");
       container.appendChild(tpl.content.cloneNode(true));
+
+      // Upgrade Markdown image paragraphs into adaptive printed editorial <figure> frames
+      container.querySelectorAll("p").forEach((p) => {
+        const imgs = Array.from(p.querySelectorAll("img"));
+        if (!imgs.length) return;
+        const onlyMedia = Array.from(p.childNodes).every(
+          (n) =>
+            (n.nodeType === Node.TEXT_NODE && !n.textContent?.trim()) ||
+            (n instanceof HTMLElement && (n.tagName === "IMG" || n.tagName === "BR"))
+        );
+        if (!onlyMedia) return;
+
+        const figure = document.createElement("figure");
+        figure.className = imgs.length > 1 ? "book-figure book-figure-grid" : "book-figure";
+        const captions: string[] = [];
+
+        imgs.forEach((img) => {
+          img.setAttribute("loading", "eager");
+          img.setAttribute("decoding", "async");
+          img.setAttribute("draggable", "false");
+          const wAttr = Number(img.getAttribute("width") || "0");
+          const hAttr = Number(img.getAttribute("height") || "0");
+          if (wAttr > 0 && hAttr > 0) {
+            img.style.aspectRatio = `${wAttr} / ${hAttr}`;
+            const src = img.getAttribute("src") || "";
+            if (src) this.imageRatioCache.set(src, wAttr / hAttr);
+          }
+          const alt = (img.getAttribute("alt") || "").trim();
+          if (alt) captions.push(alt);
+          figure.appendChild(img);
+        });
+
+        if (imgs.length === 1 && captions[0]) {
+          const cap = document.createElement("figcaption");
+          cap.textContent = captions[0];
+          figure.appendChild(cap);
+        }
+        p.replaceWith(figure);
+      });
+
       const paragraphs = container.querySelectorAll("p");
       const lastParagraph = paragraphs[paragraphs.length - 1];
       if (lastParagraph && /^(——|---|\-\-)\s*/.test((lastParagraph.textContent || "").trim())) {
@@ -192,6 +235,10 @@ export class BookEngine {
     const headerFootReserve = 76; // running head + folio + margins
     const pageW = (this.isMobile ? bookW : bookW / 2) - padX;
     const pageH = Math.max(220, bookH - padY - headerFootReserve);
+    const imgMaxH = Math.max(148, Math.round(pageH * 0.46));
+    this.shell.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
+    this.measureBox.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
+    this.preloadUnknownImages();
 
     this.pages = [];
     this.chapterStartPage = [];
@@ -368,8 +415,8 @@ export class BookEngine {
         continue;
       }
 
-      // Single paragraph is taller than a whole page -> split cleanly by character binary search
-      if (node instanceof HTMLElement && node.tagName === "P") {
+      // Single text-only paragraph is taller than a whole page -> split cleanly by character binary search
+      if (node instanceof HTMLElement && node.tagName === "P" && !node.querySelector("img, figure")) {
         const fullText = node.textContent || "";
         let lo = 20;
         let hi = fullText.length;
@@ -405,7 +452,10 @@ export class BookEngine {
           i++;
         }
       } else {
-        // Non-splittable tall block (e.g., code/image): place it on its own page
+        // Non-splittable tall block (e.g., code/image): place gracefully on its own page
+        if (node instanceof HTMLElement && node.classList.contains("book-figure")) {
+          node.classList.add("book-figure-solo");
+        }
         sandbox.appendChild(node);
         flushPage();
         i++;
@@ -822,6 +872,117 @@ export class BookEngine {
       const slug = btn.dataset.slug || "";
       void this.mountWalineInBook(slug);
     });
+
+    // Click any inline blog photo to open full-resolution lightbox (instead of turning the page)
+    this.modal.querySelectorAll<HTMLImageElement>(".page-body img").forEach((img) => {
+      img.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const caption =
+          img.closest(".book-figure")?.querySelector("figcaption")?.textContent?.trim() ||
+          img.alt?.trim() ||
+          "";
+        this.openPhotoLightbox(img.currentSrc || img.src, caption);
+      });
+    });
+  }
+
+  /** Preload external Markdown images lacking width/height attributes and re-paginate once accurately */
+  private preloadUnknownImages(): void {
+    let pending = 0;
+    let updatedAny = false;
+    const tmp = document.createElement("div");
+
+    for (const post of this.posts) {
+      if (!post.html.includes("<img")) continue;
+      tmp.innerHTML = post.html;
+      let postDirty = false;
+      const imgs = Array.from(tmp.querySelectorAll<HTMLImageElement>("img"));
+
+      imgs.forEach((img) => {
+        const src = img.getAttribute("src") || "";
+        if (!src) return;
+        const cached = this.imageRatioCache.get(src);
+        if (cached && !img.style.aspectRatio) {
+          img.style.aspectRatio = String(cached);
+          postDirty = true;
+          return;
+        }
+        if (img.style.aspectRatio || this.preloadedImageSrcs.has(src)) return;
+
+        this.preloadedImageSrcs.add(src);
+        pending++;
+        const probe = new Image();
+        probe.onload = () => {
+          if (probe.naturalWidth > 0 && probe.naturalHeight > 0) {
+            this.imageRatioCache.set(src, probe.naturalWidth / probe.naturalHeight);
+            updatedAny = true;
+          }
+          pending--;
+          if (pending === 0 && updatedAny && this.modal.classList.contains("is-open")) {
+            this.applyCachedImageRatios();
+            this.rebuild(true);
+          }
+        };
+        probe.onerror = () => {
+          pending--;
+        };
+        probe.src = src;
+      });
+
+      if (postDirty) post.html = tmp.innerHTML;
+    }
+  }
+
+  private applyCachedImageRatios(): void {
+    const tmp = document.createElement("div");
+    for (const post of this.posts) {
+      if (!post.html.includes("<img")) continue;
+      tmp.innerHTML = post.html;
+      let dirty = false;
+      tmp.querySelectorAll<HTMLImageElement>("img").forEach((img) => {
+        const src = img.getAttribute("src") || "";
+        const ratio = this.imageRatioCache.get(src);
+        if (ratio && !img.style.aspectRatio) {
+          img.style.aspectRatio = ratio.toFixed(4);
+          dirty = true;
+        }
+      });
+      if (dirty) post.html = tmp.innerHTML;
+    }
+  }
+
+  private openPhotoLightbox(src: string, caption: string): void {
+    if (!src) return;
+    this.lightboxEl?.remove();
+    const box = document.createElement("div");
+    box.className = "book-lightbox";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.innerHTML = `
+      <figure class="book-lightbox-frame">
+        <img src="${escapeHtml(src)}" alt="${escapeHtml(caption)}" />
+        ${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ""}
+      </figure>
+      <button type="button" class="book-lightbox-close box lbl" aria-label="关闭大图">CLOSE / 关闭</button>
+    `;
+    const close = () => {
+      box.remove();
+      if (this.lightboxEl === box) this.lightboxEl = null;
+      window.removeEventListener("keydown", onKey, true);
+    };
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") {
+        ev.stopImmediatePropagation();
+        close();
+      }
+    };
+    box.addEventListener("click", close);
+    box.querySelector(".book-lightbox-frame")?.addEventListener("click", (e) => e.stopPropagation());
+    box.querySelector(".book-lightbox-close")?.addEventListener("click", close);
+    window.addEventListener("keydown", onKey, true);
+    this.modal.appendChild(box);
+    this.lightboxEl = box;
+    this.sound.clipClick();
   }
 
   private async mountWalineInBook(slug: string): Promise<void> {
@@ -1393,17 +1554,17 @@ export class BookEngine {
       }
     });
 
-    // Click right/left half of book to flip (ignoring buttons, links, drags & text selection)
+    // Click right/left half of book to flip (ignoring buttons, links, photos, drags & text selection)
     this.rightSlot.addEventListener("click", (e) => {
       if (performance.now() < this.justDraggedUntil) return;
-      if ((e.target as HTMLElement).closest("button, a, #book-waline-mount")) return;
+      if ((e.target as HTMLElement).closest("button, a, #book-waline-mount, .book-figure, .page-body img")) return;
       if (window.getSelection()?.toString()) return;
       if (this.spreadIndex < this.totalSpreads() - 1) this.step(1);
     });
 
     this.leftSlot.addEventListener("click", (e) => {
       if (performance.now() < this.justDraggedUntil) return;
-      if ((e.target as HTMLElement).closest("button, a")) return;
+      if ((e.target as HTMLElement).closest("button, a, .book-figure, .page-body img")) return;
       if (window.getSelection()?.toString()) return;
       if (this.spreadIndex > 0) this.step(-1);
     });
@@ -1411,7 +1572,7 @@ export class BookEngine {
     // Real-time Drag / Touch Swipe to peel flexible paper corner live under pointer!
     this.stage.addEventListener("pointerdown", (e) => {
       if (this.isTurning || this.reducedMotion) return;
-      if ((e.target as HTMLElement).closest("button, a, #book-waline-mount, .toc-entry")) return;
+      if ((e.target as HTMLElement).closest("button, a, #book-waline-mount, .toc-entry, .book-figure, .page-body img")) return;
       this.dragActive = true;
       this.dragDir = 0;
       this.dragStartX = e.clientX;
