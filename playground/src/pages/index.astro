@@ -178,9 +178,70 @@ const searchIndex = {
     </script>
   </head>
   <body>
-    <!-- Ambient Lighting & Optional Anime Wallpaper Layer -->
+    <!-- Ambient Lighting, Sunbeams, Botanical Silhouettes & Optional Wallpaper Layer -->
     <div class="studio-ambient" aria-hidden="true">
       <div class="studio-light"></div>
+      <div class="studio-dotgrid"></div>
+      <svg class="studio-scenery" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+        <defs>
+          <linearGradient id="sun-shaft-a" x1="0%" y1="0%" x2="80%" y2="100%">
+            <stop offset="0%" stop-color="var(--sun-shaft)" stop-opacity="0.92" />
+            <stop offset="48%" stop-color="var(--sun-shaft)" stop-opacity="0.32" />
+            <stop offset="100%" stop-color="var(--sun-shaft)" stop-opacity="0" />
+          </linearGradient>
+          <linearGradient id="sun-shaft-b" x1="10%" y1="0%" x2="88%" y2="95%">
+            <stop offset="0%" stop-color="var(--sun-shaft)" stop-opacity="0.68" />
+            <stop offset="52%" stop-color="var(--sun-shaft)" stop-opacity="0.2" />
+            <stop offset="100%" stop-color="var(--sun-shaft)" stop-opacity="0" />
+          </linearGradient>
+          <radialGradient id="sun-orb" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--sun-orb)" stop-opacity="0.46" />
+            <stop offset="55%" stop-color="var(--sun-orb)" stop-opacity="0.14" />
+            <stop offset="100%" stop-color="var(--sun-orb)" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="cool-orb" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--cool-orb)" stop-opacity="0.32" />
+            <stop offset="60%" stop-color="var(--cool-orb)" stop-opacity="0.09" />
+            <stop offset="100%" stop-color="var(--cool-orb)" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+
+        <!-- Soft sunlit / tungsten lamp atmospheric color orbs -->
+        <ellipse cx="220" cy="110" rx="520" ry="340" fill="url(#sun-orb)" />
+        <ellipse cx="1260" cy="780" rx="480" ry="320" fill="url(#cool-orb)" />
+
+        <!-- Slanted afternoon window sunbeams -->
+        <polygon points="40,0 310,0 790,900 440,900" fill="url(#sun-shaft-a)" />
+        <polygon points="390,0 570,0 1050,900 810,900" fill="url(#sun-shaft-b)" />
+      </svg>
+
+      <!-- Responsive corner-pinned botanical silhouettes (visible cleanly on desktop & mobile alike) -->
+      <svg class="studio-flora studio-flora-tl" viewBox="0 0 320 340" fill="none" focusable="false">
+        <g fill="var(--botanical-fill)" stroke="var(--botanical-stroke)" stroke-width="1.25" stroke-linecap="round">
+          <path d="M-16 86 Q 74 128, 162 198 Q 214 238, 258 290" fill="none" />
+          <path d="M24 110 C 54 78, 100 74, 114 102 C 86 122, 50 124, 24 110 Z" />
+          <path d="M74 142 C 48 176, 54 218, 84 228 C 104 198, 100 164, 74 142 Z" />
+          <path d="M118 160 C 154 134, 200 138, 208 166 C 178 184, 142 182, 118 160 Z" />
+          <path d="M160 192 C 138 226, 146 264, 176 270 C 192 242, 186 210, 160 192 Z" />
+          <path d="M204 228 C 238 210, 274 218, 278 244 C 252 256, 224 250, 204 228 Z" />
+          <path d="M238 260 C 264 276, 280 302, 268 318 C 246 306, 236 284, 238 260 Z" />
+          <path d="M92 -10 Q 116 54, 158 112" fill="none" />
+          <path d="M110 36 C 140 22, 168 32, 166 54 C 142 62, 120 54, 110 36 Z" />
+          <path d="M128 70 C 104 88, 96 114, 116 126 C 136 110, 142 90, 128 70 Z" />
+        </g>
+      </svg>
+
+      <svg class="studio-flora studio-flora-br" viewBox="0 0 320 320" fill="none" focusable="false">
+        <g fill="var(--botanical-fill)" stroke="var(--botanical-stroke)" stroke-width="1.25" stroke-linecap="round">
+          <circle cx="206" cy="204" r="88" fill="none" stroke="var(--botanical-stroke)" stroke-width="0.95" stroke-dasharray="2 7" opacity="0.72" />
+          <path d="M336 244 Q 244 202, 158 140 Q 108 104, 66 56" fill="none" />
+          <path d="M286 218 C 258 248, 218 250, 206 224 C 232 204, 264 204, 286 218 Z" />
+          <path d="M232 190 C 254 154, 244 116, 216 110 C 200 138, 206 170, 232 190 Z" />
+          <path d="M180 156 C 144 176, 106 168, 100 142 C 128 128, 158 134, 180 156 Z" />
+          <path d="M134 124 C 150 90, 138 56, 112 54 C 100 80, 108 106, 134 124 Z" />
+          <path d="M92 88 C 64 74, 48 50, 60 34 C 82 46, 92 66, 92 88 Z" />
+        </g>
+      </svg>
       <div class="anime-layer" id="studio-anime-bg">
         <img id="studio-bg-a" alt="" />
         <img id="studio-bg-b" alt="" />

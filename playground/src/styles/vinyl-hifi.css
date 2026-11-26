@@ -678,6 +678,9 @@ html.dark .eq-canvas-box {
   margin: 3px 0 0;
   font-size: 12.5px;
   color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .deck-lyrics {
@@ -1019,6 +1022,8 @@ html.dark .eq-canvas-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--rule);
 }
@@ -1322,7 +1327,7 @@ html.dark .eq-canvas-box {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 10px;
+  padding: 10px 11px 10px 14px;
 }
 
 .hang-sleeve-cover {
@@ -1485,12 +1490,12 @@ html.dark .eq-canvas-box {
 
 @media (max-width: 767px) {
   .vinyl-deck-card {
-    padding: 0 14px 18px;
+    padding: 0 16px 20px;
   }
 
   .deck-walnut-bar {
-    margin: 0 -14px 12px;
-    padding: 8px 14px;
+    margin: 0 -16px 14px;
+    padding: 9px 16px;
   }
 
   .lp-stage {
@@ -1533,8 +1538,8 @@ html.dark .eq-canvas-box {
 
   .hifi-meter-bay {
     grid-template-columns: 78px minmax(0, 1fr) 78px;
-    gap: 6px;
-    padding: 8px;
+    gap: 8px;
+    padding: 10px;
   }
 
   .vu-dial {
@@ -1554,7 +1559,7 @@ html.dark .eq-canvas-box {
   }
 
   .netease-card {
-    padding: 15px;
+    padding: 18px;
   }
 
   .tracklist-scroll,
@@ -1567,7 +1572,7 @@ html.dark .eq-canvas-box {
   }
 
   .hang-vinyl-sleeve {
-    padding: 7px;
+    padding: 8px 8px 8px 11px;
   }
 
   .hang-lp-pill {
@@ -1682,7 +1687,7 @@ html.dark .eq-canvas-box {
   }
 
   .hang-vinyl-sleeve {
-    padding: 6px;
+    padding: 7px 7px 7px 9px;
   }
 
   .hang-vinyl-play {

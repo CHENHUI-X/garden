@@ -231,11 +231,11 @@ export class BookEngine {
 
     // Measure actual book page body box dimensions
     const shellRect = this.shell.getBoundingClientRect();
-    const bookW = shellRect.width > 80 ? shellRect.width : (this.isMobile ? window.innerWidth - 28 : Math.min(window.innerWidth * 0.86, 1080));
-    const bookH = shellRect.height > 80 ? shellRect.height : (this.isMobile ? Math.min(window.innerHeight * 0.74, 620) : Math.min(window.innerHeight * 0.74, 690));
+    const bookW = shellRect.width > 80 ? shellRect.width : (this.isMobile ? window.innerWidth - 32 : Math.min(window.innerWidth * (window.innerWidth <= 960 ? 0.84 : 0.86), 1080));
+    const bookH = shellRect.height > 80 ? shellRect.height : (this.isMobile ? Math.min(window.innerHeight * 0.74, 610) : Math.min(window.innerHeight * 0.74, 690));
 
-    const padX = this.isMobile ? 40 : (window.innerWidth <= 960 ? 52 : 80);
-    const padY = this.isMobile ? 40 : (window.innerWidth <= 960 ? 44 : 60);
+    const padX = this.isMobile ? (window.innerWidth <= 420 ? 40 : 48) : (window.innerWidth <= 960 ? 60 : 84);
+    const padY = this.isMobile ? (window.innerWidth <= 420 ? 38 : 44) : (window.innerWidth <= 960 ? 48 : 60);
     const headerFootReserve = 76; // running head + folio + margins
     const pageW = (this.isMobile ? bookW : bookW / 2) - padX;
     const pageH = Math.max(220, bookH - padY - headerFootReserve);

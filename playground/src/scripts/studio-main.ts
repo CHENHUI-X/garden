@@ -491,16 +491,27 @@ function initStudio(): void {
     const imgA = document.getElementById("studio-bg-a") as HTMLImageElement | null;
     const imgB = document.getElementById("studio-bg-b") as HTMLImageElement | null;
     if (!imgA || !imgB) return;
-    const pickUrl = () => {
+    const pickUrl = (fallback = false) => {
       const portrait = window.innerHeight > window.innerWidth;
+      if (fallback) return `https://api.horosama.com/random.php?_t=${Date.now()}`;
       return (portrait ? "https://api.yppp.net/pe.php" : "https://api.yppp.net/pc.php") + "?_t=" + Date.now();
     };
     const load = (el: HTMLImageElement, cb?: () => void) => {
+      let triedFallback = false;
       el.onload = () => {
         cb?.();
         el.onload = null;
+        el.onerror = null;
       };
-      el.src = pickUrl();
+      el.onerror = () => {
+        if (!triedFallback) {
+          triedFallback = true;
+          el.src = pickUrl(true);
+        } else {
+          el.onerror = null;
+        }
+      };
+      el.src = pickUrl(false);
     };
     load(imgA, () => {
       imgA.classList.add("visible");
@@ -508,7 +519,7 @@ function initStudio(): void {
     });
     let cur = "a";
     window.setInterval(() => {
-      if (!document.documentElement.classList.contains("anime-on")) return;
+      if (!document.documentElement.classList.contains("anime-on") || document.hidden) return;
       if (cur === "a") {
         imgB.classList.add("visible");
         imgA.classList.remove("visible");
@@ -523,9 +534,20 @@ function initStudio(): void {
     }, 30000);
   };
 
+  try {
+    if (localStorage.getItem("studio-anime-bg") === "1") {
+      document.documentElement.classList.add("anime-on");
+      bgBtn?.setAttribute("aria-pressed", "true");
+      enableAnimeLayer();
+    }
+  } catch {}
+
   bgBtn?.addEventListener("click", () => {
     const on = document.documentElement.classList.toggle("anime-on");
     bgBtn.setAttribute("aria-pressed", String(on));
+    try {
+      localStorage.setItem("studio-anime-bg", on ? "1" : "0");
+    } catch {}
     sound.clipClick();
     if (on) enableAnimeLayer();
   });

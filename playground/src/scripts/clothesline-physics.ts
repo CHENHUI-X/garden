@@ -171,7 +171,7 @@ export class ClotheslineEngine {
   private collectItems(): void {
     const els = Array.from(this.stage.querySelectorAll<HTMLElement>(".hanger"));
     // 5 balanced artifacts across the 30-segment desktop rope; 2 (top) + 3 (bottom) on mobile
-    const desktopNodes = [3, 9, 15, 21, 27];
+    const desktopNodes = [4, 9, 15, 21, 26];
     const mobileMap = [
       { rope: 0, node: 9 },
       { rope: 0, node: 21 },
