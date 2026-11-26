@@ -210,6 +210,7 @@ html.dark .vinyl-deck-card {
   align-items: center;
   gap: 7px;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .deck-led {
@@ -231,6 +232,7 @@ html.dark .vinyl-deck-card {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .hw-chip {
@@ -242,6 +244,8 @@ html.dark .vinyl-deck-card {
   color: var(--muted);
   font-size: 9.5px;
   letter-spacing: 0.08em;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.22s var(--ease);
 }
 
@@ -945,6 +949,7 @@ html.dark .eq-canvas-box {
   font-size: 12.5px;
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
   box-shadow: 0 8px 20px -8px rgba(200, 75, 49, 0.55);
   transition: transform 0.22s var(--ease), filter 0.22s var(--ease);
 }
@@ -964,6 +969,7 @@ html.dark .eq-canvas-box {
   font-size: 12px;
   font-weight: 500;
   text-decoration: none;
+  white-space: nowrap;
   transition: all 0.2s var(--ease);
 }
 
@@ -977,6 +983,7 @@ html.dark .eq-canvas-box {
   margin-top: 12px;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .playlist-switch-box.is-open {
@@ -985,7 +992,7 @@ html.dark .eq-canvas-box {
 
 .playlist-switch-input {
   flex: 1;
-  min-width: 0;
+  min-width: 160px;
   height: 32px;
   padding: 0 10px;
   border-radius: 3px;
@@ -1379,6 +1386,7 @@ html.dark .eq-canvas-box {
   border: 1px solid rgba(244, 230, 204, 0.32);
   font-size: 8.5px;
   letter-spacing: 0.12em;
+  white-space: nowrap;
 }
 
 .hang-vu-dots {
@@ -1495,7 +1503,22 @@ html.dark .eq-canvas-box {
 
   .deck-walnut-bar {
     margin: 0 -16px 14px;
-    padding: 9px 16px;
+    padding: 9px 14px;
+  }
+
+  .deck-engraving {
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+  }
+
+  .deck-led-wrap {
+    font-size: 10px;
+  }
+
+  .track-row {
+    grid-template-columns: 26px 36px minmax(0, 1fr) 18px;
+    gap: 10px;
+    padding: 8px;
   }
 
   .lp-stage {
@@ -1724,5 +1747,31 @@ html.dark .eq-canvas-box {
 
   .art-vinyl-hang {
     width: 80px;
+  }
+
+  .hang-lp-pill {
+    font-size: 7px;
+    padding: 1.5px 4px;
+    letter-spacing: 0.06em;
+  }
+
+  .hang-tag {
+    font-size: 7.5px !important;
+    letter-spacing: 0.02em !important;
+    gap: 3px !important;
+  }
+
+  .lp-stage {
+    height: 170px;
+  }
+
+  .lp-interactive {
+    width: 150px;
+    height: 150px;
+  }
+
+  .lp-vinyl-carrier {
+    width: 140px;
+    height: 140px;
   }
 }

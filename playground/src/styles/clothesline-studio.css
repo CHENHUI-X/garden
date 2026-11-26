@@ -319,22 +319,40 @@ html.dark .paper-grain {
 .box {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 26px;
-  padding: 0 10px;
-  border: 1px solid var(--rule-strong);
-  border-radius: 2px;
-  background: transparent;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(22, 21, 19, 0.24);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: background-color 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease), transform 0.2s var(--ease);
+}
+
+html.dark .box {
+  border-color: rgba(235, 229, 218, 0.24);
 }
 
 .box:hover {
   background: var(--ink);
+  border-color: var(--ink);
   color: var(--paper);
 }
 
 .box:active {
   transform: scale(0.96);
+}
+
+.sheet-modal code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--ink);
 }
 
 .mask-line {
@@ -1483,22 +1501,26 @@ html.dark .gesture-hint {
 
 .sheet-title-center {
   text-align: center;
+  min-width: 0;
 }
 
 .sheet-title-cn {
+  display: block;
   font-family: var(--font-serif);
   font-size: 19px;
   font-weight: 600;
   letter-spacing: 0.12em;
+  line-height: 1.2;
 }
 
 .sheet-title-en {
   display: block;
-  margin-top: 2px;
+  margin-top: 3px;
   font-size: 9.5px;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.22em;
   color: var(--accent);
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .sheet-top-right {
@@ -1692,6 +1714,8 @@ html.dark .gesture-hint {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
   margin-bottom: 12px;
 }
 
@@ -1717,17 +1741,24 @@ html.dark .gh-panel img {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 16px;
-  border: 1px solid var(--rule-strong);
+  padding: 8px 15px;
+  border: 1px solid rgba(22, 21, 19, 0.24);
   border-radius: 999px;
+  background: var(--card);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
   transition: all 0.25s var(--ease);
+}
+
+html.dark .social-chip {
+  border-color: rgba(235, 229, 218, 0.24);
 }
 
 .social-chip:hover {
   background: var(--ink);
+  border-color: var(--ink);
   color: var(--paper);
   transform: translateY(-2px);
 }
@@ -1842,6 +1873,8 @@ html.dark .gh-panel img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .pin-cmt-btn {
@@ -1851,9 +1884,11 @@ html.dark .gh-panel img {
   font-size: 12px;
   font-weight: 500;
   color: var(--muted);
-  padding: 5px 10px;
+  padding: 5px 11px;
   border-radius: 999px;
   border: 1px solid var(--rule);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s var(--ease);
 }
 
@@ -1956,6 +1991,8 @@ html.dark .gh-panel img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: 11px;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -1964,6 +2001,7 @@ html.dark .gh-panel img {
 .fp-visit {
   color: var(--accent);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .exchange-box {
@@ -1989,12 +2027,27 @@ html.dark .gh-panel img {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.exchange-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.exchange-actions .box,
+.exchange-actions .social-chip {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
 }
 
 .copy-toast {
   font-size: 12px;
   color: var(--accent);
-  margin-left: 8px;
   opacity: 0;
   transition: opacity 0.25s ease;
 }
@@ -2031,7 +2084,7 @@ html.dark .gh-panel img {
   background: transparent;
   color: var(--ink);
   font-family: var(--font-serif);
-  font-size: clamp(20px, 2.4vw, 28px);
+  font-size: clamp(16px, 2.4vw, 26px);
   outline: none;
 }
 
@@ -2071,6 +2124,8 @@ html.dark .gh-panel img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 8px;
 }
 
@@ -3306,6 +3361,8 @@ html.dark .curl-stage.is-mirror .curl-back-sheen {
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.1em;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: transform 0.25s var(--ease), background-color 0.25s var(--ease), color 0.25s var(--ease);
 }
 
@@ -3528,7 +3585,8 @@ html.dark .curl-stage.is-mirror .curl-back-sheen {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   padding-bottom: 12px;
   margin-bottom: 10px;
   border-bottom: 1px solid var(--rule);
@@ -4508,20 +4566,72 @@ html.dark .pin-waline-slot .wl-panel {
 
   /* Sheet modals on mobile */
   .sheet-topbar {
-    height: 60px;
-    padding: 0 16px;
+    height: 58px;
+    padding: 0 14px;
+    grid-template-columns: minmax(64px, auto) 1fr minmax(64px, auto);
+    gap: 8px;
+  }
+
+  .sheet-topbar .box {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  .sheet-title-cn {
+    font-size: 16.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .sheet-title-en {
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    margin-top: 2px;
   }
 
   .sheet-scroll {
-    padding: 24px 18px 56px;
+    padding: 20px 16px 56px;
+  }
+
+  .about-prose-col {
+    gap: 24px;
+  }
+
+  .about-lead {
+    font-size: 15.5px;
+    line-height: 1.85;
+  }
+
+  .stat-num {
+    font-size: 27px;
+  }
+
+  .gh-panel {
+    padding: 14px 16px;
+  }
+
+  .social-chip {
+    padding: 7px 13px;
+    font-size: 12.5px;
   }
 
   .pin-note {
-    padding: 24px 20px 18px;
+    padding: 24px 18px 18px;
+    transform: rotate(calc(var(--rot, 0deg) * 0.45));
   }
 
   .exchange-box {
-    padding: 22px 20px;
+    padding: 20px 18px;
+  }
+
+  .toc-ch-name {
+    font-size: 15.5px;
+  }
+
+  .toc-desc,
+  .toc-meta-row {
+    margin-left: 22px;
   }
 
   .about-story-cards {
@@ -4811,6 +4921,29 @@ html.dark .pin-waline-slot .wl-panel {
 }
 
 @media (max-width: 420px) {
+  .book-topbar {
+    padding: 0 10px;
+    gap: 4px;
+  }
+
+  .book-topbar .box {
+    padding: 0 8px;
+    height: 27px;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .book-tab {
+    padding: 0 7.5px;
+    font-size: 10px;
+    height: 26px;
+  }
+
+  .book-top-right .ctrl-btn {
+    min-width: 27px;
+    height: 27px;
+  }
+
   .page-sheet {
     padding: 16px 18px 14px;
   }
