@@ -752,11 +752,11 @@ export class BookEngine {
             <button type="button" class="toc-entry" data-goto-page="${this.appendixPageIdx}">
               <div class="toc-row">
                 <span class="toc-ch-num">附</span>
-                <span class="toc-ch-name">卷末拾遗 · 碎碎念与读后留痕</span>
+                <span class="toc-ch-name">附录 · 碎碎念与评论</span>
                 <span class="toc-dots" aria-hidden="true"></span>
                 <span class="toc-pg-num">P.${String(this.appendixPageIdx).padStart(2, "0")}</span>
               </div>
-              <div class="toc-desc">几条日常片语，以及给路过读者的留言簿</div>
+              <div class="toc-desc">几条日常随记和评论区</div>
             </button>
           </li>
         `
@@ -800,22 +800,19 @@ export class BookEngine {
       .join("");
 
     return this.wrapBookPage(
-      "APPENDIX · 拾遗",
-      "MARGINALIA",
+      "APPENDIX · 附录",
+      "MURMURS",
       `
-        <div style="display:flex;flex-direction:column;height:100%;justify-content:space-between;gap:16px">
+        <div style="display:flex;flex-direction:column;height:100%;justify-content:flex-start;gap:14px">
           <div>
-            <span class="chapter-badge">APPENDIX · 卷末摘记</span>
-            <h2 style="margin:0 0 12px;font-size:22px">碎碎念节选</h2>
-            <div class="appendix-murmurs">${snippets || "<p class='no-indent'>暂无摘记。</p>"}</div>
-          </div>
-          <div style="border-top:1px dashed var(--rule);padding-top:12px;font-size:12px;color:var(--muted);line-height:1.7">
-            纸短情长，想到什么便记下什么；往后有新篇落笔，也会慢慢收进这册子里。
+            <span class="chapter-badge">APPENDIX · 附录</span>
+            <h2 style="margin:0 0 12px;font-size:22px">碎碎念</h2>
+            <div class="appendix-murmurs">${snippets || "<p class='no-indent'>暂无内容。</p>"}</div>
           </div>
         </div>
       `,
       folio,
-      "卷末"
+      "附录"
     );
   }
 
@@ -825,19 +822,19 @@ export class BookEngine {
     return `
       <div class="page-sheet page-comments">
         <div class="page-running-head">
-          <span>READER NOTES</span>
-          <span>读后留痕</span>
+          <span>COMMENTS</span>
+          <span>评论</span>
         </div>
         <div class="book-guestbook-head">
           <div>
-            <span class="chapter-badge">GUESTBOOK · 留言簿</span>
-            <h2 class="guestbook-title">《${escapeHtml(title)}》· 读后留痕</h2>
+            <span class="chapter-badge">COMMENTS · 评论</span>
+            <h2 class="guestbook-title">《${escapeHtml(title)}》</h2>
           </div>
           <button type="button" class="end-btn" data-goto-page="2">返回目录 ↺</button>
         </div>
         <div class="book-end-card">
           <div id="book-waline-mount" class="book-waline-wrap" data-slug="${escapeHtml(slug)}">
-            <div class="waline-loading-note">正在铺开留言笺…</div>
+            <div class="waline-loading-note">评论加载中…</div>
           </div>
         </div>
         <div class="page-folio">
@@ -1168,13 +1165,13 @@ export class BookEngine {
   private async mountWalineInBook(slug: string): Promise<void> {
     const mount = this.modal.querySelector<HTMLElement>("#book-waline-mount");
     if (!mount || !this.walineServerUrl) {
-      if (mount) mount.innerHTML = `<div class="waline-loading-note">留言簿暂未开启。</div>`;
+      if (mount) mount.innerHTML = `<div class="waline-loading-note">评论区暂未开启。</div>`;
       return;
     }
     if (mount.dataset.loaded === "true" || mount.dataset.loading === "true") return;
 
     mount.dataset.loading = "true";
-    mount.innerHTML = `<div class="waline-loading-note">正在铺开留言笺…</div>`;
+    mount.innerHTML = `<div class="waline-loading-note">评论加载中…</div>`;
     try {
       if (!this.walineModPromise) {
         this.walineModPromise = Promise.race([
@@ -1195,18 +1192,18 @@ export class BookEngine {
         dark: "html.dark",
         requiredMeta: ["nick", "mail"],
         locale: {
-          reactionTitle: "— 读罢留个小印记 —",
+          reactionTitle: "读完感觉如何",
           reaction0: "喜欢",
           reaction1: "共鸣",
           reaction2: "好文",
           reaction3: "暖心",
-          reaction4: "掩卷",
-          placeholder: "写下此刻的想法、共鸣，或留一句路过的话…",
+          reaction4: "不错",
+          placeholder: "说点什么…",
           nick: "称呼",
           mail: "邮箱",
           link: "站点",
-          submit: "落笔留言",
-          sofa: "书页尚留白，来写下第一行注脚吧。",
+          submit: "发送",
+          sofa: "还没有评论。",
         },
       });
       mount.dataset.loaded = "true";
@@ -1217,8 +1214,8 @@ export class BookEngine {
       delete mount.dataset.loading;
       mount.innerHTML = `
         <div class="waline-loading-note">
-          <p style="margin:0 0 10px;color:var(--accent)">留言笺连接超时，请稍后再试。</p>
-          <button type="button" class="end-btn accent" data-load-book-waline data-slug="${escapeHtml(slug)}">重新加载</button>
+          <p style="margin:0 0 10px;color:var(--accent)">评论加载超时，请稍后再试。</p>
+          <button type="button" class="end-btn accent" data-load-book-waline data-slug="${escapeHtml(slug)}">重试</button>
         </div>
       `;
       this.bindDynamicPageButtons();

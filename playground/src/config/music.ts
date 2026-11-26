@@ -8,9 +8,9 @@ export const MUSIC_CONFIG = {
   /** 网易云歌单 ID（CHENHUI 的日常歌单，可随时替换成其他公开歌单 ID） */
   playlistId: "2362187252",
   /** 歌单展示标题 */
-  playlistTitle: "CHENHUI · 日常留声",
+  playlistTitle: "日常歌单",
   /** 歌单副标题 */
-  playlistSubtitle: "骑车吹风、深夜读书、发呆时循环的歌",
+  playlistSubtitle: "平时常听的歌",
   /** 网易云个人主页链接（用于「去网易云关注 CHENHUI」导流） */
   neteaseProfileUrl: "https://music.163.com/#/user/home?id=530882324",
   /** 展示的网易云昵称 */

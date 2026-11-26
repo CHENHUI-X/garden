@@ -613,12 +613,12 @@ function initStudio(): void {
             dark: "html.dark",
             requiredMeta: ["nick", "mail"],
             locale: {
-              placeholder: "留一句回声给这条碎碎念…",
+              placeholder: "说点什么…",
               nick: "称呼",
               mail: "邮箱",
               link: "站点",
-              submit: "落笔留言",
-              sofa: "还没有回声，来写第一句吧。",
+              submit: "发送",
+              sofa: "还没有评论。",
             },
           });
           slot.dataset.loaded = "true";

@@ -500,7 +500,7 @@ export class VinylPlayerEngine {
   private renderImmersiveLyrics(): void {
     if (!this.lyricFullListEl) return;
     if (!this.lyrics.length) {
-      this.lyricFullListEl.innerHTML = `<div class="lyrics-empty">暂无同步歌词，安心听旋律就好。</div>`;
+      this.lyricFullListEl.innerHTML = `<div class="lyrics-empty">暂无歌词</div>`;
       return;
     }
     this.lyricFullListEl.innerHTML = this.lyrics
@@ -632,7 +632,7 @@ export class VinylPlayerEngine {
     } catch {
       this.isPlaying = false;
       this.syncPlayUi();
-      this.setStatus("请再点一次播放键以解锁浏览器音频权限", false);
+      this.setStatus("请再点一次播放", false);
     }
   }
 
