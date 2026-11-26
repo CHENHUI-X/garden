@@ -79,7 +79,7 @@ export class BookEngine {
   private inkRevealed = false;
   private walineMountedFor = "";
   private walineModPromise: Promise<{ init: (opts: Record<string, unknown>) => void }> | null = null;
-  private imageRatioCache = new Map<string, number>();
+  private imageMetaCache = new Map<string, { w: number; h: number; ratio: number }>();
   private preloadedImageSrcs = new Set<string>();
   private lightboxEl: HTMLElement | null = null;
 
@@ -168,12 +168,16 @@ export class BookEngine {
           img.setAttribute("loading", "eager");
           img.setAttribute("decoding", "async");
           img.setAttribute("draggable", "false");
+          const src = img.getAttribute("src") || "";
+          if (/^https?:\/\//i.test(src)) {
+            img.setAttribute("referrerpolicy", "no-referrer");
+          }
           const wAttr = Number(img.getAttribute("width") || "0");
           const hAttr = Number(img.getAttribute("height") || "0");
           if (wAttr > 0 && hAttr > 0) {
-            img.style.aspectRatio = `${wAttr} / ${hAttr}`;
-            const src = img.getAttribute("src") || "";
-            if (src) this.imageRatioCache.set(src, wAttr / hAttr);
+            const meta = { w: wAttr, h: hAttr, ratio: wAttr / hAttr };
+            if (src) this.imageMetaCache.set(src, meta);
+            this.applyImageAdaptiveSizing(figure, img, meta, imgs.length > 1);
           }
           const alt = (img.getAttribute("alt") || "").trim();
           if (alt) captions.push(alt);
@@ -886,7 +890,41 @@ export class BookEngine {
     });
   }
 
-  /** Preload external Markdown images lacking width/height attributes and re-paginate once accurately */
+  /** Classify image by real pixel size & aspect ratio for tailored printed book framing */
+  private applyImageAdaptiveSizing(
+    figure: HTMLElement | null,
+    img: HTMLImageElement,
+    meta: { w: number; h: number; ratio: number },
+    isGrid: boolean
+  ): void {
+    img.setAttribute("width", String(meta.w));
+    img.setAttribute("height", String(meta.h));
+    if (!isGrid) {
+      img.style.aspectRatio = `${meta.w} / ${meta.h}`;
+    }
+    if (!figure) return;
+
+    if (isGrid) {
+      if (meta.ratio < 0.88) figure.classList.add("is-portrait-grid");
+      return;
+    }
+
+    figure.classList.remove("is-landscape", "is-portrait", "is-panorama", "is-square", "is-compact");
+    if (meta.w <= 260 && meta.h <= 260) {
+      figure.classList.add("is-compact");
+      img.style.maxWidth = `${meta.w}px`;
+    } else if (meta.ratio >= 2.05) {
+      figure.classList.add("is-panorama");
+    } else if (meta.ratio >= 1.28) {
+      figure.classList.add("is-landscape");
+    } else if (meta.ratio < 0.85) {
+      figure.classList.add("is-portrait");
+    } else {
+      figure.classList.add("is-square");
+    }
+  }
+
+  /** Preload external Markdown images to detect true pixel size & aspect ratio, then re-paginate cleanly */
   private preloadUnknownImages(): void {
     let pending = 0;
     let updatedAny = false;
@@ -901,25 +939,34 @@ export class BookEngine {
       imgs.forEach((img) => {
         const src = img.getAttribute("src") || "";
         if (!src) return;
-        const cached = this.imageRatioCache.get(src);
-        if (cached && !img.style.aspectRatio) {
-          img.style.aspectRatio = String(cached);
+        const fig = img.closest<HTMLElement>(".book-figure");
+        const isGrid = Boolean(fig?.classList.contains("book-figure-grid"));
+        const cached = this.imageMetaCache.get(src);
+        if (cached && !img.getAttribute("width")) {
+          this.applyImageAdaptiveSizing(fig, img, cached, isGrid);
           postDirty = true;
           return;
         }
-        if (img.style.aspectRatio || this.preloadedImageSrcs.has(src)) return;
+        if (cached || this.preloadedImageSrcs.has(src)) return;
 
         this.preloadedImageSrcs.add(src);
         pending++;
         const probe = new Image();
+        if (/^https?:\/\//i.test(src)) {
+          probe.referrerPolicy = "no-referrer";
+        }
         probe.onload = () => {
           if (probe.naturalWidth > 0 && probe.naturalHeight > 0) {
-            this.imageRatioCache.set(src, probe.naturalWidth / probe.naturalHeight);
+            this.imageMetaCache.set(src, {
+              w: probe.naturalWidth,
+              h: probe.naturalHeight,
+              ratio: probe.naturalWidth / probe.naturalHeight,
+            });
             updatedAny = true;
           }
           pending--;
           if (pending === 0 && updatedAny && this.modal.classList.contains("is-open")) {
-            this.applyCachedImageRatios();
+            this.applyCachedImageMeta();
             this.rebuild(true);
           }
         };
@@ -933,7 +980,7 @@ export class BookEngine {
     }
   }
 
-  private applyCachedImageRatios(): void {
+  private applyCachedImageMeta(): void {
     const tmp = document.createElement("div");
     for (const post of this.posts) {
       if (!post.html.includes("<img")) continue;
@@ -941,11 +988,12 @@ export class BookEngine {
       let dirty = false;
       tmp.querySelectorAll<HTMLImageElement>("img").forEach((img) => {
         const src = img.getAttribute("src") || "";
-        const ratio = this.imageRatioCache.get(src);
-        if (ratio && !img.style.aspectRatio) {
-          img.style.aspectRatio = ratio.toFixed(4);
-          dirty = true;
-        }
+        const meta = this.imageMetaCache.get(src);
+        if (!meta) return;
+        const fig = img.closest<HTMLElement>(".book-figure");
+        const isGrid = Boolean(fig?.classList.contains("book-figure-grid"));
+        this.applyImageAdaptiveSizing(fig, img, meta, isGrid);
+        dirty = true;
       });
       if (dirty) post.html = tmp.innerHTML;
     }
@@ -960,7 +1008,7 @@ export class BookEngine {
     box.setAttribute("aria-modal", "true");
     box.innerHTML = `
       <figure class="book-lightbox-frame">
-        <img src="${escapeHtml(src)}" alt="${escapeHtml(caption)}" />
+        <img src="${escapeHtml(src)}" alt="${escapeHtml(caption)}" referrerpolicy="no-referrer" />
         ${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ""}
       </figure>
       <button type="button" class="book-lightbox-close box lbl" aria-label="关闭大图">CLOSE / 关闭</button>

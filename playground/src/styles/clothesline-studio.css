@@ -2911,6 +2911,7 @@ html.dark .curl-stage.is-mirror .curl-back-sheen {
   display: block;
   margin: 0 auto;
   border-radius: 2px;
+  background: rgba(128, 118, 102, 0.08);
   cursor: zoom-in;
   transition: transform 0.3s var(--ease);
 }
@@ -2924,6 +2925,39 @@ html.dark .curl-stage.is-mirror .curl-back-sheen {
   box-shadow: 0 8px 20px -14px rgba(20, 16, 12, 0.32);
   width: fit-content;
   max-width: 100%;
+}
+
+/* Orientation- & size-aware adaptive frames for external/local photos */
+.page-body .book-figure.is-landscape,
+.page-body .book-figure.is-panorama {
+  width: 100%;
+}
+
+.page-body .book-figure.is-landscape img {
+  width: 100%;
+  max-height: calc(var(--book-img-max-h, 230px) * 1.08);
+}
+
+.page-body .book-figure.is-panorama img {
+  width: 100%;
+  max-height: calc(var(--book-img-max-h, 230px) * 0.85);
+}
+
+.page-body .book-figure.is-portrait {
+  max-width: 74%;
+}
+
+.page-body .book-figure.is-portrait img {
+  max-height: calc(var(--book-img-max-h, 230px) * 1.32);
+}
+
+.page-body .book-figure.is-compact {
+  padding: 4px;
+}
+
+.page-body .book-figure.is-compact img {
+  width: auto;
+  background: transparent;
 }
 
 .page-body .book-figure:hover img {
@@ -2942,7 +2976,7 @@ html.dark .curl-stage.is-mirror .curl-back-sheen {
 }
 
 .page-body .book-figure-solo img {
-  max-height: calc(var(--book-img-max-h, 230px) * 1.45);
+  max-height: calc(var(--book-img-max-h, 230px) * 1.5);
 }
 
 /* Automatic 2-column gallery when two photos appear together */
@@ -2959,6 +2993,11 @@ html.dark .curl-stage.is-mirror .curl-back-sheen {
   aspect-ratio: 4 / 3;
   max-height: calc(var(--book-img-max-h, 230px) * 0.78);
   object-fit: cover;
+}
+
+.page-body .book-figure-grid.is-portrait-grid img {
+  aspect-ratio: 3 / 4;
+  max-height: calc(var(--book-img-max-h, 230px) * 1.05);
 }
 
 /* Full-screen Book Photo Lightbox */
