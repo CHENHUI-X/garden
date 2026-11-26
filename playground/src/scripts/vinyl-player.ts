@@ -154,7 +154,7 @@ export class VinylPlayerEngine {
       ? JSON.parse(dataEl.textContent)
       : {
           playlistId: "2362187252",
-          playlistTitle: "IUHNEHC · 日常留声",
+          playlistTitle: "CHENHUI · 日常留声",
           playlistSubtitle: "骑车吹风、深夜读书、发呆时循环的歌",
           neteaseProfileUrl: "https://music.163.com/#/user/home?id=530882324",
           neteaseNickname: "CHENHUI",

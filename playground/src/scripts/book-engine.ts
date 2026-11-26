@@ -1,5 +1,5 @@
 /**
- * Interactive 3D Hardcover Book & Auto-Pagination Engine for IUHNEHC.
+ * Interactive 3D Hardcover Book & Auto-Pagination Engine for CHENHUI · 随想.
  * - Dynamically measures actual rendered book page box & splits arbitrarily long
  *   Astro Markdown posts into balanced print-style pages (zero inner scrollbars).
  * - Desktop: 2-page hardcover spread with centered closed-cover transition.
@@ -227,7 +227,7 @@ export class BookEngine {
           slug: post.slug,
           folio,
           html: this.wrapBookPage(
-            partIdx === 0 ? "IUHNEHC · 随想录" : post.title,
+            partIdx === 0 ? "CHENHUI · 随想录" : post.title,
             post.published,
             chunkHtml + (isLastPart ? `<div class="end-divider" style="margin-top:16px">— 本篇终 —</div>` : ""),
             folio,
@@ -244,7 +244,7 @@ export class BookEngine {
         kind: "endpaper",
         folio,
         html: this.wrapBookPage(
-          "IUHNEHC · 留白",
+          "CHENHUI · 留白",
           "MARGINALIA",
           `<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.55;gap:10px">
             <span style="font-size:18px;color:var(--accent)">✦</span>
@@ -440,11 +440,11 @@ export class BookEngine {
       <div class="page-cover" data-book-open-cover>
         <div class="cover-head">
           <span class="cover-edition">ARCHIVAL EDITION · VOL.01</span>
-          <span class="cover-seal-lg" aria-hidden="true">陈</span>
+          <span class="cover-seal-lg" aria-hidden="true">记</span>
         </div>
         <div class="cover-middle">
           <h2 class="cover-title">随想录</h2>
-          <p class="cover-sub">IUHNEHC — Everyday Essays &amp; Memories</p>
+          <p class="cover-sub">CHENHUI — Everyday Essays &amp; Memories</p>
           <div class="cover-rule"></div>
           <p class="cover-motto">人无法同时拥有青春和对青春的感受。</p>
         </div>
@@ -509,7 +509,7 @@ export class BookEngine {
           </div>
           <div>
             <h2 class="front-title">随想录</h2>
-            <div class="front-en">IUHNEHC · Personal Monograph</div>
+            <div class="front-en">CHENHUI · Personal Monograph</div>
             <blockquote class="front-quote">
               「人无法同时拥有青春和对青春的感受」
             </blockquote>
@@ -521,7 +521,7 @@ export class BookEngine {
         </div>
         <div class="page-folio">
           <span>P.01</span>
-          <span>IUHNEHC</span>
+          <span>CHENHUI</span>
         </div>
       </div>
     `;

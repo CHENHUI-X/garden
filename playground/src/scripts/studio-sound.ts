@@ -1,5 +1,5 @@
 /**
- * Procedural Web Audio foley synthesizer for IUHNEHC Studio.
+ * Procedural Web Audio foley synthesizer for CHENHUI Studio.
  * Zero external audio files — generates tactile rope twangs, wooden clothespin
  * clicks, cotton paper rustles, and realistic 3D book page turns on the fly.
  */

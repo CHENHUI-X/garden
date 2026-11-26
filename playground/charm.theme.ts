@@ -3,7 +3,7 @@ import charm from "astro-charm";
 export default charm({
   config: {
     lang: "zh-CN",
-    title: "IUHNEHC",
+    title: "CHENHUI",
     titleSuffix: " · 随想",
     description: "记录日常的碎碎念、读书感悟和胡思乱想",
     author: "CHENHUI",
@@ -11,7 +11,7 @@ export default charm({
     shootingStar: false,
     font: "disabled",
     side: {
-      title: "IUHNEHC",
+      title: "CHENHUI",
       sub: "",
       bio: "人无法同时拥有青春和对青春的感受",
       navHome: {

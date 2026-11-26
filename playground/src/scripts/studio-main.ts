@@ -1,5 +1,5 @@
 /**
- * IUHNEHC Studio Homepage Main Orchestrator (Performance-tuned Single-rAF Build).
+ * CHENHUI Studio Homepage Main Orchestrator (Performance-tuned Single-rAF Build).
  * - Single unified requestAnimationFrame loop driving Canvas clothesline + dust + magnetic cursor.
  * - Pre-baked static 128x128 paper grain PNG tile (eliminates 60fps SVG feTurbulence + mix-blend-mode).
  * - Pure GPU-composited FLIP transform modal open/close (eliminates software clip-path repaints).
