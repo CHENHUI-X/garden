@@ -243,6 +243,7 @@ export class BookEngine {
     this.shell.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
     this.measureBox.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
     this.preloadUnknownImages();
+    this.applyCachedImageMeta();
 
     this.pages = [];
     this.chapterStartPage = [];
@@ -272,7 +273,7 @@ export class BookEngine {
     this.posts.forEach((post, chIdx) => {
       const startFolio = this.pages.length;
       this.chapterStartPage.push(startFolio);
-      const chunks = this.paginatePost(post, chIdx, pageW, pageH);
+      const chunks = this.paginatePost(post, chIdx, pageW, pageH, imgMaxH);
       chunks.forEach((chunkHtml, partIdx) => {
         const folio = this.pages.length;
         const isLastPart = partIdx === chunks.length - 1;
@@ -343,8 +344,64 @@ export class BookEngine {
     this.renderCurrentSpread();
   }
 
+  /** Stamp deterministic pixel dimensions on cloned media inside #book-measure-sandbox so scrollHeight is exact before decode */
+  private stampMeasureImageSizes(el: HTMLElement, pageW: number, imgMaxH: number): void {
+    const imgs = Array.from(el.querySelectorAll<HTMLImageElement>("img"));
+    if (!imgs.length) return;
+
+    if (el.classList.contains("book-figure-grid")) {
+      const colW = Math.max(48, (pageW - 20) / 2);
+      const isPortraitGrid = el.classList.contains("is-portrait-grid");
+      const ratio = isPortraitGrid ? 3 / 4 : 4 / 3;
+      const maxH = imgMaxH * (isPortraitGrid ? 1.05 : 0.78);
+      const estH = Math.max(24, Math.round(Math.min(colW / ratio, maxH)));
+      imgs.forEach((img) => {
+        img.dataset.measureSized = "1";
+        img.style.height = `${estH}px`;
+      });
+      return;
+    }
+
+    const img = imgs[0];
+    const src = img.getAttribute("src") || "";
+    const cached = this.imageMetaCache.get(src);
+    const natW = cached?.w || Number(img.getAttribute("width") || "0");
+    const natH = cached?.h || Number(img.getAttribute("height") || "0");
+
+    const isPortrait = el.classList.contains("is-portrait");
+    const isLandscape = el.classList.contains("is-landscape");
+    const isPanorama = el.classList.contains("is-panorama");
+    const isCompact = el.classList.contains("is-compact");
+
+    let maxW = Math.max(80, pageW - 14);
+    if (isPortrait) maxW = Math.min(maxW, Math.floor(pageW * 0.74) - 14);
+    if (isCompact && natW > 0) maxW = Math.min(maxW, natW);
+
+    const maxH = isPortrait
+      ? imgMaxH * 1.32
+      : isLandscape
+        ? imgMaxH * 1.12
+        : isPanorama
+          ? imgMaxH * 0.9
+          : imgMaxH;
+
+    let estW: number;
+    let estH: number;
+    if (natW > 0 && natH > 0) {
+      const scale = Math.min(1, maxW / natW, maxH / natH);
+      estW = Math.max(24, Math.round(natW * scale));
+      estH = Math.max(24, Math.round(natH * scale));
+    } else {
+      estW = Math.round(maxW * 0.72);
+      estH = Math.round(imgMaxH * 0.92);
+    }
+    img.dataset.measureSized = "1";
+    img.style.width = `${estW}px`;
+    img.style.height = `${estH}px`;
+  }
+
   /** Split rendered HTML of a post into exact-height page chunks */
-  private paginatePost(post: PostMeta, chIdx: number, pageW: number, pageH: number): string[] {
+  private paginatePost(post: PostMeta, chIdx: number, pageW: number, pageH: number, imgMaxH: number): string[] {
     const sandbox = document.createElement("div");
     sandbox.className = "page-body";
     sandbox.style.width = `${Math.floor(pageW)}px`;
@@ -383,9 +440,14 @@ export class BookEngine {
     });
 
     const chunks: string[] = [];
-    const safeH = pageH - 10;
+    const safeH = pageH - 14;
 
     const flushPage = () => {
+      sandbox.querySelectorAll<HTMLImageElement>("img[data-measure-sized]").forEach((img) => {
+        img.style.removeProperty("width");
+        img.style.removeProperty("height");
+        delete img.dataset.measureSized;
+      });
       if (sandbox.innerHTML.trim()) {
         chunks.push(sandbox.innerHTML);
       }
@@ -395,6 +457,9 @@ export class BookEngine {
     let i = 0;
     while (i < queue.length) {
       const node = queue[i].cloneNode(true);
+      if (node instanceof HTMLElement && node.querySelector("img")) {
+        this.stampMeasureImageSizes(node, pageW, imgMaxH);
+      }
       sandbox.appendChild(node);
 
       if (sandbox.scrollHeight <= safeH) {
@@ -965,9 +1030,11 @@ export class BookEngine {
             updatedAny = true;
           }
           pending--;
-          if (pending === 0 && updatedAny && this.modal.classList.contains("is-open")) {
+          if (pending === 0 && updatedAny) {
             this.applyCachedImageMeta();
-            this.rebuild(true);
+            if (this.modal.classList.contains("is-open")) {
+              this.rebuild(true);
+            }
           }
         };
         probe.onerror = () => {
