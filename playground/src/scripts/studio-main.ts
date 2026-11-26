@@ -94,6 +94,7 @@ function initStudio(): void {
           cursorVisible = true;
           cursorEl.classList.remove("is-hidden");
         }
+        wakeMainLoop();
         // Only walk DOM when target element actually changes!
         if (e.target !== lastPointerTarget) {
           lastPointerTarget = e.target;
@@ -146,18 +147,31 @@ function initStudio(): void {
   });
 
   // ==========================================================================
-  // 3. Single Unified 60/120fps Animation Loop
+  // 3. Demand-Driven Unified 60/120fps Loop (0% CPU/GPU when reading or hidden)
   // ==========================================================================
   let lastFrameTs = performance.now();
-  const mainLoop = (now: number) => {
-    requestAnimationFrame(mainLoop);
+  let loopRafId = 0;
+
+  function wakeMainLoop(): void {
+    if (loopRafId || document.hidden) return;
+    lastFrameTs = performance.now();
+    loopRafId = requestAnimationFrame(mainLoop);
+  }
+
+  function mainLoop(now: number): void {
+    loopRafId = 0;
+    if (document.hidden) return;
+
     const dt = Math.min(0.032, (now - lastFrameTs) / 1000 || 0.016);
     lastFrameTs = now;
 
     // 1) Clothesline physics + dust + canvas (automatically pauses when modal open)
-    clothesline.tick(dt, now);
+    if (!activeModal) {
+      clothesline.tick(dt, now);
+    }
 
-    // 2) Magnetic cursor (only writes style when delta > 0.15px)
+    // 2) Magnetic cursor (only writes style when delta > 0.2px)
+    let cursorMoving = false;
     if (cursorActive && cursorVisible && cursorEl) {
       const dx = mx - cx;
       const dy = my - cy;
@@ -166,10 +180,28 @@ function initStudio(): void {
         cx += dx * factor;
         cy += dy * factor;
         cursorEl.style.transform = `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, 0)`;
+        cursorMoving = true;
       }
     }
-  };
-  requestAnimationFrame(mainLoop);
+
+    // Keep looping while clothesline is active OR magnetic cursor is gliding; sleep at 0% idle otherwise!
+    if (!activeModal || cursorMoving) {
+      loopRafId = requestAnimationFrame(mainLoop);
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (loopRafId) {
+        cancelAnimationFrame(loopRafId);
+        loopRafId = 0;
+      }
+    } else {
+      wakeMainLoop();
+    }
+  });
+
+  wakeMainLoop();
 
   // ==========================================================================
   // 4. GPU-Composited FLIP Modal Open / Close (zero software clip-path jank!)
@@ -265,12 +297,10 @@ function initStudio(): void {
         {
           opacity: 0,
           transform: `translate3d(${fromTx.toFixed(1)}px, ${fromTy.toFixed(1)}px, 0) scale(${fromScale.toFixed(3)})`,
-          borderRadius: "14px",
         },
         {
           opacity: 1,
           transform: "translate3d(0, 0, 0) scale(1)",
-          borderRadius: "0px",
         },
       ],
       {
@@ -313,6 +343,7 @@ function initStudio(): void {
 
       clothesline.setPaused(false);
       clothesline.sendBreezeWave(0.5);
+      wakeMainLoop();
       vinyl?.syncMiniDockVisibility();
       if (window.location.search) {
         try {
@@ -342,11 +373,10 @@ function initStudio(): void {
 
     const anim = modal.animate(
       [
-        { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)", borderRadius: "0px" },
+        { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)" },
         {
           opacity: 0,
           transform: `translate3d(${toTx.toFixed(1)}px, ${toTy.toFixed(1)}px, 0) scale(${toScale.toFixed(3)})`,
-          borderRadius: "14px",
         },
       ],
       {

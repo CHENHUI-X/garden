@@ -48,6 +48,9 @@ interface HangingItem {
   sheenX: number;
   sheenY: number;
   tiltDirty: boolean;
+  lastTx: number;
+  lastTy: number;
+  lastDeg: number;
 }
 
 interface DustMote {
@@ -201,6 +204,9 @@ export class ClotheslineEngine {
         sheenX: 50,
         sheenY: 50,
         tiltDirty: false,
+        lastTx: Number.NaN,
+        lastTy: Number.NaN,
+        lastDeg: Number.NaN,
       });
     });
   }
@@ -594,7 +600,18 @@ export class ClotheslineEngine {
       const { rope, nodeIdx } = this.getAnchorForItem(item);
       if (!rope) continue;
       const n = rope.nodes[nodeIdx];
-      item.el.style.transform = `translate3d(${n.x.toFixed(1)}px, ${(n.y + hangOffsetY).toFixed(1)}px, 0) translateX(-50%) rotate(${item.angle.toFixed(2)}deg)`;
+      const ty = n.y + hangOffsetY;
+      if (
+        Math.abs(n.x - item.lastTx) < 0.04 &&
+        Math.abs(ty - item.lastTy) < 0.04 &&
+        Math.abs(item.angle - item.lastDeg) < 0.02
+      ) {
+        continue;
+      }
+      item.lastTx = n.x;
+      item.lastTy = ty;
+      item.lastDeg = item.angle;
+      item.el.style.transform = `translate3d(${n.x.toFixed(1)}px, ${ty.toFixed(1)}px, 0) translateX(-50%) rotate(${item.angle.toFixed(2)}deg)`;
     }
   }
 
@@ -617,19 +634,19 @@ export class ClotheslineEngine {
     const h = this.height;
     ctx.clearRect(0, 0, w, h);
 
-    // 1. Subtle drifting sunlit dust motes (batched into same canvas, zero extra rAF!)
+    // 1. Subtle drifting sunlit dust motes (single fillStyle + globalAlpha, zero per-mote string alloc)
     if (!this.reducedMotion) {
-      const dustRgb = this.isDark ? "255, 224, 178" : "180, 130, 88";
+      ctx.fillStyle = this.isDark ? "#ffe0b2" : "#b48258";
       for (let i = 0; i < this.motes.length; i++) {
         const m = this.motes[i];
         m.x = (m.x + m.vx + 1) % 1;
         m.y = (m.y + m.vy + Math.sin(nowMs * 0.0006 + m.phase) * 0.00007 + 1) % 1;
-        const alpha = 0.12 + 0.14 * (0.5 + 0.5 * Math.sin(nowMs * 0.0011 + m.phase));
-        ctx.fillStyle = `rgba(${dustRgb}, ${alpha.toFixed(3)})`;
+        ctx.globalAlpha = 0.12 + 0.14 * (0.5 + 0.5 * Math.sin(nowMs * 0.0011 + m.phase));
         ctx.beginPath();
         ctx.arc(m.x * w, m.y * h, m.r, 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.globalAlpha = 1;
     }
 
     // 2. Hardware-fast Verlet ropes (soft double-stroke shadow, NO Gaussian blur pass!)

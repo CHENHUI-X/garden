@@ -415,7 +415,6 @@ html.dark .paper-grain {
   color: var(--ink);
   opacity: 0.055;
   white-space: nowrap;
-  will-change: transform, filter, opacity;
 }
 
 html.dark .ghost-word {
@@ -443,51 +442,6 @@ html.dark .ghost-word {
   z-index: 10;
   user-select: none;
   touch-action: pan-y;
-}
-
-.rope-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
-  z-index: 12;
-}
-
-.rope-shadow-path {
-  fill: none;
-  stroke: var(--rope-shadow);
-  stroke-width: 5px;
-  stroke-linecap: round;
-  filter: blur(4px);
-}
-
-.rope-main-path {
-  fill: none;
-  stroke: var(--rope-color);
-  stroke-width: 2.3px;
-  stroke-linecap: round;
-}
-
-.rope-braid-path {
-  fill: none;
-  stroke: rgba(255, 248, 236, 0.32);
-  stroke-width: 1.1px;
-  stroke-dasharray: 4 6;
-  stroke-linecap: round;
-}
-
-.rope-anchor {
-  fill: var(--ink);
-  opacity: 0.65;
-}
-
-.rope-anchor-ring {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.5;
-  opacity: 0.7;
 }
 
 /* ============================================================================
@@ -2499,6 +2453,7 @@ html.dark .flip-curl-sheen {
   position: absolute;
   bottom: 0;
   left: 0;
+  width: 104px;
   transform-origin: left bottom;
   background: linear-gradient(
     90deg,
@@ -2507,7 +2462,7 @@ html.dark .flip-curl-sheen {
     rgba(16, 12, 8, 0.05) 56%,
     transparent 100%
   );
-  will-change: transform, opacity, width;
+  will-change: transform, opacity;
 }
 
 .curl-stage.is-mirror .curl-under-shadow-band {
@@ -2585,10 +2540,100 @@ html.dark .curl-stage.is-mirror .curl-under-shadow-band {
   );
 }
 
-.curl-back-drop {
+.curl-back-wrap {
   overflow: visible;
   z-index: 4;
-  will-change: filter;
+}
+
+/* Pure-GPU contour-matched floating shadow behind the curled paper flap (zero offscreen Gaussian blur) */
+.curl-flap-shadow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 0% 100%;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.curl-stage.is-mirror .curl-flap-shadow {
+  transform-origin: 100% 100%;
+}
+
+.curl-flap-shadow-side {
+  position: absolute;
+  left: -26px;
+  bottom: 0;
+  width: 26px;
+  height: 100%;
+  transform-origin: right bottom;
+  background: linear-gradient(
+    270deg,
+    rgba(18, 13, 8, 0.24) 0%,
+    rgba(18, 13, 8, 0.09) 38%,
+    rgba(18, 13, 8, 0.02) 72%,
+    transparent 100%
+  );
+  will-change: transform;
+}
+
+.curl-stage.is-mirror .curl-flap-shadow-side {
+  left: auto;
+  right: -26px;
+  transform-origin: left bottom;
+  background: linear-gradient(
+    90deg,
+    rgba(18, 13, 8, 0.24) 0%,
+    rgba(18, 13, 8, 0.09) 38%,
+    rgba(18, 13, 8, 0.02) 72%,
+    transparent 100%
+  );
+}
+
+.curl-flap-shadow-bot {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 100%;
+  height: 22px;
+  transform-origin: left top;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 13, 8, 0.18) 0%,
+    rgba(18, 13, 8, 0.06) 44%,
+    transparent 100%
+  );
+  will-change: transform;
+}
+
+.curl-stage.is-mirror .curl-flap-shadow-bot {
+  transform-origin: right top;
+}
+
+html.dark .curl-flap-shadow-side {
+  background: linear-gradient(
+    270deg,
+    rgba(0, 0, 0, 0.44) 0%,
+    rgba(0, 0, 0, 0.16) 42%,
+    transparent 100%
+  );
+}
+
+html.dark .curl-stage.is-mirror .curl-flap-shadow-side {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.44) 0%,
+    rgba(0, 0, 0, 0.16) 42%,
+    transparent 100%
+  );
+}
+
+html.dark .curl-flap-shadow-bot {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.34) 0%,
+    rgba(0, 0, 0, 0.12) 45%,
+    transparent 100%
+  );
 }
 
 .curl-back-sheet {
@@ -2613,9 +2658,11 @@ html.dark .curl-stage.is-mirror .curl-under-shadow-band {
   position: absolute;
   bottom: 0;
   right: 0;
+  width: 96px;
   transform-origin: right bottom;
   pointer-events: none;
   z-index: 8;
+  will-change: transform, opacity;
   background: linear-gradient(
     270deg,
     rgba(22, 17, 12, 0.18) 0%,

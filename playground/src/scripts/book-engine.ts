@@ -101,7 +101,9 @@ export class BookEngine {
     frontClip: HTMLElement;
     frontSheen: HTMLElement;
     underShadow: HTMLElement;
-    backDrop: HTMLElement;
+    flapShadow: HTMLElement;
+    flapShadowSide: HTMLElement;
+    flapShadowBot: HTMLElement;
     backSheet: HTMLElement;
     backSheen: HTMLElement;
     mirror: boolean;
@@ -1023,7 +1025,11 @@ export class BookEngine {
         ${frontHtml}
         <div class="curl-front-sheen" style="height:${diagLen}px"></div>
       </div>
-      <div class="curl-half curl-back-drop">
+      <div class="curl-half curl-back-wrap">
+        <div class="curl-flap-shadow" aria-hidden="true">
+          <div class="curl-flap-shadow-side"></div>
+          <div class="curl-flap-shadow-bot"></div>
+        </div>
         <div class="curl-back-sheet">
           ${backHtml}
           <div class="curl-back-sheen" style="height:${diagLen}px"></div>
@@ -1037,7 +1043,9 @@ export class BookEngine {
       frontClip: root.querySelector<HTMLElement>(".curl-front-clip")!,
       frontSheen: root.querySelector<HTMLElement>(".curl-front-sheen")!,
       underShadow: root.querySelector<HTMLElement>(".curl-under-shadow-band")!,
-      backDrop: root.querySelector<HTMLElement>(".curl-back-drop")!,
+      flapShadow: root.querySelector<HTMLElement>(".curl-flap-shadow")!,
+      flapShadowSide: root.querySelector<HTMLElement>(".curl-flap-shadow-side")!,
+      flapShadowBot: root.querySelector<HTMLElement>(".curl-flap-shadow-bot")!,
       backSheet: root.querySelector<HTMLElement>(".curl-back-sheet")!,
       backSheen: root.querySelector<HTMLElement>(".curl-back-sheen")!,
       mirror,
@@ -1051,7 +1059,7 @@ export class BookEngine {
   /**
    * Compute exact analytical perpendicular-bisector paper fold geometry:
    * - Grabs bottom outer corner and curls diagonally across the spread without ever tearing the spine.
-   * - Aligns cylindrical roll highlight, inner fold valley, under-page cast shadow, and flap drop shadow.
+   * - 100% GPU compositor transforms (zero per-frame left/width layout thrashing or offscreen Gaussian blur).
    */
   private updateCurlRig(
     rig: NonNullable<BookEngine["dragCurl"]>,
@@ -1067,7 +1075,7 @@ export class BookEngine {
       rig.backSheet.style.opacity = "0";
       rig.frontSheen.style.opacity = "0";
       rig.underShadow.style.opacity = "0";
-      rig.backDrop.style.filter = "none";
+      rig.flapShadow.style.opacity = "0";
       return;
     }
 
@@ -1075,7 +1083,7 @@ export class BookEngine {
       rig.frontClip.style.clipPath = "polygon(0px 0px, 0px 0px, 0px 0px)";
       rig.frontSheen.style.opacity = "0";
       rig.underShadow.style.opacity = "0";
-      rig.backDrop.style.filter = "none";
+      rig.flapShadow.style.opacity = "0";
       rig.backSheet.style.opacity = "1";
       rig.backSheet.style.clipPath = "none";
       rig.backSheet.style.transform = rig.mirror
@@ -1109,6 +1117,7 @@ export class BookEngine {
       ? Math.max(0, Math.min(H, (D - W * vx) / vy))
       : 0;
 
+    let backTransform: string;
     // Clip polygons for unpeeled front page and reflected curled back page
     if (!rig.mirror) {
       rig.frontClip.style.clipPath = hitsRightEdge
@@ -1119,7 +1128,7 @@ export class BookEngine {
         ? `polygon(0px ${H.toFixed(1)}px, ${(W - xBot).toFixed(1)}px ${H.toFixed(1)}px, 0px ${yRight.toFixed(1)}px)`
         : `polygon(0px ${H.toFixed(1)}px, ${(W - xBot).toFixed(1)}px ${H.toFixed(1)}px, ${(W - xTop).toFixed(1)}px 0px, 0px 0px)`;
 
-      rig.backSheet.style.transform = `translate3d(${px.toFixed(2)}px, ${(py - H).toFixed(2)}px, 0) rotate(${(2 * theta).toFixed(5)}rad)`;
+      backTransform = `translate3d(${px.toFixed(2)}px, ${(py - H).toFixed(2)}px, 0) rotate(${(2 * theta).toFixed(5)}rad)`;
     } else {
       const mxBot = W - xBot;
       const mxTop = W - xTop;
@@ -1131,50 +1140,38 @@ export class BookEngine {
         ? `polygon(${W.toFixed(1)}px ${H.toFixed(1)}px, ${xBot.toFixed(1)}px ${H.toFixed(1)}px, ${W.toFixed(1)}px ${yRight.toFixed(1)}px)`
         : `polygon(${W.toFixed(1)}px ${H.toFixed(1)}px, ${xBot.toFixed(1)}px ${H.toFixed(1)}px, ${xTop.toFixed(1)}px 0px, ${W.toFixed(1)}px 0px)`;
 
-      rig.backSheet.style.transform = `translate3d(${(-px).toFixed(2)}px, ${(py - H).toFixed(2)}px, 0) rotate(${(-2 * theta).toFixed(5)}rad)`;
+      backTransform = `translate3d(${(-px).toFixed(2)}px, ${(py - H).toFixed(2)}px, 0) rotate(${(-2 * theta).toFixed(5)}rad)`;
     }
 
+    rig.backSheet.style.transform = backTransform;
     rig.backSheet.style.opacity = "1";
 
-    // Cylindrical paper roll highlight + inner fold shade + dynamic cast shadows
+    // Pure GPU transform-driven cylindrical highlight, inner fold shade, and cast shadows (zero layout!)
     const intensity = Math.pow(mainArc, 0.72);
-    const sheenW = Math.round(34 + intensity * 62);
-    const shadowW = Math.round(24 + intensity * 78);
-    const sign = rig.mirror ? -1 : 1;
+    const sheenScale = (34 + intensity * 62) / 96;
+    const shadowScale = (24 + intensity * 80) / 104;
 
     if (!rig.mirror) {
-      rig.underShadow.style.left = `${xBot.toFixed(1)}px`;
-      rig.underShadow.style.width = `${shadowW}px`;
-      rig.underShadow.style.transform = `rotate(${theta.toFixed(5)}rad)`;
-
-      rig.frontSheen.style.right = `${(W - xBot).toFixed(1)}px`;
-      rig.frontSheen.style.transform = `rotate(${theta.toFixed(5)}rad)`;
-
-      rig.backSheen.style.right = `${xBot.toFixed(1)}px`;
-      rig.backSheen.style.width = `${sheenW}px`;
-      rig.backSheen.style.transform = `rotate(${(-theta).toFixed(5)}rad)`;
+      rig.underShadow.style.transform = `translate3d(${xBot.toFixed(1)}px, 0px, 0) rotate(${theta.toFixed(5)}rad) scaleX(${shadowScale.toFixed(3)})`;
+      rig.frontSheen.style.transform = `translate3d(${(-(W - xBot)).toFixed(1)}px, 0px, 0) rotate(${theta.toFixed(5)}rad)`;
+      rig.backSheen.style.transform = `translate3d(${(-xBot).toFixed(1)}px, 0px, 0) rotate(${(-theta).toFixed(5)}rad) scaleX(${sheenScale.toFixed(3)})`;
     } else {
-      rig.underShadow.style.right = `${xBot.toFixed(1)}px`;
-      rig.underShadow.style.width = `${shadowW}px`;
-      rig.underShadow.style.transform = `rotate(${(-theta).toFixed(5)}rad)`;
-
-      rig.frontSheen.style.left = `${(W - xBot).toFixed(1)}px`;
-      rig.frontSheen.style.transform = `rotate(${(-theta).toFixed(5)}rad)`;
-
-      rig.backSheen.style.left = `${xBot.toFixed(1)}px`;
-      rig.backSheen.style.width = `${sheenW}px`;
-      rig.backSheen.style.transform = `rotate(${theta.toFixed(5)}rad)`;
+      rig.underShadow.style.transform = `translate3d(${(-xBot).toFixed(1)}px, 0px, 0) rotate(${(-theta).toFixed(5)}rad) scaleX(${shadowScale.toFixed(3)})`;
+      rig.frontSheen.style.transform = `translate3d(${(W - xBot).toFixed(1)}px, 0px, 0) rotate(${(-theta).toFixed(5)}rad)`;
+      rig.backSheen.style.transform = `translate3d(${xBot.toFixed(1)}px, 0px, 0) rotate(${theta.toFixed(5)}rad) scaleX(${sheenScale.toFixed(3)})`;
     }
 
     rig.underShadow.style.opacity = (intensity * 0.92).toFixed(3);
     rig.frontSheen.style.opacity = (intensity * 0.85).toFixed(3);
     rig.backSheen.style.opacity = (0.18 + intensity * 0.82).toFixed(3);
 
-    // Real-time soft contour shadow under the floating curled paper flap
-    const dropAlpha = (intensity * 0.24).toFixed(3);
-    const dropX = (sign * (-5 - intensity * 9)).toFixed(1);
-    const dropBlur = (8 + intensity * 14).toFixed(1);
-    rig.backDrop.style.filter = `drop-shadow(${dropX}px 6px ${dropBlur}px rgba(18, 13, 8, ${dropAlpha}))`;
+    // Pure GPU contour-matched feathered shadow behind the floating curled flap (replaces heavy drop-shadow blur)
+    const sideFrac = hitsRightEdge ? Math.max(0.01, (H - yRight) / H) : 1;
+    const botFrac = Math.max(0.01, (W - xBot) / W);
+    rig.flapShadow.style.transform = backTransform;
+    rig.flapShadow.style.opacity = (intensity * 0.96).toFixed(3);
+    rig.flapShadowSide.style.transform = `scaleY(${sideFrac.toFixed(4)})`;
+    rig.flapShadowBot.style.transform = `scaleX(${botFrac.toFixed(4)})`;
   }
 
   private animateFlip(

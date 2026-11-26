@@ -75,23 +75,28 @@
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  contain: strict;
 }
 
+/* Quarter-resolution blur upscaled on GPU: identical ~76px smooth aura at 1/64th blur GPU compute */
 .vinyl-aura-bg img {
   position: absolute;
-  inset: -14%;
-  width: 128%;
-  height: 128%;
+  top: 50%;
+  left: 50%;
+  width: 32%;
+  height: 32%;
   object-fit: cover;
-  filter: blur(68px) saturate(1.55);
-  opacity: 0.2;
-  transform: scale(1.06);
+  filter: blur(18px) saturate(1.55);
+  opacity: 0.22;
+  transform: translate3d(-50%, -50%, 0) scale(4.2);
+  transform-origin: center center;
   transition: opacity 0.9s var(--ease);
+  will-change: opacity;
 }
 
 html.dark .vinyl-aura-bg img {
   opacity: 0.34;
-  filter: blur(74px) saturate(1.65) brightness(0.75);
+  filter: blur(19px) saturate(1.65) brightness(0.75);
 }
 
 .vinyl-modal.is-playing .vinyl-aura-bg img {
@@ -115,6 +120,10 @@ html.dark .vinyl-modal.is-playing .vinyl-aura-bg img {
 .vinyl-scroll {
   position: relative;
   z-index: 2;
+}
+
+.vinyl-scroll {
+  contain: layout style;
 }
 
 .vinyl-topbar {
@@ -1042,6 +1051,7 @@ html.dark .eq-canvas-box {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 6px;
+  contain: content;
 }
 
 .tracklist-scroll.is-hidden,
@@ -1058,6 +1068,8 @@ html.dark .eq-canvas-box {
   padding: 8px 10px;
   border-radius: 6px;
   text-align: left;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 54px;
   transition: background-color 0.2s var(--ease);
 }
 
