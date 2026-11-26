@@ -1634,38 +1634,60 @@ html.dark .eq-canvas-box {
     font-size: 8px !important;
     margin-top: 5px !important;
     padding-top: 4px !important;
+    justify-content: flex-end !important;
+  }
+
+  .memo-footer span:first-child {
+    display: none;
   }
 
   .art-postcard {
-    width: 98px !important;
-    padding: 7px !important;
+    width: 100px !important;
+    padding: 8px 8px 7px !important;
+    gap: 5px !important;
   }
 
   .postcard-title {
-    font-size: 11.5px !important;
+    font-size: 11px !important;
   }
 
   .postcard-lines {
     font-size: 8px !important;
+    line-height: 1.4 !important;
   }
 
   .postcard-stamp {
-    width: 22px !important;
-    height: 25px !important;
+    width: 20px !important;
+    height: 23px !important;
     font-size: 6.5px !important;
   }
 
   .postcard-airmail {
-    font-size: 7px !important;
+    font-size: 6.5px !important;
     padding: 1px 3px !important;
   }
 
   .postcard-postmark {
-    font-size: 7.5px !important;
+    font-size: 7px !important;
+    padding-top: 4px !important;
+    justify-content: flex-end !important;
+  }
+
+  .postcard-postmark span:first-child {
+    display: none;
   }
 
   .art-vinyl-hang {
     width: 88px;
+  }
+
+  .hang-vinyl-sleeve {
+    padding: 6px;
+  }
+
+  .hang-vinyl-play {
+    width: 20px;
+    height: 20px;
   }
 
   .hang-vinyl-disc-wrap {

@@ -201,6 +201,8 @@ function initStudio(): void {
     }
   });
 
+  window.addEventListener("resize", () => wakeMainLoop(), { passive: true });
+
   wakeMainLoop();
 
   // ==========================================================================

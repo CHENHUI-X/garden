@@ -356,6 +356,8 @@ html.dark .paper-grain {
   background: var(--card);
   color: var(--ink-soft);
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
   transition: border-color 0.22s var(--ease), color 0.22s var(--ease), background-color 0.22s var(--ease), transform 0.2s var(--ease);
 }
@@ -514,11 +516,12 @@ html.dark .ghost-word {
 
 /* Subtle index tag below each hanging object */
 .hang-tag {
-  margin-top: 12px;
+  margin-top: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  white-space: nowrap;
   opacity: 0.72;
   transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
@@ -598,6 +601,7 @@ html.dark .ghost-word {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
 }
 
 .polaroid-hand {
@@ -605,12 +609,18 @@ html.dark .ghost-word {
   font-size: 18px;
   line-height: 1.15;
   color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .polaroid-sub {
   font-size: 10.5px;
   color: var(--muted);
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .polaroid-tape {
@@ -732,11 +742,12 @@ html.dark .ghost-word {
   border-radius: 2px 8px 8px 2px;
   background: #f5f1e7;
   color: #24211c;
-  padding: 22px 16px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 6px;
+  overflow: hidden;
   box-shadow: inset 12px 0 18px rgba(0, 0, 0, 0.12);
 }
 
@@ -745,6 +756,9 @@ html.dark .ghost-word {
   font-size: 13px;
   font-weight: 600;
   color: #1c1a17;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mini-peek-excerpt {
@@ -752,6 +766,10 @@ html.dark .ghost-word {
   font-size: 10.5px;
   line-height: 1.6;
   color: #6b655c;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .mini-book-top {
@@ -786,6 +804,7 @@ html.dark .ghost-word {
   position: relative;
   z-index: 2;
   padding: 6px 0;
+  min-width: 0;
 }
 
 .mini-book-title {
@@ -796,6 +815,7 @@ html.dark .ghost-word {
   letter-spacing: 0.12em;
   line-height: 1.25;
   color: var(--book-foil);
+  white-space: nowrap;
 }
 
 .mini-book-en {
@@ -805,6 +825,9 @@ html.dark .ghost-word {
   font-size: 12px;
   opacity: 0.65;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mini-book-foot {
@@ -813,6 +836,7 @@ html.dark .ghost-word {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  gap: 6px;
   padding-top: 10px;
   border-top: 1px solid rgba(232, 220, 198, 0.18);
 }
@@ -820,7 +844,8 @@ html.dark .ghost-word {
 .mini-book-latest {
   font-size: 10.5px;
   opacity: 0.8;
-  max-width: 72%;
+  min-width: 0;
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -830,6 +855,8 @@ html.dark .ghost-word {
   font-size: 9.5px;
   letter-spacing: 0.1em;
   opacity: 0.65;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Vermilion silk ribbon bookmark dangling from book bottom */
@@ -925,14 +952,16 @@ html.dark .memo-front {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 6px;
   margin-bottom: 10px;
 }
 
 .memo-date {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--accent);
+  white-space: nowrap;
 }
 
 .memo-count-pill {
@@ -941,6 +970,8 @@ html.dark .memo-front {
   border: 1px solid var(--rule);
   padding: 2px 6px;
   border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .memo-body {
@@ -962,23 +993,24 @@ html.dark .memo-front {
   border-top: 1px dashed var(--rule);
   display: flex;
   justify-content: space-between;
+  gap: 6px;
   font-size: 10px;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 /* --- Artifact 4: Airmail Postcard (Friends) --- */
 .art-postcard {
-  width: clamp(148px, 12.2vw, 188px);
-  aspect-ratio: 1.24 / 1;
+  width: clamp(152px, 12.6vw, 192px);
   background: var(--card);
   border-radius: 3px;
-  padding: 13px 14px;
+  padding: 14px 14px 11px;
   position: relative;
   box-shadow: var(--shadow-soft);
   border: 1px solid rgba(22, 21, 19, 0.1);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 9px;
   overflow: hidden;
 }
 
@@ -1004,29 +1036,33 @@ html.dark .memo-front {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 3px;
 }
 
 .postcard-airmail {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   color: var(--cobalt);
   border: 1px solid var(--cobalt);
   padding: 2px 5px;
   border-radius: 1px;
+  white-space: nowrap;
 }
 
 .postcard-stamp {
-  width: 34px;
-  height: 40px;
+  width: 30px;
+  height: 34px;
+  flex-shrink: 0;
   border: 1.5px dashed var(--rule-strong);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  font-size: 8.5px;
+  gap: 1px;
+  font-size: 8px;
+  line-height: 1.1;
   color: var(--accent);
   background: var(--accent-soft);
   transform: rotate(3deg);
@@ -1038,33 +1074,44 @@ html.dark .memo-front {
 }
 
 .postcard-mid {
-  margin: 6px 0 4px;
+  margin: 0;
+  min-width: 0;
 }
 
 .postcard-title {
   font-family: var(--font-serif);
-  font-size: 16px;
+  font-size: clamp(13.5px, 1.15vw, 15.5px);
   font-weight: 600;
+  line-height: 1.3;
   color: var(--ink);
   margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .postcard-lines {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.48;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .postcard-postmark {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 6px;
   padding-top: 6px;
   border-top: 1px solid var(--rule);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 /* ============================================================================
@@ -3814,6 +3861,57 @@ html.dark .pin-waline-slot .wl-panel {
    Responsive Design (Tablet & Mobile <= 767px)
    ============================================================================ */
 
+/* Compact 1-rope split-pane desktop scaling (768px - 1120px) */
+@media (max-width: 1120px) and (min-width: 768px) {
+  .top-bar {
+    padding: 0 18px;
+    gap: 10px;
+  }
+
+  .top-controls {
+    gap: 6px;
+  }
+
+  .top-controls .ctrl-btn {
+    padding: 0 8px;
+  }
+
+  .art-polaroid {
+    width: clamp(118px, 12vw, 146px);
+    padding: 8px 8px 11px;
+  }
+
+  .art-book-wrap {
+    width: clamp(136px, 13.6vw, 166px);
+  }
+
+  .mini-book-cover {
+    padding: 14px 13px 13px 18px;
+  }
+
+  .art-memo-stack {
+    width: clamp(122px, 12.2vw, 148px);
+  }
+
+  .memo-front {
+    padding: 13px 11px 11px;
+  }
+
+  .art-postcard {
+    width: clamp(124px, 12.4vw, 152px);
+    padding: 11px 11px 9px;
+    gap: 7px;
+  }
+
+  .art-vinyl-hang {
+    width: clamp(114px, 11.4vw, 144px);
+  }
+
+  .hang-tag {
+    font-size: 9px;
+  }
+}
+
 @media (max-width: 960px) {
   .about-grid {
     grid-template-columns: 1fr;
@@ -3976,11 +4074,12 @@ html.dark .pin-waline-slot .wl-panel {
 
   .art-postcard {
     width: 142px;
-    padding: 9px 10px;
+    padding: 10px 10px 8px;
+    gap: 6px;
   }
 
   .postcard-title {
-    font-size: 13.5px;
+    font-size: 13px;
   }
 
   .postcard-lines {
@@ -3988,13 +4087,18 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .postcard-stamp {
-    width: 26px;
-    height: 30px;
-    font-size: 7.5px;
+    width: 25px;
+    height: 28px;
+    font-size: 7px;
+  }
+
+  .postcard-postmark {
+    font-size: 8px;
+    padding-top: 5px;
   }
 
   .hang-tag {
-    margin-top: 7px;
+    margin-top: 9px;
     font-size: 9px;
   }
 

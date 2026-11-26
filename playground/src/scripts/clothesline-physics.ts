@@ -48,6 +48,8 @@ interface HangingItem {
   sheenX: number;
   sheenY: number;
   tiltDirty: boolean;
+  dispX: number;
+  dispY: number;
   lastTx: number;
   lastTy: number;
   lastDeg: number;
@@ -101,6 +103,7 @@ export class ClotheslineEngine {
   private activeHanger: HangingItem | null = null;
   private lastPluckTime = 0;
   private paused = false;
+  private resizePending = false;
 
   constructor(stage: HTMLElement, canvas: HTMLCanvasElement, sound: StudioSound, cb: ClotheslineCallbacks) {
     this.stage = stage;
@@ -151,12 +154,15 @@ export class ClotheslineEngine {
   /** Called once per frame by the single unified rAF loop in studio-main.ts */
   public tick(dt: number, nowMs: number): void {
     if (this.paused) return;
+    if (this.resizePending) {
+      this.syncResizeInFrame();
+    }
     this.time += dt;
 
     if (!this.reducedMotion) {
       this.stepPhysics(dt, true);
       this.stepHoverTilts(dt);
-      this.renderDOM();
+      this.renderDOM(dt);
       this.renderCanvas(nowMs);
     }
   }
@@ -204,6 +210,8 @@ export class ClotheslineEngine {
         sheenX: 50,
         sheenY: 50,
         tiltDirty: false,
+        dispX: Number.NaN,
+        dispY: Number.NaN,
         lastTx: Number.NaN,
         lastTy: Number.NaN,
         lastDeg: Number.NaN,
@@ -236,7 +244,23 @@ export class ClotheslineEngine {
     return { nodes, segLen };
   }
 
-  private setupLayout(): void {
+  private getRopeGeometry(w: number, h: number, mobile: boolean): Array<{ x0: number; y0: number; x1: number; y1: number; slack: number }> {
+    if (mobile) {
+      const pad = 12;
+      const y1 = Math.max(80, h * 0.1);
+      const y2 = Math.max(392, h * 0.478);
+      return [
+        { x0: pad, y0: y1, x1: w - pad, y1: y1 + 4, slack: 1.02 },
+        { x0: pad, y0: y2 + 4, x1: w - pad, y1: y2 - 2, slack: 1.02 },
+      ];
+    }
+    const pad = 32;
+    const yLeft = Math.max(138, h * 0.245);
+    const yRight = Math.max(150, h * 0.262);
+    return [{ x0: pad, y0: yLeft, x1: w - pad, y1: yRight, slack: 1.036 }];
+  }
+
+  private setupLayout(preserveDisplayPos = false): void {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.isMobile = this.width <= 767;
@@ -246,20 +270,8 @@ export class ClotheslineEngine {
     this.canvas.height = Math.floor(this.height * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
 
-    this.ropes = [];
-
-    if (this.isMobile) {
-      const pad = 12;
-      const y1 = Math.max(80, this.height * 0.1);
-      const y2 = Math.max(392, this.height * 0.478);
-      this.ropes.push(this.buildRope(pad, y1, this.width - pad, y1 + 4, 1.02));
-      this.ropes.push(this.buildRope(pad, y2 + 4, this.width - pad, y2 - 2, 1.02));
-    } else {
-      const pad = 32;
-      const yLeft = Math.max(138, this.height * 0.245);
-      const yRight = Math.max(150, this.height * 0.262);
-      this.ropes.push(this.buildRope(pad, yLeft, this.width - pad, yRight, 1.036));
-    }
+    const specs = this.getRopeGeometry(this.width, this.height, this.isMobile);
+    this.ropes = specs.map((sp) => this.buildRope(sp.x0, sp.y0, sp.x1, sp.y1, sp.slack));
 
     for (const item of this.items) {
       const ropeIdx = this.isMobile ? item.mobileRope : 0;
@@ -268,15 +280,105 @@ export class ClotheslineEngine {
       if (rope && rope.nodes[nodeIdx]) {
         rope.nodes[nodeIdx].mass = this.isMobile ? Math.min(1.55, item.weight) : item.weight;
         item.lastAnchorX = rope.nodes[nodeIdx].x;
+        if (!preserveDisplayPos) {
+          item.dispX = Number.NaN;
+          item.dispY = Number.NaN;
+        }
       }
     }
 
-    const steps = this.reducedMotion ? 90 : 38;
+    const steps = this.reducedMotion ? 48 : (preserveDisplayPos ? 14 : 32);
     for (let s = 0; s < steps; s++) {
       this.stepPhysics(0.016, false);
     }
-    this.renderDOM();
+    this.renderDOM(preserveDisplayPos ? 0.016 : 1);
     this.renderCanvas(performance.now());
+  }
+
+  /** VSync-aligned live resize: smoothly rescales existing rope nodes in-place (zero freeze/stutter!) */
+  private syncResizeInFrame(): void {
+    this.resizePending = false;
+    const newW = window.innerWidth;
+    const newH = window.innerHeight;
+    const newMobile = newW <= 767;
+    const newDpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    if (newW === this.width && newH === this.height && newDpr === this.dpr) return;
+
+    // Crossing 767px (1 rope <-> 2 ropes): lightweight rebuild + smooth card glide into new tier
+    if (newMobile !== this.isMobile || this.ropes.length === 0) {
+      this.setupLayout(true);
+      return;
+    }
+
+    const oldSpecs = this.getRopeGeometry(this.width, this.height, this.isMobile);
+    const newSpecs = this.getRopeGeometry(newW, newH, newMobile);
+
+    this.width = newW;
+    this.height = newH;
+    this.dpr = newDpr;
+
+    const targetW = Math.floor(newW * newDpr);
+    const targetH = Math.floor(newH * newDpr);
+    if (this.canvas.width !== targetW || this.canvas.height !== targetH) {
+      this.canvas.width = targetW;
+      this.canvas.height = targetH;
+      this.ctx.setTransform(newDpr, 0, 0, newDpr, 0, 0);
+    }
+
+    // Proportionally stretch/shrink existing Verlet nodes without resetting physics momentum
+    for (let r = 0; r < this.ropes.length; r++) {
+      const rope = this.ropes[r];
+      const oldSp = oldSpecs[r];
+      const newSp = newSpecs[r];
+      if (!oldSp || !newSp) continue;
+
+      const oldSpanX = Math.max(1, oldSp.x1 - oldSp.x0);
+      const newSpanX = Math.max(1, newSp.x1 - newSp.x0);
+      const scaleX = newSpanX / oldSpanX;
+      const oldMidY = (oldSp.y0 + oldSp.y1) * 0.5;
+      const newMidY = (newSp.y0 + newSp.y1) * 0.5;
+      const dyBase = newMidY - oldMidY;
+
+      rope.segLen = (Math.hypot(newSp.x1 - newSp.x0, newSp.y1 - newSp.y0) * newSp.slack) / SEGMENTS;
+
+      const nodes = rope.nodes;
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        if (i === 0) {
+          n.x = n.ox = newSp.x0;
+          n.y = n.oy = newSp.y0;
+        } else if (i === nodes.length - 1) {
+          n.x = n.ox = newSp.x1;
+          n.y = n.oy = newSp.y1;
+        } else {
+          n.x = newSp.x0 + (n.x - oldSp.x0) * scaleX;
+          n.ox = newSp.x0 + (n.ox - oldSp.x0) * scaleX;
+          n.y += dyBase;
+          n.oy += dyBase;
+        }
+      }
+    }
+
+    for (const item of this.items) {
+      const { rope, nodeIdx } = this.getAnchorForItem(item);
+      if (rope && rope.nodes[nodeIdx]) {
+        item.lastAnchorX = rope.nodes[nodeIdx].x;
+        if (Number.isFinite(item.dispX)) {
+          item.dispX = rope.nodes[nodeIdx].x;
+          item.dispY = rope.nodes[nodeIdx].y;
+        }
+      }
+    }
+
+    // Brief 3-pass tension settle for crisp tautness during live window drag
+    for (let s = 0; s < 3; s++) {
+      this.stepPhysics(0.016, false);
+    }
+    if (this.reducedMotion) {
+      this.renderDOM(1);
+      this.renderCanvas(performance.now());
+    }
   }
 
   private getAnchorForItem(item: HangingItem): { rope: RopeLine; nodeIdx: number } {
@@ -301,11 +403,13 @@ export class ClotheslineEngine {
   }
 
   private bindEvents(): void {
-    let resizeTimer = 0;
-    window.addEventListener("resize", () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => this.setupLayout(), 120);
-    });
+    window.addEventListener(
+      "resize",
+      () => {
+        this.resizePending = true;
+      },
+      { passive: true }
+    );
 
     window.addEventListener(
       "pointermove",
@@ -538,14 +642,14 @@ export class ClotheslineEngine {
         n.y += vy + gravity * n.mass + windY;
       }
 
-      // 8 iterations gives crisp taut linen with lower CPU cost
+      // 8 iterations with fast Math.sqrt gives crisp taut linen at minimal CPU cost
       for (let iter = 0; iter < 8; iter++) {
         for (let i = 0; i < nodes.length - 1; i++) {
           const p1 = nodes[i];
           const p2 = nodes[i + 1];
           const dx = p2.x - p1.x;
           const dy = p2.y - p1.y;
-          const dist = Math.hypot(dx, dy) || 0.0001;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.0001;
           const diff = (rope.segLen - dist) / dist;
 
           if (!p1.pinned && !p2.pinned) {
@@ -594,24 +698,39 @@ export class ClotheslineEngine {
     }
   }
 
-  private renderDOM(): void {
+  private renderDOM(dt = 0.016): void {
     const hangOffsetY = this.isMobile ? 14 : 18;
+    const glide = dt >= 0.5 || this.reducedMotion ? 1 : 1 - Math.exp(-15 * dt);
     for (const item of this.items) {
       const { rope, nodeIdx } = this.getAnchorForItem(item);
       if (!rope) continue;
       const n = rope.nodes[nodeIdx];
-      const ty = n.y + hangOffsetY;
+      if (!Number.isFinite(item.dispX) || glide >= 1) {
+        item.dispX = n.x;
+        item.dispY = n.y;
+      } else {
+        const dx = n.x - item.dispX;
+        const dy = n.y - item.dispY;
+        if (dx * dx + dy * dy < 0.04) {
+          item.dispX = n.x;
+          item.dispY = n.y;
+        } else {
+          item.dispX += dx * glide;
+          item.dispY += dy * glide;
+        }
+      }
+      const ty = item.dispY + hangOffsetY;
       if (
-        Math.abs(n.x - item.lastTx) < 0.04 &&
+        Math.abs(item.dispX - item.lastTx) < 0.04 &&
         Math.abs(ty - item.lastTy) < 0.04 &&
         Math.abs(item.angle - item.lastDeg) < 0.02
       ) {
         continue;
       }
-      item.lastTx = n.x;
+      item.lastTx = item.dispX;
       item.lastTy = ty;
       item.lastDeg = item.angle;
-      item.el.style.transform = `translate3d(${n.x.toFixed(1)}px, ${ty.toFixed(1)}px, 0) translateX(-50%) rotate(${item.angle.toFixed(2)}deg)`;
+      item.el.style.transform = `translate3d(${item.dispX.toFixed(1)}px, ${ty.toFixed(1)}px, 0) translateX(-50%) rotate(${item.angle.toFixed(2)}deg)`;
     }
   }
 
