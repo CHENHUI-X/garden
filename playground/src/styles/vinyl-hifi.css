@@ -1712,3 +1712,17 @@ html.dark .eq-canvas-box {
     letter-spacing: 0.04em !important;
   }
 }
+
+@media (max-width: 375px) {
+  .art-memo-stack {
+    width: 88px !important;
+  }
+
+  .art-postcard {
+    width: 94px !important;
+  }
+
+  .art-vinyl-hang {
+    width: 80px;
+  }
+}

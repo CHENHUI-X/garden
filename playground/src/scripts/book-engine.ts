@@ -121,6 +121,7 @@ export class BookEngine {
   constructor(modal: HTMLElement, sound: StudioSound) {
     this.modal = modal;
     this.sound = sound;
+    this.fontSize = window.innerWidth <= 767 ? 15 : 15.8;
     this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.walineServerUrl = modal.dataset.walineServer || "";
 
@@ -229,17 +230,18 @@ export class BookEngine {
     this.isMobile = window.innerWidth <= 767;
     this.shell.style.setProperty("--book-font-size", `${this.fontSize}px`);
 
-    // Measure actual book page body box dimensions
-    const shellRect = this.shell.getBoundingClientRect();
-    const bookW = shellRect.width > 80 ? shellRect.width : (this.isMobile ? window.innerWidth - 32 : Math.min(window.innerWidth * (window.innerWidth <= 960 ? 0.84 : 0.86), 1080));
-    const bookH = shellRect.height > 80 ? shellRect.height : (this.isMobile ? Math.min(window.innerHeight * 0.74, 610) : Math.min(window.innerHeight * 0.74, 690));
+    // Measure exact untransformed layout box (immune to modal open FLIP scale animation)
+    const rawW = this.shell.offsetWidth;
+    const rawH = this.shell.offsetHeight;
+    const bookW = rawW > 80 ? rawW : (this.isMobile ? window.innerWidth - 28 : Math.min(window.innerWidth * (window.innerWidth <= 960 ? 0.84 : 0.86), 1080));
+    const bookH = rawH > 80 ? rawH : (this.isMobile ? Math.min(window.innerHeight * 0.8, 640) : Math.min(window.innerHeight * 0.74, 690));
 
-    const padX = this.isMobile ? (window.innerWidth <= 420 ? 40 : 48) : (window.innerWidth <= 960 ? 60 : 84);
-    const padY = this.isMobile ? (window.innerWidth <= 420 ? 38 : 44) : (window.innerWidth <= 960 ? 48 : 60);
-    const headerFootReserve = 76; // running head + folio + margins
+    const padX = this.isMobile ? (window.innerWidth <= 420 ? 36 : 40) : (window.innerWidth <= 960 ? 60 : 84);
+    const padY = this.isMobile ? (window.innerWidth <= 420 ? 30 : 32) : (window.innerWidth <= 960 ? 48 : 60);
+    const headerFootReserve = this.isMobile ? 58 : 76; // running head + folio + margins
     const pageW = (this.isMobile ? bookW : bookW / 2) - padX;
     const pageH = Math.max(220, bookH - padY - headerFootReserve);
-    const imgMaxH = Math.max(148, Math.round(pageH * 0.46));
+    const imgMaxH = Math.max(144, Math.round(pageH * 0.46));
     this.shell.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
     this.measureBox.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
     this.preloadUnknownImages();
@@ -345,7 +347,7 @@ export class BookEngine {
   }
 
   /** Stamp deterministic pixel dimensions on cloned media inside #book-measure-sandbox so scrollHeight is exact before decode */
-  private stampMeasureImageSizes(el: HTMLElement, pageW: number, imgMaxH: number): void {
+  private stampMeasureImageSizes(el: HTMLElement, pageW: number, imgMaxH: number, overrideMaxH?: number): void {
     const imgs = Array.from(el.querySelectorAll<HTMLImageElement>("img"));
     if (!imgs.length) return;
 
@@ -353,7 +355,8 @@ export class BookEngine {
       const colW = Math.max(48, (pageW - 20) / 2);
       const isPortraitGrid = el.classList.contains("is-portrait-grid");
       const ratio = isPortraitGrid ? 3 / 4 : 4 / 3;
-      const maxH = imgMaxH * (isPortraitGrid ? 1.05 : 0.78);
+      const baseMaxH = imgMaxH * (isPortraitGrid ? 1.05 : 0.78);
+      const maxH = overrideMaxH ? Math.min(baseMaxH, overrideMaxH) : baseMaxH;
       const estH = Math.max(24, Math.round(Math.min(colW / ratio, maxH)));
       imgs.forEach((img) => {
         img.dataset.measureSized = "1";
@@ -377,13 +380,14 @@ export class BookEngine {
     if (isPortrait) maxW = Math.min(maxW, Math.floor(pageW * 0.74) - 14);
     if (isCompact && natW > 0) maxW = Math.min(maxW, natW);
 
-    const maxH = isPortrait
+    const baseMaxH = isPortrait
       ? imgMaxH * 1.32
       : isLandscape
         ? imgMaxH * 1.12
         : isPanorama
           ? imgMaxH * 0.9
           : imgMaxH;
+    const maxH = overrideMaxH ? Math.min(baseMaxH, overrideMaxH) : baseMaxH;
 
     let estW: number;
     let estH: number;
@@ -393,7 +397,7 @@ export class BookEngine {
       estH = Math.max(24, Math.round(natH * scale));
     } else {
       estW = Math.round(maxW * 0.72);
-      estH = Math.round(imgMaxH * 0.92);
+      estH = Math.round(Math.min(imgMaxH * 0.92, maxH));
     }
     img.dataset.measureSized = "1";
     img.style.width = `${estW}px`;
@@ -406,7 +410,7 @@ export class BookEngine {
     sandbox.className = "page-body";
     sandbox.style.width = `${Math.floor(pageW)}px`;
     sandbox.style.fontSize = `${this.fontSize}px`;
-    sandbox.style.lineHeight = "1.9";
+    sandbox.style.lineHeight = this.isMobile ? "1.78" : "1.9";
     sandbox.style.overflow = "visible";
     sandbox.style.height = "auto";
     this.measureBox.innerHTML = "";
@@ -440,7 +444,7 @@ export class BookEngine {
     });
 
     const chunks: string[] = [];
-    const safeH = pageH - 14;
+    const safeH = pageH - 12;
 
     const flushPage = () => {
       sandbox.querySelectorAll<HTMLImageElement>("img[data-measure-sized]").forEach((img) => {
@@ -467,8 +471,69 @@ export class BookEngine {
         continue;
       }
 
-      // Overflowed! Remove last added node
+      // Overflowed! Capture exact overflow delta (includes real margin collapse & caption wrap)
+      const firstOverBy = sandbox.scrollHeight - safeH;
       sandbox.removeChild(node);
+
+      // Smart remaining-space adaptive photo fit: keep an illustration paired below its text
+      // instead of leaving an awkward empty half-page when plenty of vertical space remains.
+      if (
+        sandbox.childNodes.length > 0 &&
+        node instanceof HTMLElement &&
+        node.classList.contains("book-figure") &&
+        !node.classList.contains("book-figure-grid")
+      ) {
+        const img = node.querySelector<HTMLImageElement>("img");
+        const curImgH = img ? parseFloat(img.style.height) || imgMaxH : 0;
+        const minComfortH = this.isMobile ? 118 : 144;
+        if (img && curImgH > minComfortH) {
+          let fitImgH = Math.floor(curImgH - firstOverBy - 6);
+          let fitted = false;
+          for (let attempt = 0; attempt < 2 && fitImgH >= minComfortH; attempt++) {
+            img.style.maxHeight = `${fitImgH}px`;
+            this.stampMeasureImageSizes(node, pageW, imgMaxH, fitImgH);
+            sandbox.appendChild(node);
+            const overNow = sandbox.scrollHeight - safeH;
+            if (overNow <= 0) {
+              fitted = true;
+              break;
+            }
+            sandbox.removeChild(node);
+            fitImgH = Math.floor(fitImgH - overNow - 4);
+          }
+          if (fitted) {
+            i++;
+            continue;
+          }
+          img.style.removeProperty("max-height");
+        }
+      }
+
+      // If a figure still overflows and follows >=2 blocks, keep its preceding paragraph paired
+      // with it on the next page (classic book keep-with-next rule) instead of stranding the photo.
+      if (
+        sandbox.childNodes.length >= 2 &&
+        node instanceof HTMLElement &&
+        node.classList.contains("book-figure")
+      ) {
+        const lastEl = sandbox.lastElementChild;
+        if (
+          lastEl instanceof HTMLElement &&
+          lastEl.tagName === "P" &&
+          !lastEl.classList.contains("article-signoff") &&
+          !lastEl.dataset.pairedFigure &&
+          lastEl.getBoundingClientRect().height <= safeH * 0.62
+        ) {
+          sandbox.removeChild(lastEl);
+          lastEl.dataset.pairedFigure = "1";
+          if (sandbox.lastElementChild?.tagName === "HR") {
+            sandbox.removeChild(sandbox.lastElementChild);
+          }
+          flushPage();
+          queue.splice(i, 0, lastEl);
+          continue;
+        }
+      }
 
       // If sandbox already has content, flush current page & retry this node on next page
       if (sandbox.childNodes.length > 0) {

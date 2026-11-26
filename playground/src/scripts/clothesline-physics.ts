@@ -175,9 +175,9 @@ export class ClotheslineEngine {
     const mobileMap = [
       { rope: 0, node: 9 },
       { rope: 0, node: 21 },
-      { rope: 1, node: 6 },
+      { rope: 1, node: 5 },
       { rope: 1, node: 15 },
-      { rope: 1, node: 24 },
+      { rope: 1, node: 25 },
     ];
     const baseTilts = [-2.2, 0.6, -1.5, 1.8, -2.0];
     const weights = [1.35, 2.0, 1.35, 1.3, 1.45];
@@ -248,11 +248,17 @@ export class ClotheslineEngine {
   private getRopeGeometry(w: number, h: number, mobile: boolean): Array<{ x0: number; y0: number; x1: number; y1: number; slack: number }> {
     if (mobile) {
       const pad = 12;
-      const y1 = Math.max(80, h * 0.1);
-      const y2 = Math.max(392, h * 0.478);
+      const topReserve = 56;
+      const bottomReserve = h <= 620 ? 48 : 74;
+      const usable = Math.max(360, h - topReserve - bottomReserve);
+      const y1 = Math.round(topReserve + Math.min(34, Math.max(12, usable * 0.048)));
+      const minRowGap = h <= 700 ? 196 : 232;
+      const maxRowGap = 290;
+      const targetY2 = y1 + Math.min(maxRowGap, Math.max(minRowGap, Math.round(usable * 0.49)));
+      const y2 = Math.round(Math.min(h - bottomReserve - 196, targetY2));
       return [
-        { x0: pad, y0: y1, x1: w - pad, y1: y1 + 4, slack: 1.02 },
-        { x0: pad, y0: y2 + 4, x1: w - pad, y1: y2 - 2, slack: 1.02 },
+        { x0: pad, y0: y1, x1: w - pad, y1: y1 + 3, slack: 1.012 },
+        { x0: pad, y0: y2 + 3, x1: w - pad, y1: y2 - 2, slack: 1.012 },
       ];
     }
     const pad = 32;

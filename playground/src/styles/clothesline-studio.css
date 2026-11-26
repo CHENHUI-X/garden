@@ -4295,7 +4295,7 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .top-bar {
-    height: 58px;
+    height: 52px;
     padding: 0 14px;
     grid-template-columns: auto 1fr auto;
     gap: 8px;
@@ -4310,7 +4310,7 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .brand-word {
-    font-size: 18px;
+    font-size: 17.5px;
     letter-spacing: 0.1em;
     padding-left: 0;
   }
@@ -4326,8 +4326,8 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .ctrl-btn {
-    min-width: 36px;
-    height: 36px;
+    min-width: 34px;
+    height: 34px;
     padding: 0;
   }
 
@@ -4447,30 +4447,30 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .hang-tag {
-    margin-top: 9px;
-    font-size: 9px;
+    margin-top: 7px;
+    font-size: 8.5px;
   }
 
   .hanger-btn {
-    padding-top: 12px;
+    padding-top: 10px;
   }
 
   .clothespin {
-    top: -14px;
-    width: 20px;
-    height: 34px;
+    top: -13px;
+    width: 19px;
+    height: 32px;
   }
 
   .clothespin-book {
-    top: -15px;
-    width: 25px;
-    height: 36px;
+    top: -14px;
+    width: 24px;
+    height: 34px;
   }
 
   .bottom-strip {
-    padding: 0 16px max(16px, env(safe-area-inset-bottom));
+    padding: 0 12px max(10px, env(safe-area-inset-bottom));
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 7px;
   }
 
   .motto-block {
@@ -4483,7 +4483,9 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .motto-text {
-    font-size: 13px;
+    font-size: 11.5px;
+    opacity: 0.72;
+    letter-spacing: 0.04em;
   }
 
   .gesture-hint {
@@ -4492,11 +4494,16 @@ html.dark .pin-waline-slot .wl-panel {
 
   .quick-nav {
     justify-content: center;
+    flex-wrap: nowrap;
+    gap: 5px;
   }
 
   .quick-pill {
-    height: 36px;
-    padding: 0 12px;
+    height: 30px;
+    padding: 0 9px;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   /* Sheet modals on mobile */
@@ -4537,15 +4544,15 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .book-topbar {
-    height: 56px;
+    height: 48px;
     padding: 0 14px;
     grid-template-columns: auto 1fr auto;
     gap: 6px;
   }
 
   .book-topbar .box {
-    padding: 0 10px;
-    height: 28px;
+    padding: 0 9px;
+    height: 27px;
     white-space: nowrap;
   }
 
@@ -4558,7 +4565,7 @@ html.dark .pin-waline-slot .wl-panel {
   .book-tab {
     padding: 0 9px;
     font-size: 10.5px;
-    height: 28px;
+    height: 27px;
     white-space: nowrap;
   }
 
@@ -4567,17 +4574,17 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .book-top-right .ctrl-btn {
-    min-width: 30px;
-    height: 30px;
+    min-width: 29px;
+    height: 29px;
   }
 
   .book-stage {
-    padding: 8px 16px 8px;
+    padding: 4px 14px 4px;
   }
 
   .book-shell {
-    --book-w: calc(100vw - 32px);
-    --book-h: min(74dvh, 610px);
+    --book-w: calc(100vw - 28px);
+    --book-h: min(80dvh, 640px);
   }
 
   .book-shell.is-closed {
@@ -4594,9 +4601,9 @@ html.dark .pin-waline-slot .wl-panel {
 
   .book-ribbon {
     left: 26px;
-    bottom: -26px;
-    width: 18px;
-    height: 34px;
+    bottom: -24px;
+    width: 17px;
+    height: 30px;
   }
 
   .book-spread {
@@ -4653,15 +4660,28 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .page-sheet {
-    padding: 24px 24px 20px;
+    padding: 18px 20px 14px;
+  }
+
+  .page-running-head {
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .page-body {
+    line-height: 1.78;
+  }
+
+  .page-body .book-figure {
+    margin: 0.65em auto;
   }
 
   .page-folio {
-    padding: 10px 24px 0 0;
+    padding: 8px 20px 0 0;
   }
 
   .page-cover {
-    padding: 38px 36px 38px 46px;
+    padding: 36px 34px 36px 44px;
     border-radius: 4px 10px 10px 4px;
   }
 
@@ -4678,7 +4698,8 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .book-bottombar {
-    padding: 0 16px max(12px, env(safe-area-inset-bottom));
+    height: 46px;
+    padding: 0 14px max(8px, env(safe-area-inset-bottom));
     gap: 10px;
   }
 
@@ -4694,7 +4715,7 @@ html.dark .pin-waline-slot .wl-panel {
   }
 
   .mobile-turn-btn {
-    height: 32px;
+    height: 30px;
     padding: 0 10px;
     border-radius: 999px;
     border: 1px solid var(--rule-strong);
@@ -4710,9 +4731,88 @@ html.dark .pin-waline-slot .wl-panel {
   }
 }
 
+@media (max-width: 520px) {
+  .art-polaroid {
+    width: 118px;
+    padding: 6px 6px 8px;
+  }
+
+  .polaroid-meta {
+    margin-top: 7px;
+  }
+
+  .polaroid-hand {
+    font-size: 13.5px;
+  }
+
+  .polaroid-sub {
+    font-size: 8.5px;
+  }
+
+  .art-book-wrap {
+    width: 116px;
+  }
+
+  .mini-book-cover {
+    padding: 12px 11px 11px 17px;
+  }
+
+  .mini-book-cover::before {
+    width: 9px;
+  }
+
+  .mini-book-cover::after {
+    inset: 5px 5px 5px 10px;
+  }
+
+  .mini-book-title {
+    font-size: 15px;
+  }
+
+  .quick-pill span.q-idx {
+    display: none;
+  }
+
+  .quick-pill {
+    height: 29px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+}
+
+/* Real Safari mobile short-viewport adaptation (<= 700px height with browser chrome) */
+@media (max-width: 767px) and (max-height: 700px) {
+  .art-polaroid {
+    width: 108px;
+    padding: 5px 5px 7px;
+  }
+
+  .art-book-wrap {
+    width: 106px;
+  }
+
+  .mini-book-cover {
+    padding: 11px 10px 10px 16px;
+  }
+
+  .mini-book-title {
+    font-size: 14px;
+  }
+
+  .hang-tag {
+    margin-top: 5px;
+  }
+}
+
+@media (max-width: 767px) and (max-height: 620px) {
+  .motto-block {
+    display: none;
+  }
+}
+
 @media (max-width: 420px) {
   .page-sheet {
-    padding: 20px 20px 18px;
+    padding: 16px 18px 14px;
   }
 
   .page-cover {
