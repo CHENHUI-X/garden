@@ -63,15 +63,15 @@ BaseLayout: typeof import("/home/runner/work/garden/garden/package/src/layouts/B
 						
 							"styles": ["/home/runner/work/garden/garden/package/src/styles/variable.css","/home/runner/work/garden/garden/package/src/styles/twoslash-style-rich.css","/home/runner/work/garden/garden/package/src/styles/global.css","/home/runner/work/garden/garden/package/src/styles/github-card.css","/home/runner/work/garden/garden/package/src/styles/admonition.css"],
 						
-							"userCustomStyle": ["/home/runner/work/garden/garden/playground/src/styles/custom-charm.css"],
+							"userCustomStyle": [],
 						
 							"custom": {
 
-CustomScriptComponent: typeof import("/home/runner/work/garden/garden/playground/src/components/CustomScriptComponent.astro").default;
+CustomScriptComponent: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
 CustomPostHeaderTop: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
-CustomPostHeaderBottom: typeof import("/home/runner/work/garden/garden/playground/src/components/CustomPostHeaderBottom.astro").default;
+CustomPostHeaderBottom: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
 CustomPostFooterTop: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
-CustomPostFooterBottom: typeof import("/home/runner/work/garden/garden/playground/src/components/WalineComment.astro").default;
+CustomPostFooterBottom: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
 },
 						
 							}
@@ -153,10 +153,10 @@ export const BaseLayout: typeof import("/home/runner/work/garden/garden/package/
 						
 							declare module "charm:custom" {
 								
-export const CustomScriptComponent: typeof import("/home/runner/work/garden/garden/playground/src/components/CustomScriptComponent.astro").default;
+export const CustomScriptComponent: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
 export const CustomPostHeaderTop: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
-export const CustomPostHeaderBottom: typeof import("/home/runner/work/garden/garden/playground/src/components/CustomPostHeaderBottom.astro").default;
+export const CustomPostHeaderBottom: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
 export const CustomPostFooterTop: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
-export const CustomPostFooterBottom: typeof import("/home/runner/work/garden/garden/playground/src/components/WalineComment.astro").default;
+export const CustomPostFooterBottom: typeof import("/home/runner/work/garden/garden/package/src/components/Empty.astro").default;
 							}
 						
