@@ -686,7 +686,7 @@ function initStudio(): void {
     const total = matchedPosts.length + matchedMurmurs.length;
     searchMeta.textContent = q
       ? `找到 ${total} 条结果 · 随笔 ${matchedPosts.length} 篇 / 碎碎念 ${matchedMurmurs.length} 条`
-      : `全站档案索引 · 随笔 ${searchData.posts.length} 篇 / 碎碎念 ${searchData.murmurs.length} 条`;
+      : `共收录 ${searchData.posts.length} 篇随笔 · ${searchData.murmurs.length} 条碎碎念`;
 
     if (total === 0) {
       searchResults.innerHTML = `<div class="search-empty">没有找到与「${esc(rawQuery.trim())}」相关的内容。</div>`;

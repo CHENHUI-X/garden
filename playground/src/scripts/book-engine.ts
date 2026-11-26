@@ -810,7 +810,7 @@ export class BookEngine {
             <div class="appendix-murmurs">${snippets || "<p class='no-indent'>暂无摘记。</p>"}</div>
           </div>
           <div style="border-top:1px dashed var(--rule);padding-top:12px;font-size:12px;color:var(--muted);line-height:1.7">
-            本书内容与博客 Markdown 文件实时同步。每当新文章落笔，目录与页码会自动重新装订成册。
+            纸短情长，想到什么便记下什么；往后有新篇落笔，也会慢慢收进这册子里。
           </div>
         </div>
       `,
@@ -1168,7 +1168,7 @@ export class BookEngine {
   private async mountWalineInBook(slug: string): Promise<void> {
     const mount = this.modal.querySelector<HTMLElement>("#book-waline-mount");
     if (!mount || !this.walineServerUrl) {
-      if (mount) mount.innerHTML = `<div class="waline-loading-note">未配置 Waline 服务地址。</div>`;
+      if (mount) mount.innerHTML = `<div class="waline-loading-note">留言簿暂未开启。</div>`;
       return;
     }
     if (mount.dataset.loaded === "true" || mount.dataset.loading === "true") return;

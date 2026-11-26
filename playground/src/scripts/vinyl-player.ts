@@ -359,7 +359,7 @@ export class VinylPlayerEngine {
         this.trackListEl.innerHTML = `
           <div class="vinyl-loading">
             <span class="vinyl-spinner" aria-hidden="true"></span>
-            <span>正在连接网易云歌单 #${escapeHtml(id)}…</span>
+            <span>正在载入歌单…</span>
           </div>
         `;
       }
@@ -390,7 +390,7 @@ export class VinylPlayerEngine {
           this.currentIdx = 0;
           this.consecutiveErrors = 0;
           if (this.trackCountEl) {
-            this.trackCountEl.textContent = `${parsed.length} 首收录 · #${id}`;
+            this.trackCountEl.textContent = `共 ${parsed.length} 首`;
           }
           this.renderTrackList();
           this.selectTrack(0, false);
@@ -403,10 +403,10 @@ export class VinylPlayerEngine {
       if (this.trackListEl) {
         this.trackListEl.innerHTML = `
           <div class="vinyl-empty">
-            <p>当前公开歌单节点繁忙，可切换为网易云官方播放器或稍后重试。</p>
+            <p>歌单暂时加载缓慢，可以稍后重试或切换网易云原版收听。</p>
             <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
               <button type="button" class="box lbl" data-retry-playlist>重试加载</button>
-              <button type="button" class="box lbl" data-open-iframe>切换官方播放器</button>
+              <button type="button" class="box lbl" data-open-iframe>网易云原版</button>
             </div>
           </div>
         `;
@@ -908,7 +908,7 @@ export class VinylPlayerEngine {
       if (!this.switchInputEl) return;
       const parsed = parsePlaylistInput(this.switchInputEl.value);
       if (!parsed) {
-        this.setStatus("请输入有效的网易云歌单 ID 或歌单链接（如 playlist?id=xxxx）", true);
+        this.setStatus("没识别到有效歌单，请粘贴网易云歌单链接或编号", true);
         return;
       }
       this.sound.clipClick();
@@ -946,7 +946,7 @@ export class VinylPlayerEngine {
       const btn = e.currentTarget as HTMLButtonElement;
       if (this.usingIframeFallback) {
         this.hideIframeFallback();
-        btn.textContent = "官方外链";
+        btn.innerHTML = `<span><span class="hide-xs">网易云</span>原版</span>`;
       } else {
         this.showIframeFallback();
         btn.textContent = "返回唱机";
