@@ -139,6 +139,7 @@ function initStudio(): void {
 
   const clothesline = new ClotheslineEngine(stage, ropeCanvas, sound, {
     onOpenArtifact: (action, sourceEl) => openModal(action, sourceEl),
+    onLayoutChange: wakeMainLoop,
     onCursorState: (mode, top, sub) => {
       if (!activeModal) setCursorState(mode, top, sub);
     },

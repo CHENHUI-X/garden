@@ -20,10 +20,22 @@ interface RopeNode {
 interface RopeLine {
   nodes: RopeNode[];
   segLen: number;
+  geometry: RopeGeometry;
+}
+
+interface RopeGeometry {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+  slack: number;
+  scaleY: number;
+  floor: number;
 }
 
 interface HangingItem {
   el: HTMLElement;
+  button: HTMLElement;
   innerEl: HTMLElement;
   sheenEl: HTMLElement | null;
   action: string;
@@ -66,11 +78,18 @@ interface DustMote {
 
 export interface ClotheslineCallbacks {
   onOpenArtifact: (action: string, sourceEl: HTMLElement) => void;
+  onLayoutChange: () => void;
   onCursorState?: (state: "default" | "rope" | "open" | "book" | "btn", labelTop?: string, labelSub?: string) => void;
   onFirstInteract?: () => void;
 }
 
 const SEGMENTS = 30;
+const DESKTOP_PIN_TOP = 108; // Header, clothespin and a small gap.
+const FOOTER_GAP = 20;
+
+function useTwoRopes(width: number, height: number): boolean {
+  return width <= 767 && (height >= width || height >= 600);
+}
 
 export class ClotheslineEngine {
   private stage: HTMLElement;
@@ -85,6 +104,7 @@ export class ClotheslineEngine {
   private isMobile = false;
   private width = 1440;
   private height = 900;
+  private readonly footer = document.querySelector<HTMLElement>(".bottom-strip")!;
   private dpr = 1;
   private time = 0;
   private isDark = false;
@@ -142,6 +162,12 @@ export class ClotheslineEngine {
     this.collectItems();
     this.setupLayout();
     this.bindEvents();
+    const observer = new ResizeObserver(() => {
+      this.resizePending = true;
+      this.cb.onLayoutChange();
+    });
+    observer.observe(this.footer, { box: "border-box" });
+    for (const item of this.items) observer.observe(item.button, { box: "border-box" });
   }
 
   public syncTheme(): void {
@@ -158,7 +184,7 @@ export class ClotheslineEngine {
     for (const rope of this.ropes) {
       for (let i = 2; i < rope.nodes.length - 2; i++) {
         const n = rope.nodes[i];
-        n.oy -= Math.sin((i / rope.nodes.length) * Math.PI) * 3.6 * strength;
+        n.oy -= Math.sin((i / rope.nodes.length) * Math.PI) * 3.6 * strength * rope.geometry.scaleY;
         n.ox -= 1.3 * strength;
       }
     }
@@ -191,9 +217,9 @@ export class ClotheslineEngine {
     const mobileMap = [
       { rope: 0, node: 9 },
       { rope: 0, node: 21 },
-      { rope: 1, node: 5 },
+      { rope: 1, node: 6 },
       { rope: 1, node: 15 },
-      { rope: 1, node: 25 },
+      { rope: 1, node: 24 },
     ];
     const baseTilts = [-2.2, 0.6, -1.5, 1.8, -2.0];
     const weights = [1.35, 2.0, 1.35, 1.3, 1.45];
@@ -204,6 +230,7 @@ export class ClotheslineEngine {
       const m = mobileMap[idx] || { rope: 0, node: 13 };
       this.items.push({
         el,
+        button: el.querySelector<HTMLElement>(".hanger-btn")!,
         innerEl,
         sheenEl,
         action: el.dataset.action || "book",
@@ -236,17 +263,18 @@ export class ClotheslineEngine {
     });
   }
 
-  private buildRope(startX: number, startY: number, endX: number, endY: number, slackFactor: number): RopeLine {
+  private buildRope(geometry: RopeGeometry): RopeLine {
+    const { x0: startX, y0: startY, x1: endX, y1: endY, slack, scaleY } = geometry;
     const nodes: RopeNode[] = [];
     const totalDx = endX - startX;
     const totalDy = endY - startY;
-    const straightDist = Math.hypot(totalDx, totalDy);
-    const segLen = (straightDist * slackFactor) / SEGMENTS;
+    const straightDist = Math.hypot(totalDx, totalDy / scaleY);
+    const segLen = (straightDist * slack) / SEGMENTS;
 
     for (let i = 0; i <= SEGMENTS; i++) {
       const t = i / SEGMENTS;
       const x = startX + totalDx * t;
-      const sag = Math.sin(t * Math.PI) * (this.isMobile ? 18 : 48);
+      const sag = Math.sin(t * Math.PI) * (this.isMobile ? 18 : 48) * scaleY;
       const y = startY + totalDy * t + sag;
       nodes.push({
         x,
@@ -258,43 +286,66 @@ export class ClotheslineEngine {
       });
     }
 
-    return { nodes, segLen };
+    return { nodes, segLen, geometry };
   }
 
-  private getRopeGeometry(w: number, h: number, mobile: boolean): Array<{ x0: number; y0: number; x1: number; y1: number; slack: number }> {
+  private layoutRopes(w: number, h: number, mobile: boolean): RopeGeometry[] {
+    // An item's lower corners rotate around its top midpoint. Measure before transforms and entrance animations.
+    const rowDepths = [0, 0];
+    let widest = 0;
+    for (const { button, mobileRope } of this.items) {
+      const width = button.offsetWidth;
+      const row = mobile ? mobileRope : 0;
+      rowDepths[row] = Math.max(rowDepths[row], Math.hypot(button.offsetHeight, width / 2));
+      widest = Math.max(widest, width);
+    }
+    const footerTop = h - this.footer.offsetHeight;
     if (mobile) {
-      const pad = 12;
-      const topReserve = 56;
-      const bottomReserve = h <= 620 ? 48 : 74;
-      const usable = Math.max(360, h - topReserve - bottomReserve);
-      const y1 = Math.round(topReserve + Math.min(34, Math.max(12, usable * 0.048)));
-      const minRowGap = h <= 700 ? 196 : 232;
-      const maxRowGap = 290;
-      const targetY2 = y1 + Math.min(maxRowGap, Math.max(minRowGap, Math.round(usable * 0.49)));
-      const y2 = Math.round(Math.min(h - bottomReserve - 196, targetY2));
+      const [topDepth, lowerDepth] = rowDepths;
+      const usable = Math.max(360, footerTop - 56);
+      const y1 = Math.round(56 + Math.min(34, Math.max(12, usable * .048)));
+      const swingRoom = Math.min(36, h * .04);
+      const rowGap = 28; // Clearance for the lower row's clothespins.
+      const zoom = Math.max(.1, Math.min(1, (footerTop - y1 - rowGap - FOOTER_GAP - 2 * swingRoom) / (topDepth + lowerDepth)));
+      this.stage.style.setProperty("--hanger-zoom", String(zoom));
+      const lowerFloor = Math.floor(footerTop - FOOTER_GAP - lowerDepth * zoom);
+      const rowSpacing = Math.min(290, Math.max(topDepth * zoom + rowGap + swingRoom, usable * .49));
+      const y2 = Math.round(Math.min(lowerFloor - swingRoom, y1 + rowSpacing));
       return [
-        { x0: pad, y0: y1, x1: w - pad, y1: y1 + 3, slack: 1.012 },
-        { x0: pad, y0: y2 + 3, x1: w - pad, y1: y2 - 2, slack: 1.012 },
+        { x0: 12, y0: y1, x1: w - 12, y1: y1 + 3, slack: 1.012, scaleY: 1, floor: y2 - rowGap - topDepth * zoom },
+        { x0: 20, y0: y2 + 3, x1: w - 20, y1: y2 - 2, slack: 1.012, scaleY: 1, floor: lowerFloor },
       ];
     }
     const pad = 32;
+    const span = w - 2 * pad;
+    const depth = rowDepths[0];
+    const swingRoom = Math.min(w * .06, h * .10);
+    const heightFit = (footerTop - DESKTOP_PIN_TOP - swingRoom - FOOTER_GAP) / depth;
+    const closestPins = span * 5 / SEGMENTS;
+    const zoom = Math.max(.1, Math.min(1, heightFit, closestPins / widest));
+    this.stage.style.setProperty("--hanger-zoom", String(zoom));
+    const floor = Math.floor(footerTop - depth * zoom - FOOTER_GAP);
     const yLeft = Math.max(138, h * 0.245);
     const yRight = Math.max(150, h * 0.262);
-    return [{ x0: pad, y0: yLeft, x1: w - pad, y1: yRight, slack: 1.036 }];
+    const slack = 1.036;
+    const sag = span / 2 * Math.sqrt(slack * slack - 1);
+    const lift = Math.min(yLeft - DESKTOP_PIN_TOP, Math.max(0, yRight + sag - floor));
+    const scaleY = Math.max(.05, Math.min(1, (floor - yRight + lift) / sag));
+    return [{ x0: pad, y0: yLeft - lift, x1: w - pad, y1: yRight - lift, slack, scaleY, floor }];
   }
 
   private setupLayout(preserveDisplayPos = false): void {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    this.isMobile = this.width <= 767;
+    this.isMobile = useTwoRopes(this.width, this.height);
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     this.canvas.width = Math.floor(this.width * this.dpr);
     this.canvas.height = Math.floor(this.height * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
 
-    const specs = this.getRopeGeometry(this.width, this.height, this.isMobile);
-    this.ropes = specs.map((sp) => this.buildRope(sp.x0, sp.y0, sp.x1, sp.y1, sp.slack));
+    const specs = this.layoutRopes(this.width, this.height, this.isMobile);
+    this.ropes = specs.map((sp) => this.buildRope(sp));
 
     for (const item of this.items) {
       const ropeIdx = this.isMobile ? item.mobileRope : 0;
@@ -306,6 +357,8 @@ export class ClotheslineEngine {
         if (!preserveDisplayPos) {
           item.dispX = Number.NaN;
           item.dispY = Number.NaN;
+        } else {
+          item.dispY = Math.min(item.dispY, rope.geometry.floor);
         }
       }
     }
@@ -460,20 +513,24 @@ export class ClotheslineEngine {
     this.resizePending = false;
     const newW = window.innerWidth;
     const newH = window.innerHeight;
-    const newMobile = newW <= 767;
+    const newMobile = useTwoRopes(newW, newH);
     const newDpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    if (newW === this.width && newH === this.height && newDpr === this.dpr) return;
-
-    // Crossing 767px (1 rope <-> 2 ropes): lightweight rebuild + brief 260ms card glide into new tier
+    // Preserve relative screen positions while cards glide between one and two ropes.
     if (newMobile !== this.isMobile || this.ropes.length === 0) {
+      for (const item of this.items) {
+        item.dispX *= newW / this.width;
+        item.dispY *= newH / this.height;
+      }
       this.tierGlideUntil = performance.now() + 260;
       this.setupLayout(true);
       return;
     }
 
-    const oldSpecs = this.getRopeGeometry(this.width, this.height, this.isMobile);
-    const newSpecs = this.getRopeGeometry(newW, newH, newMobile);
+    const viewportChanged = newW !== this.width || newH !== this.height || newDpr !== this.dpr;
+    const newSpecs = this.layoutRopes(newW, newH, newMobile);
+    if (!viewportChanged &&
+        newSpecs.every((sp, i) => sp.floor === this.ropes[i].geometry.floor && sp.y0 === this.ropes[i].geometry.y0)) return;
 
     this.width = newW;
     this.height = newH;
@@ -490,18 +547,17 @@ export class ClotheslineEngine {
     // Proportionally stretch/shrink existing Verlet nodes without resetting physics momentum
     for (let r = 0; r < this.ropes.length; r++) {
       const rope = this.ropes[r];
-      const oldSp = oldSpecs[r];
+      const oldSp = rope.geometry;
       const newSp = newSpecs[r];
-      if (!oldSp || !newSp) continue;
 
       const oldSpanX = Math.max(1, oldSp.x1 - oldSp.x0);
       const newSpanX = Math.max(1, newSp.x1 - newSp.x0);
       const scaleX = newSpanX / oldSpanX;
       const oldMidY = (oldSp.y0 + oldSp.y1) * 0.5;
       const newMidY = (newSp.y0 + newSp.y1) * 0.5;
-      const dyBase = newMidY - oldMidY;
-
-      rope.segLen = (Math.hypot(newSp.x1 - newSp.x0, newSp.y1 - newSp.y0) * newSp.slack) / SEGMENTS;
+      const scaleY = newSp.scaleY / oldSp.scaleY;
+      rope.geometry = newSp;
+      rope.segLen = (Math.hypot(newSp.x1 - newSp.x0, (newSp.y1 - newSp.y0) / newSp.scaleY) * newSp.slack) / SEGMENTS;
 
       const nodes = rope.nodes;
       for (let i = 0; i < nodes.length; i++) {
@@ -515,8 +571,8 @@ export class ClotheslineEngine {
         } else {
           n.x = newSp.x0 + (n.x - oldSp.x0) * scaleX;
           n.ox = newSp.x0 + (n.ox - oldSp.x0) * scaleX;
-          n.y += dyBase;
-          n.oy += dyBase;
+          n.y = newMidY + (n.y - oldMidY) * scaleY;
+          n.oy = newMidY + (n.oy - oldMidY) * scaleY;
         }
       }
     }
@@ -536,7 +592,7 @@ export class ClotheslineEngine {
     for (let s = 0; s < 3; s++) {
       this.stepPhysics(0.016, false);
     }
-    this.rebuildDotGrid();
+    if (viewportChanged) this.rebuildDotGrid();
     if (this.reducedMotion) {
       this.renderDOM(1);
       this.renderCanvas(performance.now());
@@ -593,7 +649,7 @@ export class ClotheslineEngine {
           if (n && !n.pinned) {
             const minY = this.isMobile ? 66 : 92;
             const maxPullY = this.isMobile ? 80 : 120;
-            const targetY = Math.max(minY, Math.min(this.height - 140, this.py));
+            const targetY = Math.max(minY, Math.min(rope.geometry.floor, this.py));
             const dxPull = (this.px - n.x) * 0.32;
             const dyPull = (Math.min(targetY, n.y + maxPullY) - n.y) * 0.42;
             n.x += dxPull;
@@ -703,7 +759,7 @@ export class ClotheslineEngine {
     });
 
     for (const item of this.items) {
-      const btn = item.el.querySelector<HTMLElement>(".hanger-btn");
+      const btn = item.button;
 
       item.el.addEventListener("pointerenter", () => {
         if (this.paused) return;
@@ -757,7 +813,7 @@ export class ClotheslineEngine {
         this.activeHanger = item;
       });
 
-      btn?.addEventListener("click", (e) => {
+      btn.addEventListener("click", (e) => {
         if (this.paused) return;
         if ((e.target as HTMLElement).closest("[data-mini-toggle]")) return;
         if (performance.now() < this.suppressClickUntil) {
@@ -823,11 +879,12 @@ export class ClotheslineEngine {
         }
 
         n.x += vx + windX;
-        n.y += vy + gravity * n.mass + windY;
+        n.y += vy + gravity * n.mass * rope.geometry.scaleY + windY * rope.geometry.scaleY;
       }
 
       const minY = this.isMobile ? 64 : 88;
-      const maxY = this.height - 130;
+      const maxY = rope.geometry.floor;
+      const unitsPerPixelY = 1 / rope.geometry.scaleY;
 
       // 8 iterations with fast Math.sqrt gives crisp taut linen at minimal CPU cost
       for (let iter = 0; iter < 8; iter++) {
@@ -836,7 +893,9 @@ export class ClotheslineEngine {
           const p2 = nodes[i + 1];
           const dx = p2.x - p1.x;
           const dy = p2.y - p1.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 0.0001;
+          // Measure tension in rope coordinates so a shallow viewport still shows a curved, moving line.
+          const ropeDy = dy * unitsPerPixelY;
+          const dist = Math.sqrt(dx * dx + ropeDy * ropeDy) || 0.0001;
           const diff = (rope.segLen - dist) / dist;
 
           if (!p1.pinned && !p2.pinned) {

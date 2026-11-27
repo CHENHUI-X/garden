@@ -651,6 +651,7 @@ html.dark .ghost-word {
 }
 
 .hanger-btn {
+  zoom: var(--hanger-zoom, 1);
   position: relative;
   display: block;
   padding-top: 16px;
@@ -5337,12 +5338,6 @@ html.dark .pin-waline-slot .wl-panel {
 
   .hang-tag {
     margin-top: 5px;
-  }
-}
-
-@media (max-width: 767px) and (max-height: 620px) {
-  .motto-block {
-    display: none;
   }
 }
 
