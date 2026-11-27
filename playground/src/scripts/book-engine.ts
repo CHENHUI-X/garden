@@ -196,8 +196,18 @@ export class BookEngine {
 
       const paragraphs = container.querySelectorAll("p");
       const lastParagraph = paragraphs[paragraphs.length - 1];
-      if (lastParagraph && /^(——|---|\-\-)\s*/.test((lastParagraph.textContent || "").trim())) {
-        lastParagraph.classList.add("article-signoff");
+      if (lastParagraph) {
+        const rawSignoff = (lastParagraph.textContent || "").trim();
+        const isDashSignoff = /^(——|---|--)\s*/.test(rawSignoff);
+        const isDateSignoff =
+          rawSignoff.length <= 36 &&
+          /^(于\s*)?20\d{2}\s*(?:年|[.\-/])\s*\d{1,2}\s*(?:月|[.\-/])?/.test(rawSignoff);
+        if (isDashSignoff || isDateSignoff) {
+          if (isDashSignoff) {
+            lastParagraph.textContent = rawSignoff.replace(/^(——|---|--)\s*/, "");
+          }
+          lastParagraph.classList.add("article-signoff");
+        }
       }
       const charCount = Number(tpl.dataset.chars || "0");
       this.totalChars += charCount;
@@ -289,7 +299,7 @@ export class BookEngine {
           html: this.wrapBookPage(
             partIdx === 0 ? "CHENHUI · 随想录" : post.title,
             post.published,
-            chunkHtml + (isLastPart ? `<div class="end-divider" style="margin-top:16px">— 本篇终 —</div>` : ""),
+            chunkHtml + (isLastPart ? `<div class="end-divider"><span>本篇终</span></div>` : ""),
             folio,
             `${partIdx + 1} / ${chunks.length}`
           ),
