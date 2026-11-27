@@ -884,7 +884,11 @@ export class BookEngine {
       `<div class="corner-peel corner-peel-left ${canPrev ? "enabled" : ""}" aria-hidden="true"></div>`;
     this.rightSlot.innerHTML =
       (right?.html || "") +
+      (this.isMobile && canPrev
+        ? `<div class="corner-peel corner-peel-left enabled" aria-hidden="true"></div>`
+        : "") +
       `<div class="corner-peel corner-peel-right ${canNext && !isClosed ? "enabled" : ""}" aria-hidden="true"></div>`;
+    this.rightSlot.classList.remove("is-hover-left", "is-hover-right");
 
     this.prevBtn.disabled = !canPrev;
     this.nextBtn.disabled = !canNext;
@@ -1731,25 +1735,58 @@ export class BookEngine {
       }
     });
 
-    // Click right/left half of book to flip (ignoring buttons, links, photos, drags & text selection)
+    const interactiveSelector =
+      "button, a, input, textarea, label, #book-waline-mount, .wl-panel, .wl-reaction, .book-figure, .page-body img";
+
+    // Click right/left side of book to flip (desktop: left page = prev, right page = next;
+    // mobile single-page: left 45% = prev, right 55% incl. bottom-right = next)
     this.rightSlot.addEventListener("click", (e) => {
       if (performance.now() < this.justDraggedUntil) return;
-      if ((e.target as HTMLElement).closest("button, a, #book-waline-mount, .book-figure, .page-body img")) return;
+      if ((e.target as HTMLElement).closest(interactiveSelector)) return;
       if (window.getSelection()?.toString()) return;
+      if (this.isMobile) {
+        const rect = this.rightSlot.getBoundingClientRect();
+        const relX = rect.width > 0 ? (e.clientX - rect.left) / rect.width : 1;
+        if (relX < 0.45) {
+          if (this.spreadIndex > 0) this.step(-1);
+        } else if (this.spreadIndex < this.totalSpreads() - 1) {
+          this.step(1);
+        }
+        return;
+      }
       if (this.spreadIndex < this.totalSpreads() - 1) this.step(1);
     });
 
     this.leftSlot.addEventListener("click", (e) => {
       if (performance.now() < this.justDraggedUntil) return;
-      if ((e.target as HTMLElement).closest("button, a, .book-figure, .page-body img")) return;
+      if ((e.target as HTMLElement).closest(interactiveSelector)) return;
       if (window.getSelection()?.toString()) return;
       if (this.spreadIndex > 0) this.step(-1);
+    });
+
+    // Hover feedback for single-page narrow/mobile mode: lift bottom-left peel on left side, bottom-right on right side
+    this.rightSlot.addEventListener(
+      "pointermove",
+      (e) => {
+        if (!this.isMobile || e.pointerType === "touch") return;
+        const rect = this.rightSlot.getBoundingClientRect();
+        const relX = rect.width > 0 ? (e.clientX - rect.left) / rect.width : 1;
+        const overLeft = relX < 0.45 && this.spreadIndex > 0;
+        const overRight = !overLeft && this.spreadIndex < this.totalSpreads() - 1;
+        this.rightSlot.classList.toggle("is-hover-left", overLeft);
+        this.rightSlot.classList.toggle("is-hover-right", overRight);
+      },
+      { passive: true }
+    );
+
+    this.rightSlot.addEventListener("pointerleave", () => {
+      this.rightSlot.classList.remove("is-hover-left", "is-hover-right");
     });
 
     // Real-time Drag / Touch Swipe to peel flexible paper corner live under pointer!
     this.stage.addEventListener("pointerdown", (e) => {
       if (this.isTurning || this.reducedMotion) return;
-      if ((e.target as HTMLElement).closest("button, a, #book-waline-mount, .toc-entry, .book-figure, .page-body img")) return;
+      if ((e.target as HTMLElement).closest("button, a, input, textarea, #book-waline-mount, .toc-entry, .book-figure, .page-body img")) return;
       this.dragActive = true;
       this.dragDir = 0;
       this.dragStartX = e.clientX;
@@ -1763,7 +1800,7 @@ export class BookEngine {
       const dx = e.clientX - this.dragStartX;
       const dy = e.clientY - this.dragStartY;
       if (this.dragDir === 0) {
-        if (Math.abs(dx) < 14 || Math.abs(dy) > Math.abs(dx) * 1.35) return;
+        if (Math.abs(dx) < 18 || Math.abs(dy) > Math.abs(dx) * 1.35) return;
         const wantedDir: 1 | -1 = dx < 0 ? 1 : -1;
         const target = this.spreadIndex + wantedDir;
         if (target < 0 || target >= this.totalSpreads()) {

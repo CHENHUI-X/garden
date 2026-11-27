@@ -2494,9 +2494,18 @@ html.dark .book-edge-right {
 }
 
 .book-slot-right:hover .corner-peel-right.enabled,
-.book-slot-left:hover .corner-peel-left.enabled {
+.book-slot-left:hover .corner-peel-left.enabled,
+.book-slot-right.is-hover-left .corner-peel-left.enabled,
+.book-slot-right.is-hover-right .corner-peel-right.enabled {
   opacity: 1;
   transform: scale(1);
+}
+
+@media (max-width: 767px) {
+  .book-slot-right:hover:not(.is-hover-right) .corner-peel-right.enabled {
+    opacity: 0;
+    transform: scale(0.45);
+  }
 }
 
 /* Rigid hardcover cover board never shows a white interior paper corner curl */
