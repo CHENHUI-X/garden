@@ -29,7 +29,6 @@ interface RopeGeometry {
   x1: number;
   y1: number;
   slack: number;
-  scaleY: number;
   floor: number;
 }
 
@@ -184,7 +183,7 @@ export class ClotheslineEngine {
     for (const rope of this.ropes) {
       for (let i = 2; i < rope.nodes.length - 2; i++) {
         const n = rope.nodes[i];
-        n.oy -= Math.sin((i / rope.nodes.length) * Math.PI) * 3.6 * strength * rope.geometry.scaleY;
+        n.oy -= Math.sin((i / rope.nodes.length) * Math.PI) * 3.6 * strength;
         n.ox -= 1.3 * strength;
       }
     }
@@ -217,9 +216,9 @@ export class ClotheslineEngine {
     const mobileMap = [
       { rope: 0, node: 9 },
       { rope: 0, node: 21 },
-      { rope: 1, node: 6 },
+      { rope: 1, node: 5 },
       { rope: 1, node: 15 },
-      { rope: 1, node: 24 },
+      { rope: 1, node: 25 },
     ];
     const baseTilts = [-2.2, 0.6, -1.5, 1.8, -2.0];
     const weights = [1.35, 2.0, 1.35, 1.3, 1.45];
@@ -264,17 +263,17 @@ export class ClotheslineEngine {
   }
 
   private buildRope(geometry: RopeGeometry): RopeLine {
-    const { x0: startX, y0: startY, x1: endX, y1: endY, slack, scaleY } = geometry;
+    const { x0: startX, y0: startY, x1: endX, y1: endY, slack } = geometry;
     const nodes: RopeNode[] = [];
     const totalDx = endX - startX;
     const totalDy = endY - startY;
-    const straightDist = Math.hypot(totalDx, totalDy / scaleY);
+    const straightDist = Math.hypot(totalDx, totalDy);
     const segLen = (straightDist * slack) / SEGMENTS;
 
     for (let i = 0; i <= SEGMENTS; i++) {
       const t = i / SEGMENTS;
       const x = startX + totalDx * t;
-      const sag = Math.sin(t * Math.PI) * (this.isMobile ? 18 : 48) * scaleY;
+      const sag = Math.sin(t * Math.PI) * (this.isMobile ? 18 : 48);
       const y = startY + totalDy * t + sag;
       nodes.push({
         x,
@@ -291,47 +290,55 @@ export class ClotheslineEngine {
 
   private layoutRopes(w: number, h: number, mobile: boolean): RopeGeometry[] {
     // An item's lower corners rotate around its top midpoint. Measure before transforms and entrance animations.
-    const rowDepths = [0, 0];
-    let widest = 0;
-    for (const { button, mobileRope } of this.items) {
+    const cards = this.items.map(({ button, mobileRope, desktopNode }) => {
       const width = button.offsetWidth;
-      const row = mobile ? mobileRope : 0;
-      rowDepths[row] = Math.max(rowDepths[row], Math.hypot(button.offsetHeight, width / 2));
-      widest = Math.max(widest, width);
-    }
+      return { width, depth: Math.hypot(button.offsetHeight, width / 2), row: mobileRope, t: desktopNode / SEGMENTS };
+    });
+    const widest = Math.max(...cards.map(card => card.width));
     const footerTop = h - this.footer.offsetHeight;
     if (mobile) {
-      const [topDepth, lowerDepth] = rowDepths;
+      const rowDepth = (row: number) => Math.max(...cards.filter(card => card.row === row).map(card => card.depth));
+      const topDepth = rowDepth(0);
+      const lowerDepth = rowDepth(1);
       const usable = Math.max(360, footerTop - 56);
       const y1 = Math.round(56 + Math.min(34, Math.max(12, usable * .048)));
-      const swingRoom = Math.min(36, h * .04);
-      const rowGap = 28; // Clearance for the lower row's clothespins.
-      const zoom = Math.max(.1, Math.min(1, (footerTop - y1 - rowGap - FOOTER_GAP - 2 * swingRoom) / (topDepth + lowerDepth)));
+      const rowGap = 28; // Clothespins extend above each rope.
+      const sagRoom = (w - 24) * .15 + 18;
+      // Both rows sag together. Only their difference in height needs space between the cards.
+      const rowDrift = sagRoom * .12;
+      const available = footerTop - FOOTER_GAP - y1;
+      const zoom = Math.max(.1, Math.min(1, (available - sagRoom - rowDrift - rowGap) / (topDepth + lowerDepth)));
       this.stage.style.setProperty("--hanger-zoom", String(zoom));
-      const lowerFloor = Math.floor(footerTop - FOOTER_GAP - lowerDepth * zoom);
-      const rowSpacing = Math.min(290, Math.max(topDepth * zoom + rowGap + swingRoom, usable * .49));
-      const y2 = Math.round(Math.min(lowerFloor - swingRoom, y1 + rowSpacing));
+      const lowerFloor = footerTop - FOOTER_GAP - lowerDepth * zoom;
+      const rowSpacing = Math.max(topDepth * zoom + rowGap + rowDrift, Math.min(290, usable * .49));
+      const y2 = Math.round(Math.min(y1 + rowSpacing, lowerFloor - sagRoom));
+      const lowerPad = Math.max(12, widest * zoom * .5 + 46 - w / 6);
       return [
-        { x0: 12, y0: y1, x1: w - 12, y1: y1 + 3, slack: 1.012, scaleY: 1, floor: y2 - rowGap - topDepth * zoom },
-        { x0: 20, y0: y2 + 3, x1: w - 20, y1: y2 - 2, slack: 1.012, scaleY: 1, floor: lowerFloor },
+        { x0: 12, y0: y1, x1: w - 12, y1: y1 + 3, slack: 1.012, floor: y2 - rowGap },
+        { x0: lowerPad, y0: y2 + 3, x1: w - lowerPad, y1: y2 - 2, slack: 1.012, floor: lowerFloor },
       ];
     }
-    const pad = 32;
-    const span = w - 2 * pad;
-    const depth = rowDepths[0];
-    const swingRoom = Math.min(w * .06, h * .10);
-    const heightFit = (footerTop - DESKTOP_PIN_TOP - swingRoom - FOOTER_GAP) / depth;
-    const closestPins = span * 5 / SEGMENTS;
-    const zoom = Math.max(.1, Math.min(1, heightFit, closestPins / widest));
+    const yLeft = Math.max(138, h * .245);
+    const yRight = Math.max(150, h * .262);
+    const pinTop = Math.min(DESKTOP_PIN_TOP, footerTop * .24);
+    const available = footerTop - FOOTER_GAP - pinTop - (yRight - yLeft);
+    const depth = Math.max(...cards.map(card => card.depth));
+    // A short landscape window needs room for both the swing and legible cards between pins.
+    const pinSpacing = widest * SEGMENTS / 5;
+    const compactZoom = Math.max(.1, Math.min(.5, (available - 40) / (depth + .19 * pinSpacing)));
+    const span = Math.min(w - 64, Math.max(1, (available - 40 - depth * compactZoom) / .19));
+    const pad = (w - span) / 2;
+    const sagRoom = span * .19 + 40;
+    // The envelope is only for placing the anchors. The physics engine draws every frame.
+    const swings = cards.map(({ t }) => sagRoom * 4 * t * (1 - t));
+    const zoom = Math.max(.1, Math.min(1, span / pinSpacing,
+      ...cards.map((card, i) => (available - swings[i]) / card.depth)));
     this.stage.style.setProperty("--hanger-zoom", String(zoom));
-    const floor = Math.floor(footerTop - depth * zoom - FOOTER_GAP);
-    const yLeft = Math.max(138, h * 0.245);
-    const yRight = Math.max(150, h * 0.262);
-    const slack = 1.036;
-    const sag = span / 2 * Math.sqrt(slack * slack - 1);
-    const lift = Math.min(yLeft - DESKTOP_PIN_TOP, Math.max(0, yRight + sag - floor));
-    const scaleY = Math.max(.05, Math.min(1, (floor - yRight + lift) / sag));
-    return [{ x0: pad, y0: yLeft - lift, x1: w - pad, y1: yRight - lift, slack, scaleY, floor }];
+    const bottom = Math.max(...cards.map((card, i) =>
+      yLeft + (yRight - yLeft) * card.t + swings[i] + card.depth * zoom));
+    const lift = Math.min(yLeft - pinTop, Math.max(0, bottom + FOOTER_GAP - footerTop));
+    const floor = footerTop - FOOTER_GAP - depth * zoom;
+    return [{ x0: pad, y0: yLeft - lift, x1: w - pad, y1: yRight - lift, slack: 1.036, floor }];
   }
 
   private setupLayout(preserveDisplayPos = false): void {
@@ -529,8 +536,10 @@ export class ClotheslineEngine {
 
     const viewportChanged = newW !== this.width || newH !== this.height || newDpr !== this.dpr;
     const newSpecs = this.layoutRopes(newW, newH, newMobile);
-    if (!viewportChanged &&
-        newSpecs.every((sp, i) => sp.floor === this.ropes[i].geometry.floor && sp.y0 === this.ropes[i].geometry.y0)) return;
+    if (!viewportChanged && newSpecs.every((sp, i) => {
+      const prev = this.ropes[i].geometry;
+      return sp.floor === prev.floor && sp.y0 === prev.y0 && sp.x0 === prev.x0;
+    })) return;
 
     this.width = newW;
     this.height = newH;
@@ -555,9 +564,9 @@ export class ClotheslineEngine {
       const scaleX = newSpanX / oldSpanX;
       const oldMidY = (oldSp.y0 + oldSp.y1) * 0.5;
       const newMidY = (newSp.y0 + newSp.y1) * 0.5;
-      const scaleY = newSp.scaleY / oldSp.scaleY;
+      const dyBase = newMidY - oldMidY;
       rope.geometry = newSp;
-      rope.segLen = (Math.hypot(newSp.x1 - newSp.x0, (newSp.y1 - newSp.y0) / newSp.scaleY) * newSp.slack) / SEGMENTS;
+      rope.segLen = (Math.hypot(newSp.x1 - newSp.x0, newSp.y1 - newSp.y0) * newSp.slack) / SEGMENTS;
 
       const nodes = rope.nodes;
       for (let i = 0; i < nodes.length; i++) {
@@ -571,8 +580,8 @@ export class ClotheslineEngine {
         } else {
           n.x = newSp.x0 + (n.x - oldSp.x0) * scaleX;
           n.ox = newSp.x0 + (n.ox - oldSp.x0) * scaleX;
-          n.y = newMidY + (n.y - oldMidY) * scaleY;
-          n.oy = newMidY + (n.oy - oldMidY) * scaleY;
+          n.y += dyBase;
+          n.oy += dyBase;
         }
       }
     }
@@ -589,10 +598,10 @@ export class ClotheslineEngine {
     }
 
     // Brief 3-pass tension settle for crisp tautness during live window drag
-    for (let s = 0; s < 3; s++) {
-      this.stepPhysics(0.016, false);
+    if (viewportChanged) {
+      for (let s = 0; s < 3; s++) this.stepPhysics(0.016, false);
+      this.rebuildDotGrid();
     }
-    if (viewportChanged) this.rebuildDotGrid();
     if (this.reducedMotion) {
       this.renderDOM(1);
       this.renderCanvas(performance.now());
@@ -879,12 +888,11 @@ export class ClotheslineEngine {
         }
 
         n.x += vx + windX;
-        n.y += vy + gravity * n.mass * rope.geometry.scaleY + windY * rope.geometry.scaleY;
+        n.y += vy + gravity * n.mass + windY;
       }
 
       const minY = this.isMobile ? 64 : 88;
-      const maxY = rope.geometry.floor;
-      const unitsPerPixelY = 1 / rope.geometry.scaleY;
+      const maxY = this.height - 130;
 
       // 8 iterations with fast Math.sqrt gives crisp taut linen at minimal CPU cost
       for (let iter = 0; iter < 8; iter++) {
@@ -893,9 +901,7 @@ export class ClotheslineEngine {
           const p2 = nodes[i + 1];
           const dx = p2.x - p1.x;
           const dy = p2.y - p1.y;
-          // Measure tension in rope coordinates so a shallow viewport still shows a curved, moving line.
-          const ropeDy = dy * unitsPerPixelY;
-          const dist = Math.sqrt(dx * dx + ropeDy * ropeDy) || 0.0001;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 0.0001;
           const diff = (rope.segLen - dist) / dist;
 
           if (!p1.pinned && !p2.pinned) {
