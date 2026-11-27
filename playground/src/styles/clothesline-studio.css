@@ -426,11 +426,6 @@ html.dark .box {
   min-width: 0;
 }
 
-.portal-back-btn {
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -526,6 +521,57 @@ html.dark .box {
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.08em;
+}
+
+.top-ctrl-sep {
+  width: 1px;
+  height: 15px;
+  background: var(--rule);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.portal-btn {
+  border-color: rgba(22, 21, 19, 0.24);
+  background: linear-gradient(135deg, rgba(22, 21, 19, 0.04), rgba(200, 75, 49, 0.06));
+  color: var(--ink);
+  gap: 5px;
+  padding: 0 11px 0 9px;
+}
+
+html.dark .portal-btn {
+  border-color: rgba(235, 229, 218, 0.26);
+  background: linear-gradient(135deg, rgba(235, 229, 218, 0.08), rgba(224, 108, 82, 0.1));
+  color: var(--ink);
+}
+
+.portal-btn .portal-mark-svg {
+  width: 14px;
+  height: 14px;
+}
+
+.portal-btn .portal-arrow {
+  width: 10px;
+  height: 10px;
+  opacity: 0.55;
+  transition: transform 0.24s var(--ease-expo), opacity 0.2s var(--ease);
+}
+
+.portal-btn:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 4px 14px rgba(22, 21, 19, 0.16);
+  transform: translateY(-1px);
+}
+
+html.dark .portal-btn:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.portal-btn:hover .portal-arrow {
+  opacity: 0.95;
+  transform: translate(1.5px, -1.5px);
 }
 
 /* ============================================================================
@@ -4591,7 +4637,8 @@ html.dark .pin-waline-slot .wl-panel {
 
 /* Prevent topbar right-edge button clipping on narrow desktop / split windows */
 @media (max-width: 1000px) and (min-width: 768px) {
-  .top-controls .ctrl-label {
+  .top-controls .ctrl-label,
+  .top-controls .portal-arrow {
     display: none;
   }
 
@@ -4738,25 +4785,24 @@ html.dark .pin-waline-slot .wl-panel {
     padding-left: 0;
   }
 
-  .ctrl-label {
+  .ctrl-label,
+  .portal-arrow {
     display: none;
   }
 
-  .ctrl-btn {
-    min-width: 34px;
-    height: 34px;
-    padding: 0;
+  .top-ctrl-sep {
+    height: 12px;
+    margin: 0 1px;
   }
 
-  .portal-back-btn {
-    height: 32px;
-    padding: 0 10px;
+  .top-controls {
     gap: 4px;
   }
 
-  .portal-back-btn .ctrl-label {
-    display: inline;
-    font-size: 11px;
+  .ctrl-btn {
+    min-width: 31px;
+    height: 31px;
+    padding: 0;
   }
 
   .ghost-word {
