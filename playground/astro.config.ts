@@ -4,7 +4,7 @@ import charm from "./charm.theme.ts";
 
 export default defineConfig({
   prefetch: true,
-  site: "https://haibarai.dpdns.org/",
+  site: "https://life.xuchenhui.cc/",
   output: "static",
   server: { port: 4322 },
   integrations: [

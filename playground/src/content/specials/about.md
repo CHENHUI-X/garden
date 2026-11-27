@@ -37,7 +37,8 @@ index: 10
 - GitHub: [CHENHUI-X](https://github.com/CHENHUI-X)
 - Bilibili: [空间](https://space.bilibili.com/294132471)
 - Email: [chenhui2422.xu@gmail.com](mailto:chenhui2422.xu@gmail.com)
-- 技术博客: [xuchenhui.cc](https://xuchenhui.cc/)
+- 技术博客: [tech.xuchenhui.cc](https://tech.xuchenhui.cc/)
+- 门厅入口: [xuchenhui.cc](https://xuchenhui.cc/)
 
 ---
 
