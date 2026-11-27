@@ -73,6 +73,45 @@ function parseLrc(raw: string): LyricLine[] {
   return lines.sort((a, b) => a.time - b.time);
 }
 
+const PLAY_POLY_A: readonly [number, number][] = [
+  [4.2, 2.6],
+  [8.9, 5.35],
+  [8.9, 10.65],
+  [4.2, 13.4],
+];
+const PLAY_POLY_B: readonly [number, number][] = [
+  [8.6, 5.2],
+  [13.4, 8.0],
+  [13.4, 8.0],
+  [8.6, 10.8],
+];
+const PAUSE_POLY_A: readonly [number, number][] = [
+  [3.5, 2.8],
+  [6.7, 2.8],
+  [6.7, 13.2],
+  [3.5, 13.2],
+];
+const PAUSE_POLY_B: readonly [number, number][] = [
+  [9.3, 2.8],
+  [12.5, 2.8],
+  [12.5, 13.2],
+  [9.3, 13.2],
+];
+
+function lerpPolyPath(
+  from: readonly [number, number][],
+  to: readonly [number, number][],
+  t: number
+): string {
+  let d = "";
+  for (let i = 0; i < from.length; i++) {
+    const x = from[i][0] + (to[i][0] - from[i][0]) * t;
+    const y = from[i][1] + (to[i][1] - from[i][1]) * t;
+    d += `${i === 0 ? "M" : " L"}${x.toFixed(2)} ${y.toFixed(2)}`;
+  }
+  return `${d} Z`;
+}
+
 export class VinylPlayerEngine {
   private modal: HTMLElement;
   private sound: StudioSound;
@@ -135,6 +174,15 @@ export class VinylPlayerEngine {
   private curTimeEl: HTMLElement | null;
   private durTimeEl: HTMLElement | null;
   private progressBar: HTMLInputElement | null;
+  private wakeWrap: HTMLElement | null = null;
+  private wakeBars: HTMLElement[] = [];
+  private wakeEnergy = new Float32Array(36);
+  private wakeRaf = 0;
+  private wakeLastTs = 0;
+  private wakeLastBarIdx = -1;
+  private wakeLastPx = -1;
+  private morphRaf = 0;
+  private morphProgress = 0;
   private volumeBar: HTMLInputElement | null;
   private trackListEl: HTMLElement | null;
   private trackCountEl: HTMLElement | null;
@@ -212,6 +260,11 @@ export class VinylPlayerEngine {
     this.curTimeEl = modal.querySelector<HTMLElement>("[data-vinyl-cur]");
     this.durTimeEl = modal.querySelector<HTMLElement>("[data-vinyl-dur]");
     this.progressBar = modal.querySelector<HTMLInputElement>("[data-vinyl-progress]");
+    this.wakeWrap = modal.querySelector<HTMLElement>("[data-wake-wrap]");
+    this.wakeBars = Array.from(modal.querySelectorAll<HTMLElement>("[data-wake-bars] .wake-bar"));
+    if (this.wakeBars.length > 0 && this.wakeBars.length !== this.wakeEnergy.length) {
+      this.wakeEnergy = new Float32Array(this.wakeBars.length);
+    }
     this.volumeBar = modal.querySelector<HTMLInputElement>("[data-vinyl-volume]");
     this.trackListEl = modal.querySelector<HTMLElement>("[data-vinyl-list]");
     this.trackCountEl = modal.querySelector<HTMLElement>("[data-vinyl-count]");
@@ -548,6 +601,7 @@ export class VinylPlayerEngine {
     if (this.miniTitle) this.miniTitle.textContent = track.name;
     if (this.miniSub) this.miniSub.textContent = track.artist;
     if (this.progressBar) this.progressBar.value = "0";
+    this.syncWakeProgress(0);
     if (this.curTimeEl) this.curTimeEl.textContent = "00:00";
     if (this.durTimeEl) this.durTimeEl.textContent = "00:00";
 
@@ -697,17 +751,143 @@ export class VinylPlayerEngine {
       }
     }
 
-    const playSvg = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4.5 2.8L13 8l-8.5 5.2V2.8z"/></svg>`;
-    const pauseSvg = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3.5" y="2.8" width="3.2" height="10.4" rx="0.8"/><rect x="9.3" y="2.8" width="3.2" height="10.4" rx="0.8"/></svg>`;
+    this.animatePlayMorph(this.isPlaying ? 1 : 0);
     if (this.playBtn) {
-      this.playBtn.innerHTML = this.isPlaying ? pauseSvg : playSvg;
       this.playBtn.setAttribute("aria-label", this.isPlaying ? "暂停播放" : "开始播放");
     }
     if (this.miniPlayBtn) {
-      this.miniPlayBtn.innerHTML = this.isPlaying ? pauseSvg : playSvg;
       this.miniPlayBtn.setAttribute("aria-label", this.isPlaying ? "暂停播放" : "继续播放");
     }
     this.highlightActiveRow();
+  }
+
+  private applyPlayMorph(t: number): void {
+    const pathA = lerpPolyPath(PLAY_POLY_A, PAUSE_POLY_A, t);
+    const pathB = lerpPolyPath(PLAY_POLY_B, PAUSE_POLY_B, t);
+    const mid = Math.sin(t * Math.PI);
+    const xform =
+      mid > 0.005 ? `rotate(${(mid * 9).toFixed(2)}deg) scale(${(1 - mid * 0.08).toFixed(3)})` : "";
+
+    const btns = [this.playBtn, this.miniPlayBtn];
+    for (const btn of btns) {
+      if (!btn) continue;
+      const svg = btn.querySelector<SVGSVGElement>(".play-morph-svg");
+      const a = btn.querySelector<SVGPathElement>("[data-morph-a]");
+      const b = btn.querySelector<SVGPathElement>("[data-morph-b]");
+      if (a) a.setAttribute("d", pathA);
+      if (b) b.setAttribute("d", pathB);
+      if (svg) svg.style.transform = xform;
+    }
+  }
+
+  private animatePlayMorph(target: 0 | 1): void {
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || Math.abs(this.morphProgress - target) < 0.001) {
+      if (this.morphRaf) {
+        cancelAnimationFrame(this.morphRaf);
+        this.morphRaf = 0;
+      }
+      this.morphProgress = target;
+      this.applyPlayMorph(target);
+      return;
+    }
+
+    if (this.morphRaf) {
+      cancelAnimationFrame(this.morphRaf);
+      this.morphRaf = 0;
+    }
+    const startVal = this.morphProgress;
+    const startTs = performance.now();
+    const duration = 260;
+
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - startTs) / duration);
+      // Smooth cubic ease-out for crisp tactile morph
+      const eased = 1 - Math.pow(1 - p, 3);
+      this.morphProgress = startVal + (target - startVal) * eased;
+      this.applyPlayMorph(this.morphProgress);
+      if (p < 1) {
+        this.morphRaf = requestAnimationFrame(tick);
+      } else {
+        this.morphProgress = target;
+        this.applyPlayMorph(target);
+        this.morphRaf = 0;
+      }
+    };
+    this.morphRaf = requestAnimationFrame(tick);
+  }
+
+  private syncWakeProgress(ratio: number): void {
+    const n = this.wakeBars.length;
+    if (!n) return;
+    const clamped = Math.max(0, Math.min(1, ratio));
+    const played = clamped <= 0.0005 ? 0 : Math.max(1, Math.round(clamped * n));
+    for (let i = 0; i < n; i++) {
+      this.wakeBars[i].classList.toggle("is-played", i < played);
+    }
+  }
+
+  private exciteWakeBar(barIdx: number, impulse: number, withNotch = false): void {
+    const n = this.wakeBars.length;
+    if (!n) return;
+    const center = Math.max(0, Math.min(n - 1, barIdx));
+    if (withNotch && center !== this.wakeLastBarIdx) {
+      this.wakeLastBarIdx = center;
+      this.sound.tickNotch(center / Math.max(1, n - 1));
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const weights = [0.22, 0.56, 1.0, 0.56, 0.22];
+    for (let offset = -2; offset <= 2; offset++) {
+      const idx = center + offset;
+      if (idx < 0 || idx >= n) continue;
+      const nextE = impulse * weights[offset + 2];
+      if (nextE > this.wakeEnergy[idx]) {
+        this.wakeEnergy[idx] = Math.min(1.55, nextE);
+      }
+    }
+
+    if (!this.wakeRaf) {
+      this.wakeLastTs = performance.now();
+      this.wakeRaf = requestAnimationFrame((ts) => this.stepWakeLoop(ts));
+    }
+  }
+
+  private stepWakeLoop(now: number): void {
+    const dt = Math.min(0.05, Math.max(0.004, (now - this.wakeLastTs) / 1000));
+    this.wakeLastTs = now;
+    const decay = Math.exp(-8.2 * dt);
+    const n = this.wakeBars.length;
+    let maxE = 0;
+
+    for (let i = 0; i < n; i++) {
+      const e = this.wakeEnergy[i] * decay;
+      this.wakeEnergy[i] = e;
+      if (e > maxE) maxE = e;
+      if (e > 0.004) {
+        const sy = 1 + e * 1.35;
+        this.wakeBars[i].style.transform = `scaleY(${sy.toFixed(3)})`;
+      } else {
+        this.wakeEnergy[i] = 0;
+        if (this.wakeBars[i].style.transform) {
+          this.wakeBars[i].style.transform = "";
+        }
+      }
+    }
+
+    if (maxE > 0.005) {
+      this.wakeRaf = requestAnimationFrame((ts) => this.stepWakeLoop(ts));
+    } else {
+      this.wakeRaf = 0;
+    }
   }
 
   private showIframeFallback(): void {
@@ -753,6 +933,7 @@ export class VinylPlayerEngine {
         this.progressBar.value = String(Math.round(ratio * 1000));
         this.progressBar.style.setProperty("--prog", `${(ratio * 100).toFixed(1)}%`);
         this.updateTonearmAngle(ratio);
+        this.syncWakeProgress(ratio);
       }
 
       if (this.lyrics.length > 0) {
@@ -869,13 +1050,41 @@ export class VinylPlayerEngine {
     });
 
     this.progressBar?.addEventListener("input", () => {
+      if (!this.progressBar) return;
+      const ratio = Math.max(0, Math.min(1, Number(this.progressBar.value) / 1000));
+      this.syncWakeProgress(ratio);
+      if (this.wakeBars.length > 0) {
+        const idx = Math.min(this.wakeBars.length - 1, Math.floor(ratio * this.wakeBars.length));
+        this.exciteWakeBar(idx, 1.15, true);
+      }
       const dur = this.audio.duration;
-      if (Number.isFinite(dur) && dur > 0 && this.progressBar) {
-        const ratio = Number(this.progressBar.value) / 1000;
+      if (Number.isFinite(dur) && dur > 0) {
         this.audio.currentTime = ratio * dur;
+        if (this.curTimeEl) this.curTimeEl.textContent = formatTime(ratio * dur);
         this.progressBar.style.setProperty("--prog", `${(ratio * 100).toFixed(1)}%`);
         this.updateTonearmAngle(ratio);
       }
+    });
+
+    this.progressBar?.addEventListener("change", () => {
+      this.wakeLastBarIdx = -1;
+    });
+
+    this.wakeWrap?.addEventListener("pointermove", (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || !this.wakeWrap || !this.wakeBars.length) return;
+      const rect = this.wakeWrap.getBoundingClientRect();
+      if (rect.width <= 0) return;
+      const ratio = Math.max(0, Math.min(0.9999, (e.clientX - rect.left) / rect.width));
+      const idx = Math.floor(ratio * this.wakeBars.length);
+      const speed = this.wakeLastPx >= 0 ? Math.abs(e.clientX - this.wakeLastPx) : 8;
+      this.wakeLastPx = e.clientX;
+      const impulse = Math.min(1.4, 0.42 + speed * 0.045);
+      this.exciteWakeBar(idx, impulse, (e.buttons & 1) === 1);
+    });
+
+    this.wakeWrap?.addEventListener("pointerleave", () => {
+      this.wakeLastPx = -1;
+      this.wakeLastBarIdx = -1;
     });
 
     this.volumeBar?.addEventListener("input", () => {

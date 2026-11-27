@@ -767,6 +767,66 @@ html.dark .eq-canvas-box {
   background: linear-gradient(90deg, var(--accent) var(--prog, 0%), var(--rule) var(--prog, 0%));
 }
 
+/* Velocity-Sensitive Wake Bar Progress Scrubber */
+.wake-slider-wrap {
+  position: relative;
+  flex: 1;
+  height: 28px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+}
+
+.wake-slider-wrap:has(.wake-input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.wake-bars {
+  width: 100%;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.wake-bar {
+  flex: 1;
+  max-width: 3px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--rule-strong);
+  opacity: 0.24;
+  transform-origin: center center;
+  will-change: transform;
+  transition: background-color 0.16s ease, opacity 0.16s ease;
+}
+
+.wake-bar.is-played {
+  background: var(--accent);
+  opacity: 0.92;
+}
+
+.wake-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.play-morph-svg {
+  display: block;
+  transform-origin: center center;
+  will-change: transform;
+}
+
 .deck-range::-webkit-slider-thumb,
 .deck-vol-range::-webkit-slider-thumb {
   -webkit-appearance: none;

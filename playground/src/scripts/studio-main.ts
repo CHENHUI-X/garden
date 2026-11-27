@@ -9,6 +9,7 @@ import { StudioSound } from "./studio-sound";
 import { ClotheslineEngine } from "./clothesline-physics";
 import { BookEngine } from "./book-engine";
 import { VinylPlayerEngine } from "./vinyl-player";
+import { setRollingText, rollStatNumber } from "./rolling-digits";
 
 /** Generate a tiny static noise PNG once so paper grain costs ~0ms/frame on GPU */
 function installFastPaperGrain(): void {
@@ -221,19 +222,82 @@ function initStudio(): void {
     const nums = container.querySelectorAll<HTMLElement>("[data-count-target]");
     nums.forEach((el) => {
       const target = Number(el.dataset.countTarget || "0");
-      if (reducedMotion || target <= 0) {
-        el.textContent = target.toLocaleString();
-        return;
+      rollStatNumber(el, target);
+    });
+  }
+
+  // Tactile 3D tilt + 180° flip interaction for the About Dossier Card (auto-sleeping rAF)
+  const dossierCard = document.getElementById("about-dossier-card");
+  if (dossierCard) {
+    const tiltWrap = dossierCard.querySelector<HTMLElement>(".dossier-tilt");
+    let curRx = 0;
+    let curRy = 0;
+    let tgtRx = 0;
+    let tgtRy = 0;
+    let tiltRaf = 0;
+    let lastTs = 0;
+
+    const stepTilt = (now: number) => {
+      tiltRaf = 0;
+      const dt = Math.min(0.05, (now - lastTs) / 1000 || 0.016);
+      lastTs = now;
+      const k = 1 - Math.pow(0.0018, dt);
+      curRx += (tgtRx - curRx) * k;
+      curRy += (tgtRy - curRy) * k;
+      if (tiltWrap) {
+        tiltWrap.style.transform = `rotateX(${curRx.toFixed(2)}deg) rotateY(${curRy.toFixed(2)}deg)`;
       }
-      const start = performance.now();
-      const dur = 820;
-      const tick = (now: number) => {
-        const p = Math.min(1, (now - start) / dur);
-        const eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(target * eased).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
+      if (Math.abs(tgtRx - curRx) > 0.02 || Math.abs(tgtRy - curRy) > 0.02) {
+        tiltRaf = requestAnimationFrame(stepTilt);
+      } else if (tgtRx === 0 && tgtRy === 0 && tiltWrap) {
+        tiltWrap.style.transform = "";
+      }
+    };
+
+    const wakeTilt = () => {
+      if (tiltRaf || reducedMotion) return;
+      lastTs = performance.now();
+      tiltRaf = requestAnimationFrame(stepTilt);
+    };
+
+    if (finePointer && !reducedMotion) {
+      dossierCard.addEventListener(
+        "pointermove",
+        (e) => {
+          const r = dossierCard.getBoundingClientRect();
+          if (r.width <= 0 || r.height <= 0) return;
+          const nx = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+          const ny = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+          tgtRx = (0.5 - ny) * 11;
+          tgtRy = (nx - 0.5) * 13;
+          dossierCard.style.setProperty("--px", `${(nx * 100).toFixed(1)}%`);
+          dossierCard.style.setProperty("--py", `${(ny * 100).toFixed(1)}%`);
+          dossierCard.classList.add("is-hovering");
+          wakeTilt();
+        },
+        { passive: true }
+      );
+
+      dossierCard.addEventListener("pointerleave", () => {
+        tgtRx = 0;
+        tgtRy = 0;
+        dossierCard.classList.remove("is-hovering");
+        wakeTilt();
+      });
+    }
+
+    const toggleFlip = () => {
+      const flipped = dossierCard.classList.toggle("is-flipped");
+      dossierCard.setAttribute("aria-pressed", String(flipped));
+      sound.cardFlip();
+    };
+
+    dossierCard.addEventListener("click", toggleFlip);
+    dossierCard.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFlip();
+      }
     });
   }
 
@@ -466,7 +530,7 @@ function initStudio(): void {
       // ignore
     }
     syncThemeBtn();
-    sound.clipClick();
+    sound.lampSwitch(isDark);
     clothesline.sendBreezeWave(0.45);
   });
 
@@ -556,6 +620,7 @@ function initStudio(): void {
   const daysEl = document.getElementById("live-days");
   const updateTime = () => {
     if (clockEl) {
+      let timeText = "";
       try {
         const fmt = new Intl.DateTimeFormat("zh-CN", {
           timeZone: "Asia/Shanghai",
@@ -563,16 +628,17 @@ function initStudio(): void {
           minute: "2-digit",
           hour12: false,
         });
-        clockEl.textContent = fmt.format(new Date());
+        timeText = fmt.format(new Date());
       } catch {
         const d = new Date();
-        clockEl.textContent = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+        timeText = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
       }
+      setRollingText(clockEl, timeText, { staggerMs: 28 });
     }
     if (daysEl) {
       const founded = new Date("2026-05-01T00:00:00+08:00").getTime();
       const diff = Math.max(1, Math.floor((Date.now() - founded) / 86400000) + 1);
-      daysEl.textContent = String(diff);
+      setRollingText(daysEl, String(diff), { staggerMs: 28 });
       const statDays = document.getElementById("stat-days-num");
       if (statDays) statDays.dataset.countTarget = String(diff);
     }
@@ -762,12 +828,13 @@ function initStudio(): void {
   const copyBtn = document.getElementById("btn-copy-email");
   const copyToast = document.getElementById("copy-email-toast");
   copyBtn?.addEventListener("click", async () => {
-    sound.clipClick();
     try {
       await navigator.clipboard.writeText("chenhui2422.xu@gmail.com");
+      sound.copyGlint();
       copyToast?.classList.add("show");
       setTimeout(() => copyToast?.classList.remove("show"), 2000);
     } catch {
+      sound.clipClick();
       window.location.href = "mailto:chenhui2422.xu@gmail.com";
     }
   });

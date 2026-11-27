@@ -10,6 +10,7 @@ export class StudioSound {
   private vinylCrackBuffer: AudioBuffer | null = null;
   private vinylLoopSrc: AudioBufferSourceNode | null = null;
   private vinylLoopGain: GainNode | null = null;
+  private lastNotchTs = 0;
   public enabled = true;
 
   constructor() {
@@ -281,5 +282,110 @@ export class StudioSound {
 
     this.vinylLoopSrc = src;
     this.vinylLoopGain = gain;
+  }
+
+  /** Crisp physical desk-lamp switch clack for Day/Night theme toggle */
+  public lampSwitch(toDark = true): void {
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    // Two-stage mechanical switch transient (pre-click + latch)
+    const freqs = toDark ? [680, 390] : [520, 760];
+    freqs.forEach((f, idx) => {
+      const t = now + idx * 0.019;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(f, t);
+      osc.frequency.exponentialRampToValueAtTime(f * 0.42, t + 0.028);
+
+      gain.gain.setValueAtTime(idx === 0 ? 0.045 : 0.075, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.034);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.038);
+    });
+  }
+
+  /** Subtle mechanical detent tick for font sizing & vinyl wake slider scrubbing */
+  public tickNotch(pitchRatio = 0.5): void {
+    const nowMs = performance.now();
+    if (nowMs - this.lastNotchTs < 38) return;
+    this.lastNotchTs = nowMs;
+
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const freq = 620 + Math.max(0, Math.min(1, pitchRatio)) * 340;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.55, now + 0.016);
+
+    gain.gain.setValueAtTime(0.032, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.019);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.022);
+  }
+
+  /** Quiet two-note crystalline chime when copying links or email */
+  public copyGlint(): void {
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    const notes = [880, 1318.5]; // A5 -> E6
+    notes.forEach((freq, idx) => {
+      const t = now + idx * 0.048;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(0.036, t + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    });
+  }
+
+  /** Short brushed-cardboard whisk when flipping the 3D dossier card */
+  public cardFlip(): void {
+    const ctx = this.ensureContext();
+    if (!ctx || !this.noiseBuffer) return;
+    const now = ctx.currentTime;
+
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.setValueAtTime(1.2, now);
+    filter.frequency.setValueAtTime(620, now);
+    filter.frequency.exponentialRampToValueAtTime(1650, now + 0.12);
+    filter.frequency.exponentialRampToValueAtTime(520, now + 0.24);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.068, now + 0.045);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start(now);
+    src.stop(now + 0.26);
   }
 }

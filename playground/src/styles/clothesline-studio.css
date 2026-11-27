@@ -183,6 +183,12 @@ html.dark .studio-light {
   -webkit-mask-image: radial-gradient(ellipse 84% 78% at 50% 48%, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.32) 66%, transparent 100%);
   mask-image: radial-gradient(ellipse 84% 78% at 50% 48%, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.32) 66%, transparent 100%);
   opacity: 0.78;
+  transition: opacity 0.3s var(--ease);
+}
+
+/* Desktop fine-pointer uses the live spring dot-matrix rendered inside #rope-canvas */
+html.has-spring-dots .studio-dotgrid {
+  opacity: 0;
 }
 
 /* Static sunlit shafts (single GPU-cached vector layer) */
@@ -314,6 +320,36 @@ html.dark .paper-grain {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
+}
+
+/* Mechanical Rolling Tabular Digits (pure GPU translate3d, zero reflow) */
+.rd-root {
+  display: inline-flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.rd-slot {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  vertical-align: -0.06em;
+}
+
+.rd-reel {
+  display: block;
+  white-space: pre;
+  line-height: 1em;
+  text-align: center;
+  will-change: transform;
+  transition: transform 0.48s cubic-bezier(0.22, 1.18, 0.36, 1);
+}
+
+.rd-lit {
+  display: inline-block;
+  line-height: 1;
+  white-space: pre;
 }
 
 .box {
@@ -1552,12 +1588,181 @@ html.dark .gesture-hint {
   align-items: start;
 }
 
+/* Tactile 3D Tilt + 180° Flip Dossier Card */
 .about-dossier-card {
+  position: relative;
+  perspective: 1100px;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+
+.about-dossier-card:focus-visible .dossier-front,
+.about-dossier-card:focus-visible .dossier-back {
+  border-color: var(--accent);
+}
+
+.dossier-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.dossier-flipper {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.66s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.about-dossier-card.is-flipped .dossier-flipper {
+  transform: rotateY(180deg);
+}
+
+.dossier-face {
+  position: relative;
   background: var(--card);
   border: 1px solid var(--rule);
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 18px;
   box-shadow: var(--shadow-soft);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  transition: border-color 0.3s var(--ease), box-shadow 0.35s var(--ease);
+}
+
+.about-dossier-card:hover .dossier-face {
+  border-color: rgba(200, 75, 49, 0.36);
+  box-shadow: var(--shadow-deep);
+}
+
+/* Warm cotton-paper diagonal sunlight sheen tracking cursor */
+.dossier-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  background:
+    radial-gradient(circle 220px at var(--px, 50%) var(--py, 50%), rgba(255, 246, 224, 0.34), transparent 68%),
+    linear-gradient(125deg, rgba(255, 244, 214, 0.16) 0%, transparent 45%, rgba(200, 75, 49, 0.05) 100%);
+  transition: opacity 0.35s var(--ease);
+}
+
+html.dark .dossier-sheen {
+  background:
+    radial-gradient(circle 220px at var(--px, 50%) var(--py, 50%), rgba(255, 222, 168, 0.14), transparent 68%),
+    linear-gradient(125deg, rgba(255, 232, 192, 0.08) 0%, transparent 45%, rgba(229, 106, 82, 0.06) 100%);
+}
+
+.about-dossier-card.is-hovering .dossier-sheen {
+  opacity: 1;
+}
+
+.dossier-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  display: flex;
+  background:
+    radial-gradient(ellipse 85% 65% at 15% 10%, rgba(255, 236, 198, 0.25), transparent 68%),
+    var(--card);
+}
+
+html.dark .dossier-back {
+  background:
+    radial-gradient(ellipse 85% 65% at 15% 10%, rgba(248, 184, 102, 0.1), transparent 68%),
+    var(--card);
+}
+
+.dossier-back-inner {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.dossier-back-top,
+.dossier-back-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.dossier-seal {
+  width: 26px;
+  height: 26px;
+  border: 1.4px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-serif);
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background: var(--accent-soft);
+}
+
+.dossier-back-mid {
+  text-align: center;
+  padding: 12px 6px;
+}
+
+.dossier-back-name {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  padding-left: 0.16em;
+  color: var(--ink);
+}
+
+.dossier-back-tags {
+  margin-top: 8px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+.dossier-back-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+  margin: 18px auto 16px;
+}
+
+.dossier-back-quote {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  text-wrap: balance;
+}
+
+.dossier-flip-hint {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 9.5px;
+  color: var(--muted);
+  opacity: 0.58;
+  letter-spacing: 0.08em;
+  transition: opacity 0.25s var(--ease), color 0.25s var(--ease);
+}
+
+.dossier-back-foot .dossier-flip-hint {
+  margin-top: 0;
+}
+
+.about-dossier-card:hover .dossier-flip-hint {
+  opacity: 1;
+  color: var(--accent);
 }
 
 .about-portrait-frame {
@@ -4269,11 +4474,17 @@ html.dark .pin-waline-slot .wl-panel {
 
   .about-dossier-card {
     max-width: 100%;
+  }
+
+  .dossier-front {
+    padding: 20px 24px;
+  }
+
+  .dossier-front-inner {
     display: grid;
     grid-template-columns: 196px 1fr;
     gap: 26px;
     align-items: center;
-    padding: 20px 24px;
   }
 
   .about-portrait-frame {
@@ -4344,10 +4555,13 @@ html.dark .pin-waline-slot .wl-panel {
 }
 
 @media (max-width: 600px) {
-  .about-dossier-card {
+  .dossier-front {
+    padding: 18px;
+  }
+
+  .dossier-front-inner {
     grid-template-columns: 1fr;
     gap: 16px;
-    padding: 18px;
   }
 
   .about-portrait-frame {

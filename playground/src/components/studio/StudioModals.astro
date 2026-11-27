@@ -59,18 +59,57 @@ const tilts = ["-1.1deg", "0.9deg", "-0.7deg", "1.2deg"];
   <div class="sheet-scroll">
     <div class="sheet-container">
       <div class="about-grid">
-        <!-- Left: Framed Polaroid & Archival Specs -->
-        <aside class="about-dossier-card">
-          <div class="about-portrait-frame">
-            <img src={avatarSrc} alt="CHENHUI 头像" width="512" height="512" loading="lazy" />
+        <!-- Left: Tactile 3D Tilt + 180° Flip Polaroid Dossier Card -->
+        <aside
+          class="about-dossier-card"
+          id="about-dossier-card"
+          role="button"
+          tabindex="0"
+          aria-pressed="false"
+          aria-label="点击翻转个人档案卡"
+        >
+          <div class="dossier-tilt">
+            <div class="dossier-flipper">
+              <div class="dossier-face dossier-front">
+                <div class="dossier-sheen" aria-hidden="true"></div>
+                <div class="dossier-front-inner">
+                  <div class="about-portrait-frame">
+                    <img src={avatarSrc} alt="CHENHUI 头像" width="512" height="512" loading="lazy" />
+                  </div>
+                  <div class="dossier-meta-col">
+                    <ul class="about-spec-list">
+                      <li><span class="spec-k">AUTHOR</span><span class="spec-v">CHENHUI</span></li>
+                      <li><span class="spec-k">BIRTH</span><span class="spec-v">1999 · 双鱼座</span></li>
+                      <li><span class="spec-k">MBTI</span><span class="spec-v">INFJ</span></li>
+                      <li><span class="spec-k">LOCATION</span><span class="spec-v">BEIJING</span></li>
+                      <li><span class="spec-k">FOUNDED</span><span class="spec-v">2026-05-01</span></li>
+                    </ul>
+                    <div class="dossier-flip-hint lbl" aria-hidden="true">点击翻面 ↻</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dossier-face dossier-back" aria-hidden="true">
+                <div class="dossier-sheen" aria-hidden="true"></div>
+                <div class="dossier-back-inner">
+                  <div class="dossier-back-top">
+                    <span class="lbl" style="color:var(--muted)">EX LIBRIS</span>
+                    <span class="dossier-seal">记</span>
+                  </div>
+                  <div class="dossier-back-mid">
+                    <div class="dossier-back-name">CHENHUI</div>
+                    <div class="dossier-back-tags">1999 · 双鱼座 · INFJ</div>
+                    <div class="dossier-back-rule"></div>
+                    <p class="dossier-back-quote">「人无法同时拥有青春和对青春的感受」</p>
+                  </div>
+                  <div class="dossier-back-foot">
+                    <span class="lbl" style="color:var(--muted)">2026-05-01 · BEIJING</span>
+                    <span class="dossier-flip-hint lbl">翻回 ↺</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <ul class="about-spec-list">
-            <li><span class="spec-k">AUTHOR</span><span class="spec-v">CHENHUI</span></li>
-            <li><span class="spec-k">BIRTH</span><span class="spec-v">1999 · 双鱼座</span></li>
-            <li><span class="spec-k">MBTI</span><span class="spec-v">INFJ</span></li>
-            <li><span class="spec-k">LOCATION</span><span class="spec-v">BEIJING</span></li>
-            <li><span class="spec-k">FOUNDED</span><span class="spec-v">2026-05-01</span></li>
-          </ul>
         </aside>
 
         <!-- Right: Editorial Story + Count-up Stats + GitHub Chart + Links -->

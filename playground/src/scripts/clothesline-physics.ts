@@ -106,6 +106,20 @@ export class ClotheslineEngine {
   private resizePending = false;
   private tierGlideUntil = 0;
 
+  // Interactive spring dot-matrix state (zero-alloc Float32Arrays, desktop fine-pointer only)
+  private finePointer = false;
+  private springDotsActive = false;
+  private dotCount = 0;
+  private dotX = new Float32Array(0);
+  private dotY = new Float32Array(0);
+  private dotUx = new Float32Array(0);
+  private dotUy = new Float32Array(0);
+  private dotVx = new Float32Array(0);
+  private dotVy = new Float32Array(0);
+  private dotAlpha = new Float32Array(0);
+  private dotAwake = new Uint8Array(0);
+  private dotRipples: Array<{ x: number; y: number; age: number }> = [];
+
   constructor(stage: HTMLElement, canvas: HTMLCanvasElement, sound: StudioSound, cb: ClotheslineCallbacks) {
     this.stage = stage;
     this.canvas = canvas;
@@ -113,6 +127,7 @@ export class ClotheslineEngine {
     this.sound = sound;
     this.cb = cb;
     this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     this.syncTheme();
 
     this.motes = Array.from({ length: 18 }, () => ({
@@ -162,6 +177,7 @@ export class ClotheslineEngine {
 
     if (!this.reducedMotion) {
       this.stepPhysics(dt, true);
+      this.stepDotGrid(dt);
       this.stepHoverTilts(dt);
       this.renderDOM(dt);
       this.renderCanvas(nowMs);
@@ -298,8 +314,145 @@ export class ClotheslineEngine {
     for (let s = 0; s < steps; s++) {
       this.stepPhysics(0.016, false);
     }
+    this.rebuildDotGrid();
     this.renderDOM(preserveDisplayPos ? 0.016 : 1);
     this.renderCanvas(performance.now());
+  }
+
+  /** Pre-allocate 28px stationery dot grid on fine-pointer desktop (mobile stays on 0ms static CSS grid) */
+  private rebuildDotGrid(): void {
+    const enable = this.finePointer && !this.reducedMotion && !this.isMobile;
+    this.springDotsActive = enable;
+    document.documentElement.classList.toggle("has-spring-dots", enable);
+    if (!enable) {
+      this.dotCount = 0;
+      this.dotRipples = [];
+      return;
+    }
+
+    const gap = 28;
+    const cols = Math.floor((this.width - 14) / gap) + 1;
+    const rows = Math.floor((this.height - 14) / gap) + 1;
+    const count = Math.max(0, cols * rows);
+    this.dotCount = count;
+    this.dotX = new Float32Array(count);
+    this.dotY = new Float32Array(count);
+    this.dotUx = new Float32Array(count);
+    this.dotUy = new Float32Array(count);
+    this.dotVx = new Float32Array(count);
+    this.dotVy = new Float32Array(count);
+    this.dotAlpha = new Float32Array(count);
+    this.dotAwake = new Uint8Array(count);
+
+    const cx = this.width * 0.5;
+    const cy = this.height * 0.48;
+    const rx = Math.max(200, this.width * 0.46);
+    const ry = Math.max(180, this.height * 0.44);
+
+    let k = 0;
+    for (let r = 0; r < rows; r++) {
+      const y = 14 + r * gap;
+      const ny = (y - cy) / ry;
+      for (let c = 0; c < cols; c++) {
+        const x = 14 + c * gap;
+        const nx = (x - cx) / rx;
+        const dist = Math.sqrt(nx * nx + ny * ny);
+        const mask = Math.max(0.08, Math.min(1, 1.05 - dist * 0.72));
+        this.dotX[k] = x;
+        this.dotY[k] = y;
+        this.dotAlpha[k] = mask;
+        k++;
+      }
+    }
+  }
+
+  /** Step damped spring physics ONLY for dots near pointer, ripples, or currently settling */
+  private stepDotGrid(dt: number): void {
+    if (!this.springDotsActive || this.dotCount === 0) return;
+
+    for (let i = this.dotRipples.length - 1; i >= 0; i--) {
+      this.dotRipples[i].age += dt;
+      if (this.dotRipples[i].age > 0.88) {
+        this.dotRipples.splice(i, 1);
+      }
+    }
+
+    const px = this.px;
+    const py = this.py;
+    const pointerOn = px > -100 && py > -100;
+    const radius = 116;
+    const radiusSq = radius * radius;
+    const hasRipples = this.dotRipples.length > 0;
+    const stiff = 135;
+    const damp = Math.exp(-12.5 * dt);
+
+    for (let i = 0; i < this.dotCount; i++) {
+      const bx = this.dotX[i];
+      const by = this.dotY[i];
+      let fx = 0;
+      let fy = 0;
+      let excited = false;
+
+      if (pointerOn) {
+        const dx = bx - px;
+        const dy = by - py;
+        const dSq = dx * dx + dy * dy;
+        if (dSq < radiusSq && dSq > 0.5) {
+          const d = Math.sqrt(dSq);
+          const falloff = 1 - d / radius;
+          const push = falloff * falloff * 14.5;
+          fx += (dx / d) * push;
+          fy += (dy / d) * push;
+          excited = true;
+        }
+      }
+
+      if (hasRipples) {
+        for (let r = 0; r < this.dotRipples.length; r++) {
+          const rp = this.dotRipples[r];
+          const ringR = rp.age * 285;
+          const band = 44;
+          const dx = bx - rp.x;
+          const dy = by - rp.y;
+          const dSq = dx * dx + dy * dy;
+          const maxCheck = ringR + band;
+          if (dSq < maxCheck * maxCheck && dSq > 4) {
+            const d = Math.sqrt(dSq);
+            const diff = Math.abs(d - ringR);
+            if (diff < band) {
+              const fade = (1 - rp.age / 0.88) * (1 - diff / band);
+              const push = fade * 16;
+              fx += (dx / d) * push;
+              fy += (dy / d) * push;
+              excited = true;
+            }
+          }
+        }
+      }
+
+      if (!excited && !this.dotAwake[i]) continue;
+
+      let ux = this.dotUx[i];
+      let uy = this.dotUy[i];
+      let vx = (this.dotVx[i] + ((fx - ux) * stiff) * dt) * damp;
+      let vy = (this.dotVy[i] + ((fy - uy) * stiff) * dt) * damp;
+      ux += vx * dt;
+      uy += vy * dt;
+
+      if (!excited && Math.abs(ux) + Math.abs(uy) + Math.abs(vx) + Math.abs(vy) < 0.04) {
+        this.dotUx[i] = 0;
+        this.dotUy[i] = 0;
+        this.dotVx[i] = 0;
+        this.dotVy[i] = 0;
+        this.dotAwake[i] = 0;
+      } else {
+        this.dotUx[i] = ux;
+        this.dotUy[i] = uy;
+        this.dotVx[i] = vx;
+        this.dotVy[i] = vy;
+        this.dotAwake[i] = 1;
+      }
+    }
   }
 
   /** VSync-aligned live resize: smoothly rescales existing rope nodes in-place (zero freeze/stutter!) */
@@ -383,6 +536,7 @@ export class ClotheslineEngine {
     for (let s = 0; s < 3; s++) {
       this.stepPhysics(0.016, false);
     }
+    this.rebuildDotGrid();
     if (this.reducedMotion) {
       this.renderDOM(1);
       this.renderCanvas(performance.now());
@@ -522,6 +676,12 @@ export class ClotheslineEngine {
         this.dragStartY = e.clientY;
         this.draggedDist = 0;
         this.cb.onFirstInteract?.();
+      } else if (this.springDotsActive && !(e.target as HTMLElement).closest("button, a, header, footer")) {
+        // Gentle ripple wave on blank studio paper click + faint breeze impulse
+        this.dotRipples.push({ x: e.clientX, y: e.clientY, age: 0 });
+        if (this.dotRipples.length > 3) this.dotRipples.shift();
+        this.sendBreezeWave(0.24);
+        this.sound.tickNotch(0.35);
       }
     });
 
@@ -797,6 +957,32 @@ export class ClotheslineEngine {
     const w = this.width;
     const h = this.height;
     ctx.clearRect(0, 0, w, h);
+
+    // 0. Interactive spring stationery dot-matrix (batched fillRect pass < 0.35ms)
+    if (this.springDotsActive && this.dotCount > 0) {
+      const baseRgb = this.isDark ? "235, 224, 206" : "82, 68, 52";
+      const accentRgb = this.isDark ? "229, 106, 82" : "200, 75, 49";
+      const baseOpacity = this.isDark ? 0.11 : 0.145;
+      ctx.fillStyle = `rgb(${baseRgb})`;
+      for (let i = 0; i < this.dotCount; i++) {
+        const ux = this.dotUx[i];
+        const uy = this.dotUy[i];
+        const disp = Math.abs(ux) + Math.abs(uy);
+        const x = this.dotX[i] + ux;
+        const y = this.dotY[i] + uy;
+        if (disp > 1.2) {
+          ctx.fillStyle = `rgb(${accentRgb})`;
+          ctx.globalAlpha = Math.min(0.45, this.dotAlpha[i] * (baseOpacity + disp * 0.025));
+          const s = disp > 4 ? 2.4 : 2;
+          ctx.fillRect(x - s * 0.5, y - s * 0.5, s, s);
+          ctx.fillStyle = `rgb(${baseRgb})`;
+        } else {
+          ctx.globalAlpha = this.dotAlpha[i] * baseOpacity;
+          ctx.fillRect(x - 0.85, y - 0.85, 1.7, 1.7);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
 
     // 1. Subtle drifting sunlit dust motes (single fillStyle + globalAlpha, zero per-mote string alloc)
     if (!this.reducedMotion) {

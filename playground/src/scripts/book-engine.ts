@@ -8,6 +8,7 @@
  *   reveal + live Waline comments on the back spread.
  */
 import type { StudioSound } from "./studio-sound";
+import { setRollingText } from "./rolling-digits";
 
 export interface PostMeta {
   slug: string;
@@ -903,13 +904,19 @@ export class BookEngine {
     this.progressFill.style.transform = `scaleX(${pct.toFixed(3)})`;
 
     if (this.spreadIndex === 0) {
-      this.pageIndicator.textContent = `封面 · 共 ${this.pages.length - 1} 页`;
+      setRollingText(this.pageIndicator, `封面 · 共 ${this.pages.length - 1} 页`, { immediate: true });
     } else if (this.isMobile) {
-      this.pageIndicator.textContent = `P.${String(this.spreadIndex).padStart(2, "0")} / ${String(this.pages.length - 1).padStart(2, "0")}`;
+      setRollingText(
+        this.pageIndicator,
+        `P.${String(this.spreadIndex).padStart(2, "0")} / ${String(this.pages.length - 1).padStart(2, "0")}`
+      );
     } else {
       const lFolio = left?.folio ?? 0;
       const rFolio = right?.folio ?? lFolio;
-      this.pageIndicator.textContent = `P.${String(lFolio).padStart(2, "0")}–${String(rFolio).padStart(2, "0")} / ${String(this.pages.length - 1).padStart(2, "0")}`;
+      setRollingText(
+        this.pageIndicator,
+        `P.${String(lFolio).padStart(2, "0")}–${String(rFolio).padStart(2, "0")} / ${String(this.pages.length - 1).padStart(2, "0")}`
+      );
     }
 
     // Dynamic stacked paper fore-edge thickness
@@ -1706,24 +1713,24 @@ export class BookEngine {
     // Font size A- / A+ controls -> dynamically re-paginates!
     this.modal.querySelector("[data-font-dec]")?.addEventListener("click", () => {
       this.fontSize = Math.max(13.5, +(this.fontSize - 1).toFixed(1));
-      this.sound.clipClick();
+      this.sound.tickNotch((this.fontSize - 13.5) / 6);
       this.rebuild(true);
     });
     this.modal.querySelector("[data-font-inc]")?.addEventListener("click", () => {
       this.fontSize = Math.min(19.5, +(this.fontSize + 1).toFixed(1));
-      this.sound.clipClick();
+      this.sound.tickNotch((this.fontSize - 13.5) / 6);
       this.rebuild(true);
     });
 
     // Share current chapter deep-link
     this.modal.querySelector("[data-copy-book-link]")?.addEventListener("click", async () => {
-      this.sound.clipClick();
       const shareUrl = this.activeSlug
         ? `${window.location.origin}/posts/${this.activeSlug}`
         : `${window.location.origin}/?open=book`;
       const lbl = this.modal.querySelector<HTMLElement>("[data-copy-book-label]");
       try {
         await navigator.clipboard.writeText(shareUrl);
+        this.sound.copyGlint();
         if (lbl) {
           lbl.textContent = "已复制";
           setTimeout(() => {
@@ -1731,7 +1738,7 @@ export class BookEngine {
           }, 1800);
         }
       } catch {
-        // ignore clipboard failure
+        this.sound.clipClick();
       }
     });
 
