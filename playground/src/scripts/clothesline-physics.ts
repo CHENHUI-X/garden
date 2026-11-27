@@ -939,17 +939,17 @@ export class ClotheslineEngine {
     }
   }
 
-  private traceRope(nodes: RopeNode[], offsetY: number): void {
-    const ctx = this.ctx;
-    ctx.beginPath();
-    ctx.moveTo(nodes[0].x, nodes[0].y + offsetY);
+  private traceRope(nodes: RopeNode[]): Path2D {
+    const path = new Path2D();
+    path.moveTo(nodes[0].x, nodes[0].y);
     for (let i = 1; i < nodes.length - 1; i++) {
       const xc = (nodes[i].x + nodes[i + 1].x) * 0.5;
-      const yc = (nodes[i].y + nodes[i + 1].y) * 0.5 + offsetY;
-      ctx.quadraticCurveTo(nodes[i].x, nodes[i].y + offsetY, xc, yc);
+      const yc = (nodes[i].y + nodes[i + 1].y) * 0.5;
+      path.quadraticCurveTo(nodes[i].x, nodes[i].y, xc, yc);
     }
     const last = nodes[nodes.length - 1];
-    ctx.lineTo(last.x, last.y + offsetY);
+    path.lineTo(last.x, last.y);
+    return path;
   }
 
   private renderCanvas(nowMs: number): void {
@@ -1015,27 +1015,29 @@ export class ClotheslineEngine {
       if (nodes.length < 2) continue;
 
       // Soft cast shadow (2 crisp alpha strokes replace expensive SVG filter:blur)
-      this.traceRope(nodes, 14);
+      const path = this.traceRope(nodes);
+      ctx.save();
+      ctx.translate(0, 14);
       ctx.setLineDash([]);
       ctx.lineWidth = 8;
       ctx.strokeStyle = shadowOuter;
-      ctx.stroke();
+      ctx.stroke(path);
 
       ctx.lineWidth = 3.5;
       ctx.strokeStyle = shadowInner;
-      ctx.stroke();
+      ctx.stroke(path);
+      ctx.restore();
 
       // Main linen rope
-      this.traceRope(nodes, 0);
       ctx.lineWidth = 2.4;
       ctx.strokeStyle = ropeMain;
-      ctx.stroke();
+      ctx.stroke(path);
 
       // Twisted braid texture highlight
       ctx.lineWidth = 1.1;
       ctx.strokeStyle = ropeBraid;
       ctx.setLineDash([4, 6]);
-      ctx.stroke();
+      ctx.stroke(path);
       ctx.setLineDash([]);
 
       // Left & right brass wall anchors
