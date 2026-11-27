@@ -4722,17 +4722,6 @@ html.dark .pin-waline-slot .wl-panel {
     display: none;
   }
 
-  .portal-back-btn {
-    height: 30px;
-    padding: 0 9px;
-    gap: 4px;
-  }
-
-  .portal-back-btn .ctrl-label {
-    display: inline;
-    font-size: 11px;
-  }
-
   .top-brand {
     align-items: flex-start;
   }
@@ -4757,6 +4746,17 @@ html.dark .pin-waline-slot .wl-panel {
     min-width: 34px;
     height: 34px;
     padding: 0;
+  }
+
+  .portal-back-btn {
+    height: 32px;
+    padding: 0 10px;
+    gap: 4px;
+  }
+
+  .portal-back-btn .ctrl-label {
+    display: inline;
+    font-size: 11px;
   }
 
   .ghost-word {
