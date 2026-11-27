@@ -426,6 +426,11 @@ html.dark .box {
   min-width: 0;
 }
 
+.portal-back-btn {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -4715,6 +4720,17 @@ html.dark .pin-waline-slot .wl-panel {
 
   .top-left .status-chip {
     display: none;
+  }
+
+  .portal-back-btn {
+    height: 30px;
+    padding: 0 9px;
+    gap: 4px;
+  }
+
+  .portal-back-btn .ctrl-label {
+    display: inline;
+    font-size: 11px;
   }
 
   .top-brand {
