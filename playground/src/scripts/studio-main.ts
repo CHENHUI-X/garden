@@ -92,6 +92,7 @@ function initStudio(): void {
         if (!cursorVisible) {
           cx = mx;
           cy = my;
+          cursorEl.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
           cursorVisible = true;
           cursorEl.classList.remove("is-hidden");
         }

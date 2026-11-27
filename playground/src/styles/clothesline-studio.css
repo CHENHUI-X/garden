@@ -630,6 +630,12 @@ html.dark .ghost-word {
   touch-action: pan-y;
 }
 
+@media (scripting: enabled) {
+  .clothesline-stage:not(.is-positioned) {
+    visibility: hidden;
+  }
+}
+
 /* ============================================================================
    Hanging Artifacts (Anchored to Rope Nodes via JS Transform)
    ============================================================================ */
@@ -640,6 +646,7 @@ html.dark .ghost-word {
   left: 0;
   z-index: 15;
   transform-origin: 50% 0%;
+  transition-property: none; /* The rope engine positions each frame, including the first. */
   will-change: transform;
   perspective: 1100px;
   contain: layout style;

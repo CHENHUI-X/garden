@@ -160,6 +160,7 @@ export class ClotheslineEngine {
 
     this.collectItems();
     this.setupLayout();
+    this.stage.classList.add("is-positioned");
     this.bindEvents();
     const observer = new ResizeObserver(() => {
       this.resizePending = true;
