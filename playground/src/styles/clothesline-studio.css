@@ -607,6 +607,22 @@ html.dark .ghost-word {
   opacity: 0.065;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .ghost-word { animation: studio-word-in 950ms var(--ease) 60ms backwards; }
+  .top-bar { animation: studio-header-in 680ms var(--ease) 110ms backwards; }
+  .bottom-strip { animation: studio-footer-in 740ms var(--ease) 200ms backwards; }
+}
+
+@keyframes studio-word-in {
+  from { opacity: 0; transform: translate3d(0, 22px, 0) scale(0.98); }
+}
+@keyframes studio-header-in {
+  from { opacity: 0; transform: translate3d(0, -12px, 0); }
+}
+@keyframes studio-footer-in {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+}
+
 .ghost-seal {
   margin-top: 12px;
   font-family: var(--font-sans);

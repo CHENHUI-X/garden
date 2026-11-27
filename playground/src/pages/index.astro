@@ -182,6 +182,8 @@ const murmurBriefs = murmurs.map((m) => ({
   excerpt: m.rawText,
 }));
 
+const studioFonts = "https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Inter+Tight:wght@500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Noto+Serif+SC:wght@400;600;700&display=swap";
+
 const searchIndex = {
   posts: renderedPosts.map((p) => ({
     slug: p.slug,
@@ -211,8 +213,11 @@ const searchIndex = {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Inter+Tight:wght@500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+      href={studioFonts}
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript><link rel="stylesheet" href={studioFonts} /></noscript>
     <link
       rel="stylesheet"
       href="https://unpkg.com/@waline/client@3/dist/waline.css"
@@ -231,6 +236,18 @@ const searchIndex = {
           }
         } catch (e) {}
       })();
+    </script>
+    <script is:inline>
+      // A visitor can activate a visible toolbar button before the studio module arrives.
+      const replayStudioClick = (event) => {
+        const button = event.target.closest?.(".top-controls button, .quick-nav button");
+        if (button) document.addEventListener("studio-ready", () => button.click(), { once: true });
+      };
+      document.addEventListener("click", replayStudioClick);
+      document.addEventListener("studio-ready", () => document.removeEventListener("click", replayStudioClick), { once: true });
+    </script>
+    <script>
+      import "../scripts/studio-main";
     </script>
   </head>
   <body>
@@ -721,9 +738,5 @@ const searchIndex = {
     />
     <VinylPlayerModal avatarSrc={avatarImg.src} />
 
-    <!-- Bundled Studio Engine -->
-    <script>
-      import "../scripts/studio-main";
-    </script>
   </body>
 </html>

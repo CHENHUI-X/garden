@@ -968,39 +968,8 @@ function initStudio(): void {
     }
   });
 
-  // ==========================================================================
-  // 7. Fail-Safe Entrance Choreography
-  // ==========================================================================
-  if (!reducedMotion) {
-    const ghostWord = document.querySelector<HTMLElement>(".ghost-word");
-    ghostWord?.animate(
-      [
-        { opacity: 0, transform: "translate3d(0, 22px, 0) scale(0.98)" },
-        { opacity: document.documentElement.classList.contains("dark") ? 0.065 : 0.055, transform: "translate3d(0, 0, 0) scale(1)" },
-      ],
-      { duration: 950, delay: 60, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" }
-    );
-
-    const topBar = document.querySelector<HTMLElement>(".top-bar");
-    topBar?.animate(
-      [
-        { opacity: 0, transform: "translate3d(0, -12px, 0)" },
-        { opacity: 1, transform: "translate3d(0, 0, 0)" },
-      ],
-      { duration: 680, delay: 110, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" }
-    );
-
-    const bottomStrip = document.querySelector<HTMLElement>(".bottom-strip");
-    bottomStrip?.animate(
-      [
-        { opacity: 0, transform: "translate3d(0, 14px, 0)" },
-        { opacity: 1, transform: "translate3d(0, 0, 0)" },
-      ],
-      { duration: 740, delay: 200, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" }
-    );
-
-    setTimeout(() => clothesline.sendBreezeWave(0.7), 280);
-  }
+  if (!reducedMotion) setTimeout(() => clothesline.sendBreezeWave(0.7), 280);
+  document.dispatchEvent(new Event("studio-ready"));
 }
 
 if (document.readyState === "loading") {
