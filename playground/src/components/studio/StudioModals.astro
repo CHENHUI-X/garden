@@ -345,31 +345,33 @@ const tilts = ["-1.1deg", "0.9deg", "-0.7deg", "1.2deg"];
         </div>
       </div>
 
-      <div class="friends-tray">
-        {
-          friends.map((f, idx) => (
-            <a class="friend-postcard" href={f.href} target="_blank" rel="noopener noreferrer">
-              <div class="fp-head">
-                <img
-                  class="fp-avatar"
-                  src={f.avatar}
-                  alt={f.name}
-                  loading="lazy"
-                  onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/pixel-art/svg?seed=chenhui'"
-                />
-                <div style="min-width:0;flex:1">
-                  <h3 class="fp-name">{f.name}</h3>
-                  <p class="fp-desc">{f.desc}</p>
+      {
+        friends.length > 0 && (
+          <div class="friends-tray">
+            {friends.map((f, idx) => (
+              <a class="friend-postcard" href={f.href} target="_blank" rel="noopener noreferrer">
+                <div class="fp-head">
+                  <img
+                    class="fp-avatar"
+                    src={f.avatar}
+                    alt={f.name}
+                    loading="lazy"
+                    onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/pixel-art/svg?seed=chenhui'"
+                  />
+                  <div style="min-width:0;flex:1">
+                    <h3 class="fp-name">{f.name}</h3>
+                    <p class="fp-desc">{f.desc}</p>
+                  </div>
                 </div>
-              </div>
-              <div class="fp-foot">
-                <span>NO.{String(idx + 1).padStart(2, "0")}</span>
-                <span class="fp-visit">访问 ↗</span>
-              </div>
-            </a>
-          ))
-        }
-      </div>
+                <div class="fp-foot">
+                  <span>NO.{String(idx + 1).padStart(2, "0")}</span>
+                  <span class="fp-visit">访问 ↗</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        )
+      }
 
       <div class="exchange-box">
         <div>

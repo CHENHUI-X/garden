@@ -164,14 +164,6 @@ if (friendsEntry?.body) {
     });
   }
 }
-if (friends.length === 0) {
-  friends.push({
-    href: "https://tech.xuchenhui.cc/",
-    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=chenhui",
-    name: "CHENHUI · 技术博客",
-    desc: "算法、工程、折腾记录",
-  });
-}
 
 const latestMurmur = murmurs[0] ?? {
   date: "2026-05-01",
@@ -560,7 +552,7 @@ const searchIndex = {
               <div class="postcard-mid">
                 <h3 class="postcard-title">朋友们</h3>
                 <p class="postcard-lines">
-                  {friends[0]?.name || "tech.xuchenhui.cc"} 等 {friends.length} 位朋友
+                  {friends.length ? `${friends[0].name} 等 ${friends.length} 位朋友` : "暂无友链，欢迎交换"}
                 </p>
               </div>
               <div class="postcard-postmark">

@@ -12,18 +12,6 @@ index: 2
 
 这里是我认识的、关注的、觉得有意思的人们。
 
-<div class="friends-grid">
-
-<a class="friend-card" href="https://tech.xuchenhui.cc/" target="_blank" rel="noopener noreferrer">
-  <img src="https://tech.xuchenhui.cc/favicon.ico" alt="CHENHUI" onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/pixel-art/svg?seed=chenhui'" />
-  <div class="friend-info">
-    <span class="friend-name">CHENHUI · 技术博客</span>
-    <span class="friend-desc">算法、工程、折腾记录</span>
-  </div>
-</a>
-
-</div>
-
 <div class="friends-apply">
 
 想交换友链？发邮件给我：<a href="mailto:chenhui2422.xu@gmail.com">chenhui2422.xu@gmail.com</a>
