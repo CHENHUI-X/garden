@@ -519,6 +519,7 @@ function initStudio(): void {
     const lbl = themeBtn?.querySelector<HTMLElement>(".ctrl-label");
     if (lbl) lbl.textContent = isDark ? "台灯" : "晴日";
     clothesline.syncTheme();
+    vinyl?.syncMiniDockVisibility();
   };
   syncThemeBtn();
 

@@ -294,7 +294,6 @@ export class VinylPlayerEngine {
       this.loadPlaylist(this.playlistId);
     }
     this.syncMiniDockVisibility();
-    this.startMeterLoop();
   }
 
   public syncMiniDockVisibility(): void {
@@ -314,8 +313,6 @@ export class VinylPlayerEngine {
         this.meterRaf = 0;
         return;
       }
-      this.meterRaf = requestAnimationFrame(draw);
-
       const t = now * 0.001;
       const volScale = 0.35 + this.audio.volume * 0.65;
 
@@ -333,8 +330,11 @@ export class VinylPlayerEngine {
         targetR = Math.max(-42, Math.min(34, targetR));
       }
 
+      const previousLeft = this.vuLeft;
+      const previousRight = this.vuRight;
       this.vuLeft += (targetL - this.vuLeft) * (this.isPlaying ? 0.24 : 0.12);
       this.vuRight += (targetR - this.vuRight) * (this.isPlaying ? 0.24 : 0.12);
+      let moving = this.isPlaying || previousLeft !== this.vuLeft || previousRight !== this.vuRight;
 
       if (this.vuNeedleL) this.vuNeedleL.style.transform = `rotate(${this.vuLeft.toFixed(1)}deg)`;
       if (this.vuNeedleR) this.vuNeedleR.style.transform = `rotate(${this.vuRight.toFixed(1)}deg)`;
@@ -363,7 +363,9 @@ export class VinylPlayerEngine {
             const pulse = 0.5 + 0.5 * Math.sin(t * 3.1 + u * 4.2);
             target = (0.16 + (wave1 * 0.42 + wave2 * 0.28 + pulse * 0.22) * (0.45 + bell * 0.72)) * volScale;
           }
-          this.specBars[i] += (target - this.specBars[i]) * (this.isPlaying ? 0.22 : 0.12);
+          const previous = this.specBars[i];
+          this.specBars[i] += (target - previous) * (this.isPlaying ? 0.22 : 0.12);
+          if (this.specBars[i] !== previous) moving = true;
           const bh = Math.max(3, this.specBars[i] * (h - 4));
           const x = i * (barW + gap);
           const y = h - bh;
@@ -373,6 +375,8 @@ export class VinylPlayerEngine {
           ctx.fill();
         }
       }
+      // Let the original decay run until another step would produce exactly the same state.
+      this.meterRaf = moving ? requestAnimationFrame(draw) : 0;
     };
 
     this.meterRaf = requestAnimationFrame(draw);
@@ -978,6 +982,7 @@ export class VinylPlayerEngine {
         if (this.crackleOn) this.sound.setVinylAmbience(true);
         this.syncPlayUi();
       }
+      this.syncMiniDockVisibility();
     });
 
     this.audio.addEventListener("error", () => {
