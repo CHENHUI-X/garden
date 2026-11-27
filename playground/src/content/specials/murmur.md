@@ -13,6 +13,17 @@ index: 1
 <div class="murmur-feed">
 
 <div class="murmur-item">
+<span class="murmur-date">2026-11-27</span>
+
+哈吉米大人真厉害呀，一下午就帮我把博客重构完成了！
+
+<div class="murmur-images" data-count="2">
+<img src="https://img.xuchenhui.cc/murmurs/redesign-before.webp" alt="修改前 · 旧版博客首页" />
+<img src="https://img.xuchenhui.cc/murmurs/redesign-after.webp" alt="修改后 · 新版纸间书桌" />
+</div>
+</div>
+
+<div class="murmur-item">
 <span class="murmur-date">2026-11-16</span>
 
 Claude 又被封了。
@@ -130,7 +141,13 @@ html.charm.dark .murmur-item {
 
 .murmur-images[data-count="2"] {
   grid-template-columns: repeat(2, 1fr);
-  max-width: 400px;
+  max-width: 100%;
+  gap: 0.75rem;
+}
+
+.murmur-images[data-count="2"] img {
+  aspect-ratio: 16 / 10;
+  object-position: top;
 }
 
 .murmur-images[data-count="3"] {

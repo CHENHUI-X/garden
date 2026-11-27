@@ -4,6 +4,7 @@ import { MUSIC_CONFIG } from "../../config/music";
 interface MurmurItem {
   date: string;
   paragraphs: string[];
+  images: { src: string; alt: string }[];
   rawText: string;
 }
 
@@ -242,7 +243,10 @@ const tilts = ["-1.1deg", "0.9deg", "-0.7deg", "1.2deg"];
       <div class="murmur-board">
         {
           murmurs.map((item, idx) => (
-            <article class="pin-note" style={`--rot: ${tilts[idx % tilts.length]}`}>
+            <article
+              class:list={["pin-note", { "pin-note--wide": item.images.length >= 2 }]}
+              style={`--rot: ${tilts[idx % tilts.length]}`}
+            >
               <div class="pin-note-head">
                 <time class="pin-date">{item.date}</time>
                 <span class="pin-idx">NO.{String(murmurs.length - idx).padStart(2, "0")}</span>
@@ -252,6 +256,29 @@ const tilts = ["-1.1deg", "0.9deg", "-0.7deg", "1.2deg"];
                   <p>{p}</p>
                 ))}
               </div>
+              {
+                item.images.length > 0 && (
+                  <div class="pin-gallery" data-count={Math.min(item.images.length, 3)}>
+                    {item.images.map((img, imgIdx) => (
+                      <figure class="pin-photo-card">
+                        <button
+                          type="button"
+                          class="pin-photo-btn"
+                          data-lightbox-src={img.src}
+                          data-lightbox-caption={img.alt}
+                          data-lightbox-idx={String(imgIdx)}
+                          aria-label={img.alt ? `查看大图：${img.alt}` : "查看大图"}
+                        >
+                          <span class="pin-photo-frame">
+                            <img src={img.src} alt={img.alt || "碎碎念附图"} loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+                          </span>
+                          {img.alt && <span class="pin-photo-cap">{img.alt}</span>}
+                        </button>
+                      </figure>
+                    ))}
+                  </div>
+                )
+              }
               <div class="pin-actions">
                 <button
                   type="button"

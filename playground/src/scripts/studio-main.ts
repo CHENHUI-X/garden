@@ -695,6 +695,133 @@ function initStudio(): void {
     });
   });
 
+  // Murmur Photo Gallery Lightbox (supports A/B Prev/Next & Esc/Arrow keys)
+  let murmurLightboxEl: HTMLElement | null = null;
+  const openMurmurLightbox = (
+    items: { src: string; caption: string }[],
+    startIndex: number
+  ) => {
+    if (!items.length) return;
+    murmurLightboxEl?.remove();
+    let current = ((startIndex % items.length) + items.length) % items.length;
+
+    const box = document.createElement("div");
+    box.className = "book-lightbox murmur-lightbox";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", "图片预览");
+
+    const fig = document.createElement("figure");
+    fig.className = "book-lightbox-frame";
+    const imgEl = document.createElement("img");
+    imgEl.referrerPolicy = "no-referrer";
+    const capEl = document.createElement("figcaption");
+    fig.append(imgEl, capEl);
+    fig.addEventListener("click", (e) => e.stopPropagation());
+
+    const controls = document.createElement("div");
+    controls.className = "book-lightbox-controls";
+    controls.addEventListener("click", (e) => e.stopPropagation());
+
+    let counterEl: HTMLSpanElement | null = null;
+    if (items.length > 1) {
+      const prevBtn = document.createElement("button");
+      prevBtn.type = "button";
+      prevBtn.className = "book-lightbox-nav box lbl";
+      prevBtn.dataset.lbPrev = "1";
+      prevBtn.setAttribute("aria-label", "上一张");
+      prevBtn.textContent = "上一张";
+
+      counterEl = document.createElement("span");
+      counterEl.className = "book-lightbox-counter lbl";
+      counterEl.dataset.lbCounter = "1";
+
+      const nextBtn = document.createElement("button");
+      nextBtn.type = "button";
+      nextBtn.className = "book-lightbox-nav box lbl";
+      nextBtn.dataset.lbNext = "1";
+      nextBtn.setAttribute("aria-label", "下一张");
+      nextBtn.textContent = "下一张";
+
+      prevBtn.addEventListener("click", () => step(-1));
+      nextBtn.addEventListener("click", () => step(1));
+      controls.append(prevBtn, counterEl, nextBtn);
+    }
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "book-lightbox-close box lbl";
+    closeBtn.setAttribute("aria-label", "关闭大图");
+    closeBtn.textContent = "CLOSE / 关闭";
+    controls.append(closeBtn);
+
+    const renderSlide = () => {
+      const item = items[current];
+      imgEl.src = item.src;
+      imgEl.alt = item.caption || "碎碎念附图";
+      capEl.textContent = item.caption;
+      capEl.style.display = item.caption ? "" : "none";
+      if (counterEl) {
+        counterEl.textContent = `${current + 1} / ${items.length}`;
+      }
+    };
+
+    const step = (delta: number) => {
+      if (items.length <= 1) return;
+      current = (current + delta + items.length) % items.length;
+      renderSlide();
+      sound.clipClick();
+    };
+
+    const close = () => {
+      box.remove();
+      if (murmurLightboxEl === box) murmurLightboxEl = null;
+      window.removeEventListener("keydown", onKey, true);
+    };
+
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        close();
+      } else if (ev.key === "ArrowLeft" && items.length > 1) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        step(-1);
+      } else if (ev.key === "ArrowRight" && items.length > 1) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        step(1);
+      }
+    };
+
+    closeBtn.addEventListener("click", close);
+    box.addEventListener("click", close);
+    window.addEventListener("keydown", onKey, true);
+    renderSlide();
+    box.append(fig, controls);
+    document.body.appendChild(box);
+    murmurLightboxEl = box;
+    sound.clipClick();
+  };
+
+  murmurModal?.addEventListener("click", (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const btn = target.closest<HTMLButtonElement>(".pin-photo-btn[data-lightbox-src]");
+    if (!btn) return;
+    const gallery = btn.closest(".pin-gallery");
+    const galleryBtns = gallery
+      ? Array.from(gallery.querySelectorAll<HTMLButtonElement>(".pin-photo-btn[data-lightbox-src]"))
+      : [btn];
+    const items = galleryBtns.map((el) => ({
+      src: el.dataset.lightboxSrc || "",
+      caption: el.dataset.lightboxCaption || "",
+    }));
+    const startIdx = Math.max(0, galleryBtns.indexOf(btn));
+    openMurmurLightbox(items, startIdx);
+  });
+
   // ==========================================================================
   // 6b. Built-in Paper Archive Search (Posts + Murmurs)
   // ==========================================================================

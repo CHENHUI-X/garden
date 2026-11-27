@@ -56,24 +56,87 @@ const specials = await getCollection("specials");
 const murmurEntry = specials.find((s) => s.slug === "murmur");
 const friendsEntry = specials.find((s) => s.slug === "friends");
 
-const murmurs: { date: string; paragraphs: string[]; rawText: string }[] = [];
+interface MurmurImage {
+  src: string;
+  alt: string;
+}
+
+const murmurs: { date: string; paragraphs: string[]; images: MurmurImage[]; rawText: string }[] = [];
+
+function extractMurmurBlocks(body: string): string[] {
+  const blocks: string[] = [];
+  const openTag = '<div class="murmur-item">';
+  let searchFrom = 0;
+  while (searchFrom < body.length) {
+    const start = body.indexOf(openTag, searchFrom);
+    if (start === -1) break;
+    const contentStart = start + openTag.length;
+    let depth = 1;
+    const tagRe = /<div\b[^>]*>|<\/div>/gi;
+    tagRe.lastIndex = contentStart;
+    let end = body.length;
+    let tagMatch: RegExpExecArray | null;
+    while ((tagMatch = tagRe.exec(body)) !== null) {
+      if (tagMatch[0].toLowerCase().startsWith("</")) {
+        depth -= 1;
+        if (depth === 0) {
+          end = tagMatch.index;
+          searchFrom = tagMatch.index + tagMatch[0].length;
+          break;
+        }
+      } else {
+        depth += 1;
+      }
+    }
+    if (depth !== 0) break;
+    blocks.push(body.slice(contentStart, end));
+  }
+  return blocks;
+}
+
 if (murmurEntry?.body) {
-  const itemRegex = /<div class="murmur-item">([\s\S]*?)<\/div>/g;
-  let m: RegExpExecArray | null;
-  while ((m = itemRegex.exec(murmurEntry.body)) !== null) {
-    const block = m[1];
+  for (const block of extractMurmurBlocks(murmurEntry.body)) {
     const dateMatch = /<span class="murmur-date">([^<]+)<\/span>/.exec(block);
     const date = dateMatch ? dateMatch[1].trim() : "";
+
+    const images: MurmurImage[] = [];
+    const seenSrc = new Set<string>();
+    const pushImg = (src: string, alt: string) => {
+      const cleanSrc = src.trim();
+      if (!cleanSrc || seenSrc.has(cleanSrc)) return;
+      seenSrc.add(cleanSrc);
+      images.push({ src: cleanSrc, alt: alt.trim() });
+    };
+
+    const htmlImgRe = /<img\b[^>]*>/gi;
+    let im: RegExpExecArray | null;
+    while ((im = htmlImgRe.exec(block)) !== null) {
+      const tag = im[0];
+      const srcMatch = /\bsrc=(?:"([^"]+)"|'([^']+)')/i.exec(tag);
+      const altMatch = /\balt=(?:"([^"]*)"|'([^']*)')/i.exec(tag);
+      const src = srcMatch?.[1] ?? srcMatch?.[2] ?? "";
+      const alt = altMatch?.[1] ?? altMatch?.[2] ?? "";
+      if (src) pushImg(src, alt);
+    }
+
+    const mdImgRe = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+    let mm: RegExpExecArray | null;
+    while ((mm = mdImgRe.exec(block)) !== null) {
+      pushImg(mm[2] ?? "", mm[1] ?? "");
+    }
+
     const textOnly = block
       .replace(/<span class="murmur-date">[^<]*<\/span>/g, "")
+      .replace(/<div class="murmur-images"[^>]*>[\s\S]*?<\/div>/gi, "")
+      .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
       .replace(/<[^>]+>/g, "")
       .trim();
     const paragraphs = textOnly
       .split(/\n\s*\n/)
       .map((p) => p.replace(/\s+/g, " ").trim())
       .filter(Boolean);
-    if (date && paragraphs.length) {
-      murmurs.push({ date, paragraphs, rawText: paragraphs.join(" ") });
+    if (date && (paragraphs.length || images.length)) {
+      murmurs.push({ date, paragraphs, images, rawText: paragraphs.join(" ") });
     }
   }
 }
@@ -113,6 +176,7 @@ if (friends.length === 0) {
 const latestMurmur = murmurs[0] ?? {
   date: "2026-05-01",
   paragraphs: ["今天是建站的第一天。"],
+  images: [],
   rawText: "今天是建站的第一天。",
 };
 
@@ -461,7 +525,7 @@ const searchIndex = {
                 </div>
                 <p class="memo-body">{latestMurmur.rawText}</p>
                 <div class="memo-footer">
-                  <span>碎碎念</span>
+                  <span>{latestMurmur.images.length ? `碎碎念 · ${latestMurmur.images.length} 图` : "碎碎念"}</span>
                   <span>查看 →</span>
                 </div>
               </div>
