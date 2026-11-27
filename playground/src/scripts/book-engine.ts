@@ -67,6 +67,7 @@ export class BookEngine {
   private posts: PostMeta[] = [];
   private murmurs: MurmurBrief[] = [];
   private pages: BookPage[] = [];
+  private paginationKey = "";
   private chapterStartPage: number[] = [];
   private appendixPageIdx = -1;
   private walineServerUrl = "";
@@ -143,6 +144,9 @@ export class BookEngine {
 
     this.loadSourceData();
     this.bindControls();
+    document.fonts.addEventListener("loadingdone", () => {
+      this.paginationKey = "";
+    });
   }
 
   private loadSourceData(): void {
@@ -253,6 +257,12 @@ export class BookEngine {
     const pageW = (this.isMobile ? bookW : bookW / 2) - padX;
     const pageH = Math.max(220, bookH - padY - headerFootReserve);
     const imgMaxH = Math.max(144, Math.round(pageH * 0.46));
+    // Opening the cover animates a transform. It doesn't change the page box.
+    const key = [window.innerWidth, window.innerHeight, pageW, pageH, this.fontSize, this.imageMetaCache.size].join("/");
+    if (key === this.paginationKey && document.fonts.status === "loaded") {
+      this.renderCurrentSpread();
+      return;
+    }
     this.shell.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
     this.measureBox.style.setProperty("--book-img-max-h", `${imgMaxH}px`);
     this.preloadUnknownImages();
@@ -347,6 +357,7 @@ export class BookEngine {
 
     // Fill TOC now that we have exact folio numbers for every chapter!
     this.pages[tocPageIndex].html = this.renderTocHtml();
+    this.paginationKey = document.fonts.status === "loaded" ? key : "";
 
     if (preserveRatio) {
       this.spreadIndex = Math.min(this.totalSpreads() - 1, Math.round(ratio * (this.totalSpreads() - 1)));

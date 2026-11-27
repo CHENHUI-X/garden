@@ -185,8 +185,7 @@ function initStudio(): void {
       }
     }
 
-    // Keep looping while clothesline is active OR magnetic cursor is gliding; sleep at 0% idle otherwise!
-    if (!activeModal || cursorMoving) {
+    if ((!activeModal && !reducedMotion) || cursorMoving) {
       loopRafId = requestAnimationFrame(mainLoop);
     }
   }
